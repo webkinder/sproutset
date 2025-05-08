@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CREDITS.md
 - CODE_OF_CONDUCT.md
 - CONTRIBUTING.md
+- Issue templates for bug reports, feature requests, and questions
 
 ### Fixed
 
