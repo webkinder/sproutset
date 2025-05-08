@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - composer.json and .gitignore
 - CREDITS.md
 - CODE_OF_CONDUCT.md
+- CONTRIBUTING.md
 
 ### Fixed
 
