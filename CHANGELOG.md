@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CODE_OF_CONDUCT.md
 - CONTRIBUTING.md
 - Issue templates for bug reports, feature requests, and questions
+- Pull request template
 
 ### Fixed
 
