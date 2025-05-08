@@ -1,5 +1,6 @@
 name: "Enhancement"
 description: "Suggest an idea or improvement for this project."
+labels: "type:enhancement"
 type: "Enhancement"
 body:
     - type: markdown
