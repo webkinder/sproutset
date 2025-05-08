@@ -20,3 +20,4 @@ composer require webkinder/sproutset
 
 - [Changelog](CHANGELOG.md) - All notable changes to this project
 - [Credits](CREDITS.md) - Project maintainers, contributors, and libraries used
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Code of Conduct for this project
