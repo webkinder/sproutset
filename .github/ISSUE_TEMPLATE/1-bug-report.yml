@@ -49,8 +49,7 @@ body:
       attributes:
           label: Screenshots, screen recording, or code snippet
           description: |
-              If possible, attach a screenshot, screen recording, or code snippet that shows the bug. 
-              You can use [LICEcap](https://www.cockos.com/licecap/) to create a GIF recording.  
+              If possible, attach a screenshot, screen recording, or code snippet that shows the bug.
               
               👉 Tip: Drag and drop images or log files here, or paste code snippets directly.
               
