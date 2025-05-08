@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CHANGELOG.md
 - README.md
 - composer.json and .gitignore
+- CREDITS.md
 
 ### Fixed
 

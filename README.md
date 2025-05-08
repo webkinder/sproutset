@@ -14,3 +14,9 @@ Inspired by [mindkomm/timmy](https://github.com/mindkomm/timmy) for Timber/Twig,
 
 ```bash
 composer require webkinder/sproutset
+```
+
+## Project Information
+
+- [Changelog](CHANGELOG.md) - All notable changes to this project
+- [Credits](CREDITS.md) - Project maintainers, contributors, and libraries used
