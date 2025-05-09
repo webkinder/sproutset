@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Fixed
+
+### Changed
+
+### Removed
+
+## [0.1.0-alpha.2] - 2025-05-09 
+
+### Added
+
 - Added merge strategy guidelines for different branch types by @marcoluzi in #4
 - Added release notes formatting guidelines by @marcoluzi in #4
 - Add package metadata and license information to composer.json by @marcoluzi in #5
@@ -39,5 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-alpha.1...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-alpha.2...develop
+[0.1.0-alpha.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.1
