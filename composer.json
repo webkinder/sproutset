@@ -1,0 +1,20 @@
+{
+    "name": "webkinder/sproutset",
+    "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
+    "autoload": {
+        "psr-4": {
+            "Webkinder\\Sproutset\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marco Luzi",
+            "email": "marco@webkinder.ch"
+        },
+        {
+            "name": "Raphael Portmann",
+            "email": "raphael@webkinder.ch"
+        }
+    ],
+    "require": {}
+}
