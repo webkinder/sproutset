@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Fixed
+
+### Changed
+
+### Removed
+
+## [0.1.0-alpha.1] - 2025-05-09 
+
+### Added
+
 - LICENSE.md
 - CHANGELOG.md
 - README.md
@@ -18,16 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTING.md
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
-
-### Fixed
-
-### Changed
-
-### Removed
-
-## [0.1.0-alpha.1] - 2025-05-08
-
-### Added
 
 ### Fixed
 
