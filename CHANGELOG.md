@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Merge strategy guidelines to CONTRIBUTING.md and .github/pull_request_template.md
+- Added merge strategy guidelines for different branch types by @marcoluzi in #TBD
+- Added release notes formatting guidelines by @marcoluzi in #TBD
 
 ### Fixed
 

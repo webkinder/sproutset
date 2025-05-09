@@ -186,6 +186,30 @@ When adding or updating documentation:
 - Add PHPDoc blocks for all public methods
 - Update both inline and external documentation
 
+## Release Notes Guidelines
+
+Both CHANGELOG.md and GitHub release notes should be identical and follow this format. When creating a release, copy the relevant section from CHANGELOG.md into the GitHub release notes to maintain consistency.
+
+### Format
+- Each change should be documented as:
+  ```
+  - <change message> by @<username> in #<PR number>
+  ```
+
+### Examples
+```markdown
+- Added dark mode support by @johndoe in #123
+- Fixed mobile navigation bug by @janedoe in #124
+- Updated documentation for API endpoints by @devuser in #125
+```
+
+### Categories
+Group changes under these categories:
+- `Added` for new features
+- `Fixed` for any bug fixes
+- `Changed` for changes in existing functionality
+- `Removed` for now removed features
+
 ## Merge Strategy Guidelines
 
 We follow specific merge strategies for different types of branches to maintain a clean and meaningful history:
