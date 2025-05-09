@@ -1,6 +1,14 @@
 {
     "name": "webkinder/sproutset",
     "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
+    "keywords": [
+        "responsive images",
+        "bedrock",
+        "sage",
+        "blade"
+    ],
+    "homepage": "https://github.com/webkinder/sproutset",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Webkinder\\Sproutset\\": "src/"
