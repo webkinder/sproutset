@@ -1,0 +1,46 @@
+name: "Need help?"
+description: "Ask a question — we're here to help!"
+labels: "type:question"
+type: "Task"
+body:
+    - type: markdown
+      attributes:
+          value: |
+              💬 Have a question that's not a bug report or feature request? You're in the right place!  
+              
+              Please fill out the template below so we can assist you as quickly as possible.
+
+    - type: textarea
+      attributes:
+          label: Describe your question
+          description: |
+              Provide a clear and concise description of your question or what you need help with.
+              
+              Example:
+              I'm trying to set up the project locally, but I get an error when running `npm install`. How should I resolve this?
+          placeholder: |
+              I'm trying to `...describe what you're doing...`, but I'm running into `...describe issue or confusion...`.
+      validations:
+          required: true
+
+    - type: textarea
+      attributes:
+          label: Additional context
+          description: |
+              Add any other details that might help us assist you, such as:
+              - What you've tried so far
+              - Relevant error messages or links
+              - Any related issues or documentation you've checked
+          placeholder: |
+              I've already tried `...commands, steps...`, but I'm still having trouble. Here's the error message I see: `...error message...`.
+      validations:
+          required: false
+
+    - type: checkboxes
+      id: terms
+      attributes:
+        label: Code of Conduct
+        description: By submitting this issue, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+        options:
+          - label: I agree to follow this project's Code of Conduct
+            required: true
