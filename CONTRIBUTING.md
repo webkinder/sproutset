@@ -186,4 +186,54 @@ When adding or updating documentation:
 - Add PHPDoc blocks for all public methods
 - Update both inline and external documentation
 
+## Release Notes Guidelines
+
+Both CHANGELOG.md and GitHub release notes should be identical and follow this format. When creating a release, copy the relevant section from CHANGELOG.md into the GitHub release notes to maintain consistency.
+
+### Format
+- Each change should be documented as:
+  ```
+  - <change message> by @<username> in #<PR number>
+  ```
+
+### Examples
+```markdown
+- Added dark mode support by @johndoe in #123
+- Fixed mobile navigation bug by @janedoe in #124
+- Updated documentation for API endpoints by @devuser in #125
+```
+
+### Categories
+Group changes under these categories:
+- `Added` for new features
+- `Fixed` for any bug fixes
+- `Changed` for changes in existing functionality
+- `Removed` for now removed features
+
+## Merge Strategy Guidelines
+
+We follow specific merge strategies for different types of branches to maintain a clean and meaningful history:
+
+### Feature Branches → Develop
+- Use squash merges or rebase merges
+- This keeps the develop history clean and readable
+- Example: `feature/foo → develop` (squash or rebase merge)
+
+### Release/Hotfix Branches → Main and Develop
+- Use merge commits with `--no-ff` flag
+- This preserves the meaningful branch structure
+- Marks release points clearly in history
+- Example: 
+  ```
+  release/1.0.0 → main (merge commit)
+  release/1.0.0 → develop (merge commit)
+  ```
+
+### Benefits of this Strategy
+- `develop` maintains a readable line of squashed features
+- `main` contains only release merge commits
+- Both `main` and `develop` share identical release points
+- No "ahead/behind" branch indicators for releases
+- History remains clear, auditable, and easy to follow
+
 We aim to review pull requests within a week. Feel free to ping the team if you haven't received feedback after that time.

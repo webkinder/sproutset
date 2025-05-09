@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added merge strategy guidelines for different branch types by @marcoluzi in #4
+- Added release notes formatting guidelines by @marcoluzi in #4
+
 ### Fixed
 
 ### Changed
