@@ -1,29 +1,31 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
-    "name": "webkinder/sproutset",
-    "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
-    "keywords": [
-        "responsive images",
-        "bedrock",
-        "sage",
-        "blade"
-    ],
-    "homepage": "https://github.com/webkinder/sproutset",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Webkinder\\Sproutset\\": "src/"
-        }
+  "$schema": "https://getcomposer.org/schema.json",
+  "name": "webkinder/sproutset",
+  "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
+  "keywords": [
+    "responsive images",
+    "bedrock",
+    "sage",
+    "blade"
+  ],
+  "homepage": "https://github.com/webkinder/sproutset",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Webkinder\\Sproutset\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Marco Luzi",
+      "email": "marco@webkinder.ch"
     },
-    "authors": [
-        {
-            "name": "Marco Luzi",
-            "email": "marco@webkinder.ch"
-        },
-        {
-            "name": "Raphael Portmann",
-            "email": "raphael@webkinder.ch"
-        }
-    ],
-    "require": {}
+    {
+      "name": "Raphael Portmann",
+      "email": "raphael@webkinder.ch"
+    }
+  ],
+  "require-dev": {
+    "laravel/pint": "1.22.1"
+  }
 }
