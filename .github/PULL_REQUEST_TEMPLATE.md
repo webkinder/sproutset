@@ -29,6 +29,7 @@ Fixes #
 - [ ] I have updated the changelog
 - [ ] I have checked for and resolved any merge conflicts
 - [ ] I have confirmed the correct merge strategy will be used (see Branch Type above)
+- [ ] I have updated CREDITS.md if necessary
 
 ## Screenshots (if applicable)
 <!-- Add screenshots to help explain your changes -->
