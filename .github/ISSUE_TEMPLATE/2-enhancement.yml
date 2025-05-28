@@ -1,76 +1,76 @@
-name: "Enhancement"
-description: "Suggest an idea or improvement for this project."
-labels: "type:enhancement"
-type: "Enhancement"
+name: 'Enhancement'
+description: 'Suggest an idea or improvement for this project.'
+labels: 'type:enhancement'
+type: 'Enhancement'
 body:
-    - type: markdown
-      attributes:
-          value: |
-              💡 Thank you for suggesting an idea to improve this project! Please fill out as much of this template as you can — it will help us better understand and evaluate your proposal.
-              
-              ⚠️ *Please search existing issues before submitting a new enhancement request.*
-              
-    - type: textarea
-      attributes:
-          label: Is your enhancement related to a problem? Please describe.
-          description: |
-              Describe the problem or need you are trying to solve.
-              
-              Example:
-              I use this project as a `note-taking app`, but I often lose track of recent notes. I would like a `recent notes` sidebar so that I can easily access my latest work.
-          placeholder: |
-              I use this project as a `...` and I would like `...` so that `...describe benefit...`.
-      validations:
+  - type: markdown
+    attributes:
+      value: |
+        💡 Thank you for suggesting an idea to improve this project! Please fill out as much of this template as you can — it will help us better understand and evaluate your proposal.
+
+        ⚠️ *Please search existing issues before submitting a new enhancement request.*
+
+  - type: textarea
+    attributes:
+      label: Is your enhancement related to a problem? Please describe.
+      description: |
+        Describe the problem or need you are trying to solve.
+
+        Example:
+        I use this project as a `note-taking app`, but I often lose track of recent notes. I would like a `recent notes` sidebar so that I can easily access my latest work.
+      placeholder: |
+        I use this project as a `...` and I would like `...` so that `...describe benefit...`.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the solution you’d like
+      description: |
+        Clearly describe the feature or improvement you have in mind.
+
+        Example:
+        Add a sidebar on the right side that shows the 5 most recently edited notes, with the ability to pin them.
+      placeholder: |
+        I’d like to see `...describe the feature or idea...` which would help with `...describe benefit or use case...`.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe alternatives you’ve considered
+      description: |
+        Have you considered other ways to solve this problem? Describe any alternative solutions you explored.
+      placeholder: |
+        I have also considered `...describe alternative...`, but I think my proposed solution is better because `...reason...`.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Designs, mockups, or screenshots
+      description: |
+        If possible, attach designs, wireframes, screenshots, or videos to help explain your idea. 
+
+        👉 Tip: Drag and drop images or files here, or paste in links.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: |
+        Add any other details or context that might help us understand your idea.
+      placeholder: |
+        Any other notes, related issues, or references.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+      options:
+        - label: I agree to follow this project's Code of Conduct
           required: true
-
-    - type: textarea
-      attributes:
-          label: Describe the solution you’d like
-          description: |
-              Clearly describe the feature or improvement you have in mind.
-              
-              Example:
-              Add a sidebar on the right side that shows the 5 most recently edited notes, with the ability to pin them.
-          placeholder: |
-              I’d like to see `...describe the feature or idea...` which would help with `...describe benefit or use case...`.
-      validations:
-          required: true
-
-    - type: textarea
-      attributes:
-          label: Describe alternatives you’ve considered
-          description: |
-              Have you considered other ways to solve this problem? Describe any alternative solutions you explored.
-          placeholder: |
-             I have also considered `...describe alternative...`, but I think my proposed solution is better because `...reason...`.
-      validations:
-          required: false
-
-    - type: textarea
-      attributes:
-          label: Designs, mockups, or screenshots
-          description: |
-              If possible, attach designs, wireframes, screenshots, or videos to help explain your idea. 
-              
-              👉 Tip: Drag and drop images or files here, or paste in links.
-      validations:
-          required: false
-
-    - type: textarea
-      attributes:
-          label: Additional context
-          description: |
-              Add any other details or context that might help us understand your idea.
-          placeholder: |
-              Any other notes, related issues, or references.
-      validations:
-          required: false
-
-    - type: checkboxes
-      id: terms
-      attributes:
-        label: Code of Conduct
-        description: By submitting this issue, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
-        options:
-          - label: I agree to follow this project's Code of Conduct
-            required: true

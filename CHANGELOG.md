@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [0.1.0-alpha.2] - 2025-05-09 
+## [0.1.0-alpha.2] - 2025-05-09
 
 ### Added
 
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [0.1.0-alpha.1] - 2025-05-09 
+## [0.1.0-alpha.1] - 2025-05-09
 
 ### Added
 
