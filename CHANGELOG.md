@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added composer schema definition to composer.json by @marcoluzi in #10
 - Added credits file update checkbox to PR template by @marcoluzi in #11
 - Added Node.js version definition to .node-version by @marcoluzi in #13
+- Added pre-commit formatting and linting by @marcoluzi in #14
 
 ### Fixed
 
