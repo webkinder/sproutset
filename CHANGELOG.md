@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Renovate configuration by @marcoluzi in #8
 - Added composer schema definition to composer.json by @marcoluzi in #10
+- Added credits file update checkbox to PR template by @marcoluzi in #11
 
 ### Fixed
 
