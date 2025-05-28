@@ -1,4 +1,5 @@
 {
+    "$schema": "https://getcomposer.org/schema.json",
     "name": "webkinder/sproutset",
     "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
     "keywords": [
