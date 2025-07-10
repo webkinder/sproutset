@@ -26,6 +26,6 @@
     }
   ],
   "require-dev": {
-    "laravel/pint": "1.23.0"
+    "laravel/pint": "1.24.0"
   }
 }
