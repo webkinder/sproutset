@@ -3,7 +3,7 @@
   "extends": ["config:best-practices", ":rebaseStalePrs"],
   "branchPrefix": "deps/",
   "labels": ["type:dependency"],
-  "baseBranches": ["develop"],
+  "baseBranchPatterns": ["develop"],
   "packageRules": [
     {
       "matchPackageNames": [],
