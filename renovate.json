@@ -1,0 +1,56 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices", ":rebaseStalePrs"],
+  "branchPrefix": "deps/",
+  "labels": ["type:dependency"],
+  "baseBranchPatterns": ["develop"],
+  "packageRules": [
+    {
+      "matchPackageNames": [],
+      "enabled": false
+    },
+    {
+      "description": "Automatically merge minor and patch-level updates",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Assigning PRs of non-trivial updates",
+      "matchUpdateTypes": [
+        "major",
+        "pin",
+        "pinDigest",
+        "lockFileMaintenance",
+        "rollback",
+        "bump",
+        "replacement"
+      ],
+      "reviewers": ["marcoluzi", "raphaelportmann"],
+      "labels": ["needs:tests"],
+      "automerge": false
+    }
+  ],
+  "timezone": "Europe/Zurich",
+  "schedule": [
+    "after 10pm every weekday",
+    "before 5am every weekday",
+    "every weekend"
+  ],
+  "platformAutomerge": true,
+  "rebaseWhen": "conflicted",
+  "rollbackPrs": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardAutoclose": false,
+  "addLabels": ["type:dependency"],
+  "commitMessageAction": "Update",
+  "commitMessageTopic": "{{depName}}",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "commitMessageAction": "Lock file maintenance",
+    "prBodyDefinitions": {
+      "Change": "All locks refreshed"
+    }
+  },
+  "ignoreTests": true
+}

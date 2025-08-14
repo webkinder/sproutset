@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "devDependencies": {
+    "@eslint/compat": "1.3.2",
+    "@eslint/js": "9.33.0",
+    "@stylistic/eslint-plugin": "5.2.3",
+    "globals": "16.3.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.1.5",
+    "prettier": "3.6.2",
+    "prettier-plugin-blade": "2.1.21"
+  },
+  "scripts": {
+    "postinstall": "husky"
+  },
+  "lint-staged": {
+    "*.blade.php": "prettier --write",
+    "!(*blade).php": "./vendor/bin/pint",
+    "*.{js,cjs,mjs}": "eslint --fix",
+    "!(*.php|*.js|*.cjs|*.mjs)": "prettier --write --ignore-unknown"
+  }
+}

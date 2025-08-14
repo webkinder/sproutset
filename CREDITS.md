@@ -19,6 +19,12 @@ A big thank you to everyone who has contributed to this repository!
 
 This project uses the following software libraries.
 
-- [Library Name](library link)
-- [Library Name2](library link2)
-- [Library NameN](library linkN).
+- [@eslint/compat](https://github.com/eslint/rewrite/tree/main/packages/compat)
+- [@eslint/js](https://github.com/eslint/eslint/tree/main/packages/js)
+- [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic).
+- [globals](https://github.com/sindresorhus/globals)
+- [husky](https://github.com/typicode/husky)
+- [laravel/pint](https://github.com/laravel/pint)
+- [lint-staged](https://github.com/lint-staged/lint-staged)
+- [prettier](https://github.com/prettier/prettier)
+- [prettier-plugin-blade](https://www.npmjs.com/package/prettier-plugin-blade)
