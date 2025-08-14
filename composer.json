@@ -12,7 +12,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Webkinder\\Sproutset\\": "src/"
+      "Webkinder\\SproutsetPackage\\": "src/"
     }
   },
   "authors": [
@@ -25,7 +25,18 @@
       "email": "raphael@webkinder.ch"
     }
   ],
+  "require": {
+    "php": "~8.4.0",
+    "roots/acorn": "^5.0"
+  },
   "require-dev": {
     "laravel/pint": "1.24.0"
+  },
+  "extra": {
+    "acorn": {
+      "providers": [
+        "Webkinder\\SproutsetPackage\\SproutsetServiceProvider"
+      ]
+    }
   }
 }
