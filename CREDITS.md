@@ -28,3 +28,4 @@ This project uses the following software libraries.
 - [lint-staged](https://github.com/lint-staged/lint-staged)
 - [prettier](https://github.com/prettier/prettier)
 - [prettier-plugin-blade](https://www.npmjs.com/package/prettier-plugin-blade)
+- [roots/acorn](https://github.com/roots/acorn)
