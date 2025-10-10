@@ -104,6 +104,12 @@ final readonly class Sproutset
 
             $sizeConfig = $config[$baseSizeName];
 
+            if (isset($sizeConfig['show_in_ui']) && $sizeConfig['show_in_ui'] !== false) {
+                $filteredSizes[$sizeName] = $sizeData;
+
+                continue;
+            }
+
             if (! isset($sizeConfig['post_types'])) {
                 $filteredSizes[$sizeName] = $sizeData;
 
