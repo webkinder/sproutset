@@ -10,6 +10,7 @@ final readonly class Sproutset
     {
         $this->registerImageSizes();
         $this->filterImageSizesByPostType();
+        $this->filterImageSizesInUI();
     }
 
     private function registerImageSizes(): void
@@ -120,5 +121,31 @@ final readonly class Sproutset
     private function getBaseSizeName(string $sizeName): string
     {
         return preg_replace('/@[\d.]+x$/', '', $sizeName) ?? $sizeName;
+    }
+
+    private function filterImageSizesInUI(): void
+    {
+        add_filter('image_size_names_choose', function (array $sizes): array {
+            $config = config('sproutset-image-sizes', []);
+            $filteredSizes = [];
+
+            foreach ($config as $sizeName => $sizeConfig) {
+                if (isset($sizeConfig['show_in_ui'])) {
+                    $showInUi = $sizeConfig['show_in_ui'];
+
+                    if ($showInUi === true) {
+                        $filteredSizes[$sizeName] = $sizes[$sizeName] ?? ucwords(str_replace(['-', '_'], ' ', $sizeName));
+                    } elseif (is_string($showInUi)) {
+                        $filteredSizes[$sizeName] = $showInUi;
+                    }
+                }
+            }
+
+            if (isset($sizes['full'])) {
+                $filteredSizes['full'] = $sizes['full'];
+            }
+
+            return $filteredSizes;
+        });
     }
 }

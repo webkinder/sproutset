@@ -42,6 +42,7 @@ return [
             0.5,
             2,
         ],
+        'show_in_ui' => true,
     ],
 
     '16-9' => [
@@ -53,6 +54,7 @@ return [
             2,
         ],
         'post_types' => [],
+        'show_in_ui' => __('16:9', 'sproutset'),
     ],
 
 ];
