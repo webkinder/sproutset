@@ -104,9 +104,17 @@ final readonly class Sproutset
 
             $sizeConfig = $config[$baseSizeName];
 
-            if (! isset($sizeConfig['post_types']) || ! is_array($sizeConfig['post_types']) || empty($sizeConfig['post_types'])) {
+            if (! isset($sizeConfig['post_types'])) {
                 $filteredSizes[$sizeName] = $sizeData;
 
+                continue;
+            }
+
+            if (! is_array($sizeConfig['post_types'])) {
+                continue;
+            }
+
+            if (empty($sizeConfig['post_types'])) {
                 continue;
             }
 
