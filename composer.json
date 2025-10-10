@@ -38,12 +38,6 @@
     "optimize-autoloader": true,
     "sort-packages": true
   },
-  "scripts": {
-    "lint": [
-      "rector",
-      "pint --parallel"
-    ]
-  },
   "extra": {
     "acorn": {
       "providers": [
