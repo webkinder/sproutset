@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added Sproutset service provider and service by @marcoluzi in #51
 - Added rector to pre-commit formatting by @marcoluzi in #72
+- Added image size management system with configuration by @marcoluzi in #73
+- Added image size registration logic with srcset variant support by @marcoluzi in #73
+- Added `show_in_ui` option to control image size visibility in WordPress media selector by @marcoluzi in #73
+- Added post type filtering for conditional image size generation by @marcoluzi in #73
+- Added `config/sproutset-image-sizes.php` configuration file by @marcoluzi in #73
+- Added `roots/wordpress-no-content` (6.8.3) as dev dependency by @marcoluzi in #73
 
 ### Fixed
 
@@ -18,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed pint to use parallel processing by @marcoluzi in #72
 - Changed pint configuration by @marcoluzi in #72
+- Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
 
 ### Removed
 
