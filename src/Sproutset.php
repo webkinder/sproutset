@@ -11,6 +11,7 @@ final readonly class Sproutset
         $this->registerImageSizes();
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
+        $this->addMediaSettingsNotice();
     }
 
     private function registerImageSizes(): void
@@ -160,6 +161,28 @@ final readonly class Sproutset
             }
 
             return $filteredSizes;
+        });
+    }
+
+    private function addMediaSettingsNotice(): void
+    {
+        add_action('admin_notices', function (): void {
+            $screen = get_current_screen();
+
+            if (! $screen || $screen->id !== 'options-media') {
+                return;
+            }
+
+            echo '<div class="notice notice-info">';
+            echo '<p><strong>Sproutset:</strong> ';
+            echo esc_html__('Image size settings on this page are managed by Sproutset configuration and changes here will have no effect.', 'sproutset');
+            echo ' ';
+            echo sprintf(
+                esc_html__('Configure image sizes in %s.', 'sproutset'),
+                '<code>config/sproutset-image-sizes.php</code>'
+            );
+            echo '</p>';
+            echo '</div>';
         });
     }
 }
