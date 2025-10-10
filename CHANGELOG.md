@@ -10,10 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added Sproutset service provider and service by @marcoluzi in #51
+- Added rector to pre-commit formatting by @marcoluzi in #72
 
 ### Fixed
 
 ### Changed
+
+- Changed pint to use parallel processing by @marcoluzi in #72
+- Changed pint configuration by @marcoluzi in #72
 
 ### Removed
 

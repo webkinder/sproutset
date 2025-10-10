@@ -15,7 +15,10 @@
   },
   "lint-staged": {
     "*.blade.php": "prettier --write",
-    "!(*blade).php": "./vendor/bin/pint",
+    "!(*blade).php": [
+      "./vendor/bin/rector",
+      "./vendor/bin/pint --parallel"
+    ],
     "*.{js,cjs,mjs}": "eslint --fix",
     "!(*.php|*.js|*.cjs|*.mjs)": "prettier --write --ignore-unknown"
   }
