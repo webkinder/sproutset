@@ -10,11 +10,6 @@
   ],
   "homepage": "https://github.com/webkinder/sproutset",
   "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Webkinder\\SproutsetPackage\\": "src/"
-    }
-  },
   "authors": [
     {
       "name": "Marco Luzi",
@@ -30,7 +25,24 @@
     "roots/acorn": "^5.0"
   },
   "require-dev": {
-    "laravel/pint": "1.25.1"
+    "driftingly/rector-laravel": "^2.0",
+    "laravel/pint": "1.25.1",
+    "rector/rector": " ^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webkinder\\SproutsetPackage\\": "src/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "scripts": {
+    "lint": [
+      "rector",
+      "pint --parallel"
+    ]
   },
   "extra": {
     "acorn": {
