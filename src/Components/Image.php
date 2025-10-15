@@ -169,6 +169,14 @@ final class Image extends Component
 
         $metadata['sizes'][$sizeName] = $resized;
         wp_update_attachment_metadata($this->id, $metadata);
+
+        $pathinfo = pathinfo($file);
+        $generatedImagePath = $pathinfo['dirname'].'/'.$resized['file'];
+
+        if (file_exists($generatedImagePath)) {
+            $optimizer = \Webkinder\SproutsetPackage\Services\ImageOptimizer::getInstance();
+            $optimizer->optimizeAndMark($generatedImagePath, $this->id);
+        }
     }
 
     private function getSizeData(string $sizeName): ?array

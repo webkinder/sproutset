@@ -13,6 +13,7 @@ final readonly class Sproutset
         $this->filterImageSizesInUI();
         $this->addMediaSettingsNotice();
         $this->registerAvifConversion();
+        $this->registerImageOptimization();
     }
 
     private function registerImageSizes(): void
@@ -195,5 +196,14 @@ final readonly class Sproutset
 
             return $output_format;
         });
+    }
+
+    private function registerImageOptimization(): void
+    {
+        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
+            $optimizer = Services\ImageOptimizer::getInstance();
+
+            return $optimizer->optimizeAttachmentSizes($attachmentId, $metadata);
+        }, 10, 2);
     }
 }

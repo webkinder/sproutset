@@ -8,7 +8,7 @@ use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Roots\Acorn\Console\Commands\Command;
-use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Webkinder\SproutsetPackage\Services\ImageOptimizer;
 
 final class Optimize extends Command
 {
@@ -16,9 +16,7 @@ final class Optimize extends Command
 
     protected $description = 'Optimize all images in the media library.';
 
-    private array $uploadDir;
-
-    private string $baseDir;
+    private ImageOptimizer $optimizer;
 
     public function handle(): int
     {
@@ -26,9 +24,9 @@ final class Optimize extends Command
         $this->info('Starting image optimization process...');
         $this->newLine();
 
-        $this->uploadDir = wp_upload_dir();
-        $this->baseDir = trailingslashit($this->uploadDir['basedir']);
-        $this->line("Uploads directory: <comment>{$this->uploadDir['basedir']}</comment>");
+        $this->optimizer = ImageOptimizer::getInstance();
+        $uploadDir = wp_upload_dir();
+        $this->line("Uploads directory: <comment>{$uploadDir['basedir']}</comment>");
         $this->newLine();
 
         if (! $this->checkBinaryAvailability()) {
@@ -37,7 +35,7 @@ final class Optimize extends Command
             return self::FAILURE;
         }
 
-        $imagePaths = $this->scanForImages($this->uploadDir['basedir']);
+        $imagePaths = $this->scanForImages($uploadDir['basedir']);
 
         if ($imagePaths === []) {
             $this->warn('No images found to optimize.');
@@ -106,7 +104,6 @@ final class Optimize extends Command
     {
         $this->line('Optimizing images...');
 
-        $optimizerChain = OptimizerChainFactory::create();
         $totalImages = count($imagePaths);
         $progressBar = $this->output->createProgressBar($totalImages);
         $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %message%');
@@ -121,11 +118,11 @@ final class Optimize extends Command
             $fileName = basename((string) $imagePath);
             $progressBar->setMessage("Optimizing: {$fileName}");
 
-            try {
-                $optimizerChain->optimize($imagePath);
-                $this->markAsOptimized($imagePath);
+            $attachmentId = $this->optimizer->getAttachmentIdByPath($imagePath);
+
+            if ($attachmentId && $this->optimizer->optimizeAndMark($imagePath, $attachmentId)) {
                 $optimizedCount++;
-            } catch (Exception) {
+            } else {
                 $this->newLine();
                 $this->warn("Failed to optimize: {$fileName}");
                 $this->newLine();
@@ -146,6 +143,25 @@ final class Optimize extends Command
         }
     }
 
+    private function filterOptimizedImages(array $imagePaths): array
+    {
+        $this->line('Checking optimization status...');
+
+        $filtered = [];
+        foreach ($imagePaths as $imagePath) {
+            $attachmentId = $this->optimizer->getAttachmentIdByPath($imagePath);
+            if ($attachmentId && ! $this->optimizer->isOptimized($imagePath, $attachmentId)) {
+                $filtered[] = $imagePath;
+            } elseif ($attachmentId === null || $attachmentId === 0) {
+                $filtered[] = $imagePath;
+            }
+        }
+
+        $this->newLine();
+
+        return $filtered;
+    }
+
     private function checkBinaryAvailability(): bool
     {
         $optimizers = [
@@ -164,7 +180,7 @@ final class Optimize extends Command
         $availableCount = 0;
 
         foreach ($optimizers as $binaryName => $format) {
-            if ($this->isBinaryAvailable($binaryName)) {
+            if ($this->optimizer->isBinaryAvailable($binaryName)) {
                 $availableCount++;
                 $this->line(sprintf('<info>✓</info> %-12s <comment>(%s)</comment>', $binaryName, $format));
             } else {
@@ -185,120 +201,5 @@ final class Optimize extends Command
         $this->newLine();
 
         return $availableCount > 0;
-    }
-
-    private function isBinaryAvailable(string $binaryName): bool
-    {
-        $command = sprintf('command -v %s > /dev/null 2>&1', escapeshellarg($binaryName));
-        exec($command, $output, $returnCode);
-
-        return $returnCode === 0;
-    }
-
-    private function filterOptimizedImages(array $imagePaths): array
-    {
-        $this->line('Checking optimization status...');
-
-        $filtered = [];
-        foreach ($imagePaths as $imagePath) {
-            if (! $this->isOptimized($imagePath)) {
-                $filtered[] = $imagePath;
-            }
-        }
-
-        $this->newLine();
-
-        return $filtered;
-    }
-
-    private function isOptimized(string $imagePath): bool
-    {
-        $attachmentId = $this->getAttachmentIdByPath($imagePath);
-        if ($attachmentId === null || $attachmentId === 0 || ! ($metadata = wp_get_attachment_metadata($attachmentId))) {
-            return false;
-        }
-
-        $fileName = basename($imagePath);
-
-        if (isset($metadata['original_image']) && $metadata['original_image'] === $fileName) {
-            return isset($metadata['original_image_optimized']['hash'])
-                && $metadata['original_image_optimized']['hash'] === md5_file($imagePath);
-        }
-
-        if (isset($metadata['file']) && basename($metadata['file']) === $fileName) {
-            return isset($metadata['sproutset_optimized']['hash'])
-                && $metadata['sproutset_optimized']['hash'] === md5_file($imagePath);
-        }
-
-        if (isset($metadata['sizes'])) {
-            foreach ($metadata['sizes'] as $sizeName => $sizeData) {
-                if ($sizeData['file'] === $fileName) {
-                    return isset($metadata['sizes'][$sizeName]['sproutset_optimized']['hash'])
-                        && $metadata['sizes'][$sizeName]['sproutset_optimized']['hash'] === md5_file($imagePath);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private function markAsOptimized(string $imagePath): void
-    {
-        $attachmentId = $this->getAttachmentIdByPath($imagePath);
-        if ($attachmentId === null || $attachmentId === 0 || ! ($metadata = wp_get_attachment_metadata($attachmentId))) {
-            return;
-        }
-
-        $fileName = basename($imagePath);
-        $optimizationData = [
-            'hash' => md5_file($imagePath),
-        ];
-
-        if (isset($metadata['original_image']) && $metadata['original_image'] === $fileName) {
-            $metadata['original_image_optimized'] = $optimizationData;
-        } elseif (isset($metadata['file']) && basename($metadata['file']) === $fileName) {
-            $metadata['sproutset_optimized'] = $optimizationData;
-        } elseif (isset($metadata['sizes'])) {
-            foreach ($metadata['sizes'] as $sizeName => $sizeData) {
-                if ($sizeData['file'] === $fileName) {
-                    $metadata['sizes'][$sizeName]['sproutset_optimized'] = $optimizationData;
-                    break;
-                }
-            }
-        }
-
-        wp_update_attachment_metadata($attachmentId, $metadata);
-    }
-
-    private function getAttachmentIdByPath(string $imagePath): ?int
-    {
-        $relativePath = mb_ltrim(str_replace($this->baseDir, '', $imagePath), '/');
-
-        global $wpdb;
-
-        $attachmentId = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value = %s LIMIT 1",
-                $relativePath
-            )
-        );
-
-        if ($attachmentId) {
-            return (int) $attachmentId;
-        }
-
-        $pathInfo = pathinfo($relativePath);
-
-        $baseFilename = preg_replace('/-\d+x\d+$|@\d+x$|-scaled$/', '', $pathInfo['filename']);
-
-        $searchPattern = ($pathInfo['dirname'] !== '.' ? $pathInfo['dirname'].'/' : '').$baseFilename.'%';
-        $attachmentId = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1",
-                $searchPattern
-            )
-        );
-
-        return $attachmentId ? (int) $attachmentId : null;
     }
 }
