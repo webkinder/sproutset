@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added post type filtering for conditional image size generation by @marcoluzi in #73
 - Added `config/sproutset-image-sizes.php` configuration file by @marcoluzi in #73
 - Added `roots/wordpress-no-content` (6.8.3) as dev dependency by @marcoluzi in #73
+- Added `Image` Blade component (`<x-sproutset-image>`) for responsive image rendering with automatic srcset generation by @marcoluzi in #74
+- Added automatic on-demand image size generation when missing sizes are requested by @marcoluzi in #74
+- Added admin notice on WordPress media settings page to inform users about Sproutset configuration by @marcoluzi in #74
 
 ### Fixed
 
@@ -25,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed pint to use parallel processing by @marcoluzi in #72
 - Changed pint configuration by @marcoluzi in #72
 - Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
+- Changed `Sproutset` constructor to remove unused `$app` parameter by @marcoluzi in #74
 
 ### Removed
 

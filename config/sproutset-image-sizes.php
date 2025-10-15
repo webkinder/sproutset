@@ -45,16 +45,4 @@ return [
         'show_in_ui' => true,
     ],
 
-    '16-9' => [
-        'width' => 1920,
-        'height' => 1080,
-        'crop' => true,
-        'srcset' => [
-            0.5,
-            2,
-        ],
-        'post_types' => [],
-        'show_in_ui' => __('16:9', 'sproutset'),
-    ],
-
 ];
