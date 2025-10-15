@@ -12,6 +12,7 @@ final readonly class Sproutset
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
         $this->addMediaSettingsNotice();
+        $this->registerAvifConversion();
     }
 
     private function registerImageSizes(): void
@@ -183,6 +184,16 @@ final readonly class Sproutset
             );
             echo '</p>';
             echo '</div>';
+        });
+    }
+
+    private function registerAvifConversion(): void
+    {
+        add_filter('image_editor_output_format', function (array $output_format): array {
+            $output_format['image/jpeg'] = 'image/avif';
+            $output_format['image/png'] = 'image/avif';
+
+            return $output_format;
         });
     }
 }
