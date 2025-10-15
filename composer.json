@@ -22,7 +22,8 @@
   ],
   "require": {
     "php": "~8.4.0",
-    "roots/acorn": "^5.0"
+    "roots/acorn": "^5.0",
+    "spatie/image-optimizer": "^1.8"
   },
   "require-dev": {
     "driftingly/rector-laravel": "^2.0",
