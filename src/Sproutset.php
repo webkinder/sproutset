@@ -33,34 +33,34 @@ final readonly class Sproutset
 
     private function registerConfiguredImageSizes(): void
     {
-        $sizes = config('sproutset-image-sizes', []);
+        $imageSizes = config('sproutset-config.image_sizes', []);
 
-        foreach ($sizes as $name => $config) {
-            $this->registerImageSize($name, $config);
-            $this->registerSrcsetVariants($name, $config);
+        foreach ($imageSizes as $name => $sizeConfig) {
+            $this->registerImageSize($name, $sizeConfig);
+            $this->registerSrcsetVariants($name, $sizeConfig);
         }
     }
 
-    private function registerImageSize(string $name, array $config): void
+    private function registerImageSize(string $name, array $sizeConfig): void
     {
-        $width = $config['width'] ?? 0;
-        $height = $config['height'] ?? 0;
-        $crop = $config['crop'] ?? false;
+        $width = $sizeConfig['width'] ?? 0;
+        $height = $sizeConfig['height'] ?? 0;
+        $crop = $sizeConfig['crop'] ?? false;
 
         add_image_size($name, $width, $height, $crop);
     }
 
-    private function registerSrcsetVariants(string $name, array $config): void
+    private function registerSrcsetVariants(string $name, array $sizeConfig): void
     {
-        if (! isset($config['srcset']) || ! is_array($config['srcset'])) {
+        if (! isset($sizeConfig['srcset']) || ! is_array($sizeConfig['srcset'])) {
             return;
         }
 
-        $width = $config['width'] ?? 0;
-        $height = $config['height'] ?? 0;
-        $crop = $config['crop'] ?? false;
+        $width = $sizeConfig['width'] ?? 0;
+        $height = $sizeConfig['height'] ?? 0;
+        $crop = $sizeConfig['crop'] ?? false;
 
-        foreach ($config['srcset'] as $multiplier) {
+        foreach ($sizeConfig['srcset'] as $multiplier) {
             $multipliedWidth = $width > 0 ? (int) ($width * $multiplier) : 0;
             $multipliedHeight = $height > 0 ? (int) ($height * $multiplier) : 0;
             $srcsetName = "{$name}@{$multiplier}x";
@@ -93,19 +93,19 @@ final readonly class Sproutset
 
     private function filterSizesByAllowedPostTypes(array $sizes, ?string $postType): array
     {
-        $config = config('sproutset-image-sizes', []);
+        $imageSizes = config('sproutset-config.image_sizes', []);
         $filteredSizes = [];
 
         foreach ($sizes as $sizeName => $sizeData) {
             $baseSizeName = $this->getBaseSizeName($sizeName);
 
-            if (! isset($config[$baseSizeName])) {
+            if (! isset($imageSizes[$baseSizeName])) {
                 $filteredSizes[$sizeName] = $sizeData;
 
                 continue;
             }
 
-            $sizeConfig = $config[$baseSizeName];
+            $sizeConfig = $imageSizes[$baseSizeName];
 
             if (isset($sizeConfig['show_in_ui']) && $sizeConfig['show_in_ui'] !== false) {
                 $filteredSizes[$sizeName] = $sizeData;
@@ -143,10 +143,10 @@ final readonly class Sproutset
     private function filterImageSizesInUI(): void
     {
         add_filter('image_size_names_choose', function (array $sizes): array {
-            $config = config('sproutset-image-sizes', []);
+            $imageSizes = config('sproutset-config.image_sizes', []);
             $filteredSizes = [];
 
-            foreach ($config as $sizeName => $sizeConfig) {
+            foreach ($imageSizes as $sizeName => $sizeConfig) {
                 if (isset($sizeConfig['show_in_ui'])) {
                     $showInUi = $sizeConfig['show_in_ui'];
 
@@ -181,7 +181,7 @@ final readonly class Sproutset
             echo ' ';
             echo sprintf(
                 esc_html__('Configure image sizes in %s.', 'sproutset'),
-                '<code>config/sproutset-image-sizes.php</code>'
+                '<code>config/sproutset-config.php</code>'
             );
             echo '</p>';
             echo '</div>';
@@ -190,6 +190,10 @@ final readonly class Sproutset
 
     private function registerAvifConversion(): void
     {
+        if (! config('sproutset-config.convert_to_avif', false)) {
+            return;
+        }
+
         add_filter('image_editor_output_format', function (array $output_format): array {
             $output_format['image/jpeg'] = 'image/avif';
             $output_format['image/png'] = 'image/avif';

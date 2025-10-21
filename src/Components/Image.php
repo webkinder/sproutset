@@ -84,13 +84,13 @@ final class Image extends Component
 
     private function generateSrcset(): string
     {
-        $config = config('sproutset-image-sizes', []);
+        $imageSizes = config('sproutset-config.image_sizes', []);
 
-        if (! isset($config[$this->size])) {
+        if (! isset($imageSizes[$this->size])) {
             return wp_get_attachment_image_srcset($this->id, $this->size) ?: '';
         }
 
-        $sizeConfig = $config[$this->size];
+        $sizeConfig = $imageSizes[$this->size];
 
         if (! isset($sizeConfig['srcset']) || ! is_array($sizeConfig['srcset'])) {
             return wp_get_attachment_image_srcset($this->id, $this->size) ?: '';

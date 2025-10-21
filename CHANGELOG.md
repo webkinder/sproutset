@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Image` Blade component (`<x-sproutset-image>`) for responsive image rendering with automatic srcset generation by @marcoluzi in #74
 - Added automatic on-demand image size generation when missing sizes are requested by @marcoluzi in #74
 - Added admin notice on WordPress media settings page to inform users about Sproutset configuration by @marcoluzi in #74
+- Added `convert_to_avif` configuration option for automatic AVIF image conversion by @marcoluzi in #79
+- Added automatic AVIF conversion for JPEG and PNG images via `image_editor_output_format` filter by @marcoluzi in #79
 
 ### Fixed
 
@@ -29,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed pint configuration by @marcoluzi in #72
 - Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
 - Changed `Sproutset` constructor to remove unused `$app` parameter by @marcoluzi in #74
+- **BREAKING:** Changed configuration file from `sproutset-image-sizes.php` to `sproutset-config.php` by @marcoluzi in #79
+- **BREAKING:** Changed config structure to nest image sizes under `image_sizes` key by @marcoluzi in #79
+- Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
+- Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
 
 ### Removed
 

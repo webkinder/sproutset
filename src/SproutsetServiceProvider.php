@@ -16,16 +16,16 @@ final class SproutsetServiceProvider extends ServiceProvider
         $this->app->singleton('Sproutset', fn (): Sproutset => new Sproutset());
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/sproutset-image-sizes.php',
-            'sproutset-image-sizes'
+            __DIR__.'/../config/sproutset-config.php',
+            'sproutset-config'
         );
     }
 
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/../config/sproutset-image-sizes.php' => config_path('sproutset-image-sizes.php'),
-        ], 'sproutset-image-sizes');
+            __DIR__.'/../config/sproutset-config.php' => config_path('sproutset-config.php'),
+        ], 'sproutset-config');
 
         $this->app->make('Sproutset');
 
