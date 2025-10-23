@@ -8,6 +8,7 @@ final readonly class Sproutset
 {
     public function __construct()
     {
+        $this->validateRequiredImageSizes();
         $this->registerImageSizes();
         $this->updateImageSizeOptions();
         $this->filterImageSizesByPostType();
@@ -15,6 +16,36 @@ final readonly class Sproutset
         $this->addMediaSettingsNotice();
         $this->disableMediaSettingsFields();
         $this->registerAvifConversion();
+    }
+
+    private function validateRequiredImageSizes(): void
+    {
+        $imageSizes = config('sproutset-config.image_sizes', []);
+        $requiredSizes = ['thumbnail', 'medium', 'medium_large', 'large'];
+        $missingSizes = [];
+
+        foreach ($requiredSizes as $requiredSize) {
+            if (! isset($imageSizes[$requiredSize])) {
+                $missingSizes[] = $requiredSize;
+            }
+        }
+
+        if ($missingSizes !== []) {
+            $message = sprintf(
+                __('Sproutset: Required image sizes are missing in config/sproutset-config.php: %s', 'sproutset'),
+                implode(', ', $missingSizes)
+            );
+
+            if (function_exists('wp_die')) {
+                wp_die(
+                    esc_html($message),
+                    __('Sproutset Configuration Error', 'sproutset'),
+                    ['response' => 500]
+                );
+            }
+
+            throw new \RuntimeException($message);
+        }
     }
 
     private function registerImageSizes(): void
