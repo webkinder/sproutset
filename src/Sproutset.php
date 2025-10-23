@@ -9,9 +9,11 @@ final readonly class Sproutset
     public function __construct()
     {
         $this->registerImageSizes();
+        $this->updateImageSizeOptions();
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
         $this->addMediaSettingsNotice();
+        $this->disableMediaSettingsFields();
         $this->registerAvifConversion();
     }
 
@@ -21,6 +23,81 @@ final readonly class Sproutset
             $this->removeAllImageSizes();
             $this->registerConfiguredImageSizes();
         });
+    }
+
+    private function updateImageSizeOptions(): void
+    {
+        add_action('after_setup_theme', function (): void {
+            $this->syncImageSizeOptionsToDatabase();
+        }, 11);
+    }
+
+    private function syncImageSizeOptionsToDatabase(): void
+    {
+        $imageSizes = config('sproutset-config.image_sizes', []);
+        $configHash = md5(serialize($imageSizes));
+        $storedHash = get_option('_sproutset_image_sizes_hash', '');
+
+        if ($configHash === $storedHash) {
+            return;
+        }
+
+        $optionMapping = [
+            'thumbnail' => [
+                'width' => 'thumbnail_size_w',
+                'height' => 'thumbnail_size_h',
+                'crop' => 'thumbnail_crop',
+            ],
+            'medium' => [
+                'width' => 'medium_size_w',
+                'height' => 'medium_size_h',
+            ],
+            'medium_large' => [
+                'width' => 'medium_large_size_w',
+                'height' => 'medium_large_size_h',
+            ],
+            'large' => [
+                'width' => 'large_size_w',
+                'height' => 'large_size_h',
+            ],
+        ];
+
+        foreach ($optionMapping as $sizeName => $options) {
+            if (! isset($imageSizes[$sizeName])) {
+                continue;
+            }
+
+            $sizeConfig = $imageSizes[$sizeName];
+
+            if (isset($options['width'])) {
+                $newValue = $sizeConfig['width'] ?? 0;
+                $currentValue = (int) get_option($options['width']);
+
+                if ($currentValue !== $newValue) {
+                    update_option($options['width'], $newValue);
+                }
+            }
+
+            if (isset($options['height'])) {
+                $newValue = $sizeConfig['height'] ?? 0;
+                $currentValue = (int) get_option($options['height']);
+
+                if ($currentValue !== $newValue) {
+                    update_option($options['height'], $newValue);
+                }
+            }
+
+            if (isset($options['crop'])) {
+                $newValue = $sizeConfig['crop'] ? 1 : 0;
+                $currentValue = (int) get_option($options['crop']);
+
+                if ($currentValue !== $newValue) {
+                    update_option($options['crop'], $newValue);
+                }
+            }
+        }
+
+        update_option('_sproutset_image_sizes_hash', $configHash);
     }
 
     private function removeAllImageSizes(): void
@@ -184,6 +261,47 @@ final readonly class Sproutset
             );
             echo '</p>';
             echo '</div>';
+        });
+    }
+
+    private function disableMediaSettingsFields(): void
+    {
+        add_action('admin_head-options-media.php', function (): void {
+            ?>
+            <style>
+                input[name="thumbnail_size_w"],
+                input[name="thumbnail_size_h"],
+                input[name="thumbnail_crop"],
+                input[name="medium_size_w"],
+                input[name="medium_size_h"],
+                input[name="large_size_w"],
+                input[name="large_size_h"] {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+            </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const fields = [
+                        'thumbnail_size_w',
+                        'thumbnail_size_h',
+                        'thumbnail_crop',
+                        'medium_size_w',
+                        'medium_size_h',
+                        'large_size_w',
+                        'large_size_h'
+                    ];
+
+                    fields.forEach(function(fieldName) {
+                        const field = document.querySelector('input[name="' + fieldName + '"]');
+                        if (field) {
+                            field.setAttribute('readonly', 'readonly');
+                            field.setAttribute('disabled', 'disabled');
+                        }
+                    });
+                });
+            </script>
+            <?php
         });
     }
 
