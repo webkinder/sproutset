@@ -169,6 +169,15 @@ final class Image extends Component
 
         $metadata['sizes'][$sizeName] = $resized;
         wp_update_attachment_metadata($this->id, $metadata);
+
+        if (config('sproutset-config.auto_optimize_images', false)) {
+            $pathinfo = pathinfo($file);
+            $generatedImagePath = $pathinfo['dirname'].'/'.$resized['file'];
+
+            if (file_exists($generatedImagePath)) {
+                \Webkinder\SproutsetPackage\Services\CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
+            }
+        }
     }
 
     private function getSizeData(string $sizeName): ?array
@@ -194,7 +203,7 @@ final class Image extends Component
 
         $parts = ['auto'];
 
-        $parts[] = $this->sizes !== null && $this->sizes !== '' && $this->sizes !== '0' ? mb_trim($this->sizes) : $this->generateDefaultSizes();
+        $parts[] = in_array($this->sizes, [null, '', '0'], true) ? $this->generateDefaultSizes() : mb_trim($this->sizes);
 
         return implode(', ', $parts);
     }
