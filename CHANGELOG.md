@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added automatic optimization for on-the-fly generated image sizes
 - Added admin notice for missing optimization binaries in development/staging environments
 - Added optimization status tracking in attachment metadata with hash verification
+- Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
+- Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
+- Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
 
 ### Fixed
 
@@ -43,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Changed config structure to nest image sizes under `image_sizes` key by @marcoluzi in #79
 - Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
 - Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
+- Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 
 ### Removed
 
