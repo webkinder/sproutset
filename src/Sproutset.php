@@ -8,6 +8,7 @@ final readonly class Sproutset
 {
     public function __construct()
     {
+        $this->loadTextDomain();
         $this->registerImageSizes();
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
@@ -16,6 +17,38 @@ final readonly class Sproutset
         $this->registerAvifConversion();
         $this->registerImageOptimization();
         $this->initCronOptimizer();
+    }
+
+    private function loadTextDomain(): void
+    {
+        add_action('init', function (): void {
+            $this->registerTextDomain();
+        });
+    }
+
+    private function registerTextDomain(): void
+    {
+        $locale = get_locale();
+        $domain = $this->getTextDomain();
+        $filePath = $this->getFilePath($locale, $domain);
+
+        if (! file_exists($filePath)) {
+            return;
+        }
+
+        load_textdomain($domain, $filePath);
+    }
+
+    private function getTextDomain(): string
+    {
+        return 'webkinder-sproutset';
+    }
+
+    private function getFilePath(string $locale, string $domain): string
+    {
+        $file = "{$domain}-{$locale}.mo";
+
+        return __DIR__."/../languages/{$file}";
     }
 
     private function registerImageSizes(): void
@@ -179,10 +212,11 @@ final readonly class Sproutset
 
             echo '<div class="notice notice-info">';
             echo '<p><strong>Sproutset:</strong> ';
-            echo esc_html__('Image size settings on this page are managed by Sproutset configuration and changes here will have no effect.', 'sproutset');
+            echo esc_html__('Image size settings on this page are managed by Sproutset configuration and changes here will have no effect.', 'webkinder-sproutset');
             echo ' ';
             echo sprintf(
-                esc_html__('Configure image sizes in %s.', 'sproutset'),
+                /* translators: %s: path to Sproutset configuration file */
+                esc_html__('Configure image sizes in %s.', 'webkinder-sproutset'),
                 '<code>config/sproutset-config.php</code>'
             );
             echo '</p>';
@@ -218,18 +252,19 @@ final readonly class Sproutset
 
             echo '<div class="notice notice-warning">';
             echo '<p><strong>Sproutset:</strong> ';
-            echo esc_html__('Image optimization is enabled but some optimization packages are missing. Images may not be optimized properly.', 'sproutset');
+            echo esc_html__('Image optimization is enabled but some optimization packages are missing. Images may not be optimized.', 'webkinder-sproutset');
             echo '</p>';
             echo '<p>';
-            echo esc_html__('Missing packages:', 'sproutset');
+            echo esc_html__('Missing packages:', 'webkinder-sproutset');
             echo ' <code>'.esc_html(implode(', ', $missingBinaries)).'</code>';
             echo '</p>';
             echo '<p>';
-            echo esc_html__('Install the missing packages to enable full image optimization. See the ', 'sproutset');
-            echo '<a href="https://github.com/spatie/image-optimizer#optimization-tools" target="_blank" rel="noopener noreferrer">';
-            echo esc_html__('Spatie Image Optimizer documentation', 'sproutset');
-            echo '</a> ';
-            echo esc_html__('for installation instructions.', 'sproutset');
+            printf(
+                /* translators: 1: opening link tag, 2: closing link tag */
+                esc_html__('Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions.', 'webkinder-sproutset'),
+                '<a href="https://github.com/spatie/image-optimizer#optimization-tools" target="_blank" rel="noopener noreferrer">',
+                '</a>'
+            );
             echo '</p>';
             echo '</div>';
         });
