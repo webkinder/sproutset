@@ -32,3 +32,4 @@ This project uses the following software libraries and packages.
 - [rectorphp/rector](https://github.com/rectorphp/rector)
 - [roots/acorn](https://github.com/roots/acorn)
 - [spatie/image-optimizer](https://github.com/spatie/image-optimizer)
+- [wp-cli/i18n-command](https://github.com/wp-cli/i18n-command)
