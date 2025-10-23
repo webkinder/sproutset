@@ -12,7 +12,7 @@ use Webkinder\SproutsetPackage\Services\ImageOptimizer;
 
 final class Optimize extends Command
 {
-    protected $signature = 'sproutset:optimize';
+    protected $signature = 'sproutset:optimize {--force : Force reoptimization of all images}';
 
     protected $description = 'Optimize all images in the media library.';
 
@@ -43,17 +43,25 @@ final class Optimize extends Command
             return self::SUCCESS;
         }
 
-        $filteredPaths = $this->filterOptimizedImages($imagePaths);
+        $force = (bool) $this->option('force');
 
-        if ($filteredPaths === []) {
-            $this->info('All images are already optimized.');
+        if ($force) {
+            $this->line('<comment>Force mode enabled:</comment> Reoptimizing all images');
+            $this->newLine();
+            $filteredPaths = $imagePaths;
+        } else {
+            $filteredPaths = $this->filterOptimizedImages($imagePaths);
 
-            return self::SUCCESS;
-        }
+            if ($filteredPaths === []) {
+                $this->info('All images are already optimized.');
 
-        $skippedCount = count($imagePaths) - count($filteredPaths);
-        if ($skippedCount > 0) {
-            $this->line(sprintf('Skipping <comment>%d</comment> already optimized images', $skippedCount));
+                return self::SUCCESS;
+            }
+
+            $skippedCount = count($imagePaths) - count($filteredPaths);
+            if ($skippedCount > 0) {
+                $this->line(sprintf('Skipping <comment>%d</comment> already optimized images', $skippedCount));
+            }
         }
 
         $this->info(sprintf('Optimizing <comment>%d</comment> images', count($filteredPaths)));
@@ -188,13 +196,13 @@ final class Optimize extends Command
             }
         }
 
-        $this->newLine();
-
         if ($availableCount > 0) {
+            $this->newLine();
             $this->line(sprintf('<info>%d/%d</info> optimizers available', $availableCount, count($optimizers)));
         }
 
         if ($availableCount < count($optimizers)) {
+            $this->newLine();
             $this->line('<comment>Tip:</comment> Install missing optimizers for better results. See <fg=blue>https://github.com/spatie/image-optimizer?tab=readme-ov-file#optimization-tools</fg=blue> for more information.');
         }
 

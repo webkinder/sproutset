@@ -69,8 +69,8 @@ final class ImageOptimizer
         $fileName = basename($imagePath);
 
         if (isset($metadata['original_image']) && $metadata['original_image'] === $fileName) {
-            return isset($metadata['original_image_optimized']['hash'])
-                && $metadata['original_image_optimized']['hash'] === md5_file($imagePath);
+            return isset($metadata['original_image_sproutset_optimized']['hash'])
+                && $metadata['original_image_sproutset_optimized']['hash'] === md5_file($imagePath);
         }
 
         if (isset($metadata['file']) && basename($metadata['file']) === $fileName) {
@@ -100,10 +100,11 @@ final class ImageOptimizer
         $fileName = basename($imagePath);
         $optimizationData = [
             'hash' => md5_file($imagePath),
+            'timestamp' => time(),
         ];
 
         if (isset($metadata['original_image']) && $metadata['original_image'] === $fileName) {
-            $metadata['original_image_optimized'] = $optimizationData;
+            $metadata['original_image_sproutset_optimized'] = $optimizationData;
         } elseif (isset($metadata['file']) && basename($metadata['file']) === $fileName) {
             $metadata['sproutset_optimized'] = $optimizationData;
         } elseif (isset($metadata['sizes'])) {
@@ -163,13 +164,19 @@ final class ImageOptimizer
             $pathInfo = pathinfo((string) $metadata['file']);
             $originalPath = $baseDir.$pathInfo['dirname'].'/'.$metadata['original_image'];
             if (file_exists($originalPath) && $this->optimize($originalPath)) {
-                $metadata['original_image_optimized'] = ['hash' => md5_file($originalPath)];
+                $metadata['original_image_sproutset_optimized'] = [
+                    'hash' => md5_file($originalPath),
+                    'timestamp' => time(),
+                ];
             }
         }
 
         $mainFile = $baseDir.$metadata['file'];
         if (file_exists($mainFile) && $this->optimize($mainFile)) {
-            $metadata['sproutset_optimized'] = ['hash' => md5_file($mainFile)];
+            $metadata['sproutset_optimized'] = [
+                'hash' => md5_file($mainFile),
+                'timestamp' => time(),
+            ];
             $metadata['filesize'] = filesize($mainFile);
         }
 
@@ -180,7 +187,10 @@ final class ImageOptimizer
             foreach ($metadata['sizes'] as $sizeName => $sizeData) {
                 $sizePath = $baseDir.$dirname.'/'.$sizeData['file'];
                 if (file_exists($sizePath) && $this->optimize($sizePath)) {
-                    $metadata['sizes'][$sizeName]['sproutset_optimized'] = ['hash' => md5_file($sizePath)];
+                    $metadata['sizes'][$sizeName]['sproutset_optimized'] = [
+                        'hash' => md5_file($sizePath),
+                        'timestamp' => time(),
+                    ];
                     $metadata['sizes'][$sizeName]['filesize'] = filesize($sizePath);
                 }
             }

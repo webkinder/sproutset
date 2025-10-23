@@ -14,6 +14,7 @@ final readonly class Sproutset
         $this->addMediaSettingsNotice();
         $this->registerAvifConversion();
         $this->registerImageOptimization();
+        $this->initCronOptimizer();
     }
 
     private function registerImageSizes(): void
@@ -204,10 +205,23 @@ final readonly class Sproutset
 
     private function registerImageOptimization(): void
     {
-        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
-            $optimizer = Services\ImageOptimizer::getInstance();
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
 
-            return $optimizer->optimizeAttachmentSizes($attachmentId, $metadata);
+        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
+            Services\CronOptimizer::scheduleAttachmentOptimization($attachmentId, $metadata);
+
+            return $metadata;
         }, 10, 2);
+    }
+
+    private function initCronOptimizer(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        Services\CronOptimizer::init();
     }
 }
