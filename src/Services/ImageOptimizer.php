@@ -33,6 +33,24 @@ final class ImageOptimizer
         return self::$instance;
     }
 
+    /**
+     * Get optimizer binaries configuration.
+     *
+     * @return array<string, array{name: string, format: string}>
+     */
+    public static function getOptimizerBinaries(): array
+    {
+        return [
+            'jpegoptim' => ['name' => 'JpegOptim', 'format' => 'JPEG'],
+            'optipng' => ['name' => 'Optipng', 'format' => 'PNG'],
+            'pngquant' => ['name' => 'Pngquant 2', 'format' => 'PNG'],
+            'svgo' => ['name' => 'SVGO 1', 'format' => 'SVG'],
+            'gifsicle' => ['name' => 'Gifsicle', 'format' => 'GIF'],
+            'cwebp' => ['name' => 'cwebp', 'format' => 'WebP'],
+            'avifenc' => ['name' => 'avifenc', 'format' => 'AVIF'],
+        ];
+    }
+
     public function optimize(string $imagePath): bool
     {
         if (! file_exists($imagePath)) {

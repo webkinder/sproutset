@@ -172,27 +172,19 @@ final class Optimize extends Command
 
     private function checkBinaryAvailability(): bool
     {
-        $optimizers = [
-            'jpegoptim' => 'JPEG',
-            'pngquant' => 'PNG',
-            'optipng' => 'PNG',
-            'svgo' => 'SVG',
-            'gifsicle' => 'GIF',
-            'cwebp' => 'WebP',
-            'avifenc' => 'AVIF',
-        ];
+        $optimizers = ImageOptimizer::getOptimizerBinaries();
 
         $this->line('Checking optimizer binaries...');
         $this->newLine();
 
         $availableCount = 0;
 
-        foreach ($optimizers as $binaryName => $format) {
+        foreach ($optimizers as $binaryName => $config) {
             if ($this->optimizer->isBinaryAvailable($binaryName)) {
                 $availableCount++;
-                $this->line(sprintf('<info>✓</info> %-12s <comment>(%s)</comment>', $binaryName, $format));
+                $this->line(sprintf('<info>✓</info> %-12s <comment>(%s)</comment>', $binaryName, $config['format']));
             } else {
-                $this->line(sprintf('<fg=red>✗</fg=red> %-12s <fg=gray>(%s)</fg=gray>', $binaryName, $format));
+                $this->line(sprintf('<fg=red>✗</fg=red> %-12s <fg=gray>(%s)</fg=gray>', $binaryName, $config['format']));
             }
         }
 
