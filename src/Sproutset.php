@@ -12,7 +12,10 @@ final readonly class Sproutset
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
         $this->addMediaSettingsNotice();
+        $this->addOptimizationBinariesNotice();
         $this->registerAvifConversion();
+        $this->registerImageOptimization();
+        $this->initCronOptimizer();
     }
 
     private function registerImageSizes(): void
@@ -187,6 +190,52 @@ final readonly class Sproutset
         });
     }
 
+    private function addOptimizationBinariesNotice(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        $environment = defined('WP_ENV') ? WP_ENV : 'production';
+        if (! in_array($environment, ['development', 'staging'], true)) {
+            return;
+        }
+
+        add_action('admin_notices', function (): void {
+            $optimizer = Services\ImageOptimizer::getInstance();
+            $binaries = Services\ImageOptimizer::getOptimizerBinaries();
+
+            $missingBinaries = [];
+            foreach ($binaries as $binary => $config) {
+                if (! $optimizer->isBinaryAvailable($binary)) {
+                    $missingBinaries[] = $config['name'];
+                }
+            }
+
+            if ($missingBinaries === []) {
+                return;
+            }
+
+            echo '<div class="notice notice-warning">';
+            echo '<p><strong>Sproutset:</strong> ';
+            echo esc_html__('Image optimization is enabled but some optimization packages are missing. Images may not be optimized properly.', 'sproutset');
+            echo '</p>';
+            echo '<p>';
+            echo esc_html__('Missing packages:', 'sproutset');
+            echo ' <code>'.esc_html(implode(', ', $missingBinaries)).'</code>';
+            echo '</p>';
+            echo '<p>';
+            echo esc_html__('Install the missing packages to enable full image optimization. See the ', 'sproutset');
+            echo '<a href="https://github.com/spatie/image-optimizer#optimization-tools" target="_blank" rel="noopener noreferrer">';
+            echo esc_html__('Spatie Image Optimizer documentation', 'sproutset');
+            echo '</a> ';
+            echo esc_html__('for installation instructions.', 'sproutset');
+            echo '</p>';
+            echo '</div>';
+        });
+
+    }
+
     private function registerAvifConversion(): void
     {
         if (! config('sproutset-config.convert_to_avif', false)) {
@@ -199,5 +248,27 @@ final readonly class Sproutset
 
             return $output_format;
         });
+    }
+
+    private function registerImageOptimization(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
+            Services\CronOptimizer::scheduleAttachmentOptimization($attachmentId, $metadata);
+
+            return $metadata;
+        }, 10, 2);
+    }
+
+    private function initCronOptimizer(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        Services\CronOptimizer::init();
     }
 }

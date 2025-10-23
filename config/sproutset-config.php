@@ -16,6 +16,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Image Optimization
+    |--------------------------------------------------------------------------
+    |
+    | Enable automatic image optimization. When enabled, images will be
+    | optimized automatically on upload and when generating image sizes
+    | on-the-fly. When disabled, images will only be optimized when running
+    | the sproutset:optimize command manually.
+    |
+    */
+
+    'auto_optimize_images' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Image Sizes configuration
     |--------------------------------------------------------------------------
     |

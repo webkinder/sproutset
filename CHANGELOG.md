@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added admin notice on WordPress media settings page to inform users about Sproutset configuration by @marcoluzi in #74
 - Added `convert_to_avif` configuration option for automatic AVIF image conversion by @marcoluzi in #79
 - Added automatic AVIF conversion for JPEG and PNG images via `image_editor_output_format` filter by @marcoluzi in #79
+- Added `auto_optimize_images` configuration option to control automatic image optimization
+- Added `sproutset:optimize` CLI command for manual image optimization with progress tracking
+- Added `ImageOptimizer` service for optimizing images using multiple optimization binaries
+- Added `CronOptimizer` service for background image optimization via WordPress cron
+- Added automatic image optimization on upload when `auto_optimize_images` is enabled
+- Added automatic optimization for on-the-fly generated image sizes
+- Added admin notice for missing optimization binaries in development/staging environments
+- Added optimization status tracking in attachment metadata with hash verification
 
 ### Fixed
 
