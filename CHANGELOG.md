@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added automatic optimization for on-the-fly generated image sizes
 - Added admin notice for missing optimization binaries in development/staging environments
 - Added optimization status tracking in attachment metadata with hash verification
+- Added i18n support with translations for DE, FR and IT locales by @marcoluzi in #87
 
 ### Fixed
 
