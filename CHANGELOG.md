@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed Rector configuration to automatically remove unused imports by @marcoluzi in #89
+- Changed Rector configuration to remove `strictBooleans` rule from preparation rules by @marcoluzi in #89
 - Changed pint to use parallel processing by @marcoluzi in #72
 - Changed pint configuration by @marcoluzi in #72
 - Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
@@ -44,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Changed config structure to nest image sizes under `image_sizes` key by @marcoluzi in #79
 - Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
 - Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
+- Changed package license to GPL-3.0-or-later by @marcoluzi in #92
 
 ### Removed
 
