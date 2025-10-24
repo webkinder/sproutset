@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added i18n support with translations for DE, FR and IT locales by @marcoluzi in #87
 
 ### Fixed
+- Fix PHP 8.2 compatibility by removing typed class constants in CronOptimizer by @marcoluzi in #93
 
 ### Changed
 
@@ -47,8 +48,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
 - Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
 - Changed package license to GPL-3.0-or-later by @marcoluzi in #92
+- Changed PHP version requirement from `~8.4.0` to `^8.2` in composer.json by @marcoluzi in #93
+- Changed `roots/wordpress-no-content` from dev dependency to regular dependency by @marcoluzi in #93
+- Changed issue templates to remove emojis and simplify formatting by @marcoluzi in #93
+- Changed CONTRIBUTING.md to update coding guidelines and remove outdated references by @marcoluzi in #93
+- Changed README.md with comprehensive documentation including installation, configuration, and usage examples by @marcoluzi in #93
 
 ### Removed
+
+- Remove ESLint configuration and dependencies by @marcoluzi in #93
+- Remove Prettier Blade plugin by @marcoluzi in #93
+- Remove `.blade.format.json` configuration file by @marcoluzi in #93
+- Remove `.prettierrc.json` configuration file by @marcoluzi in #93
+- Remove `eslint.config.mjs` configuration file by @marcoluzi in #93
+- Remove `translate:js` npm script by @marcoluzi in #93
+- Remove Blade-specific formatting from lint-staged configuration by @marcoluzi in #93
 
 ## [0.1.0-alpha.3] - 2025-08-14
 
