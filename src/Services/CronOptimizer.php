@@ -6,9 +6,9 @@ namespace Webkinder\SproutsetPackage\Services;
 
 final class CronOptimizer
 {
-    private const string HOOK_OPTIMIZE_ATTACHMENT = 'sproutset_optimize_attachment';
+    private const HOOK_OPTIMIZE_ATTACHMENT = 'sproutset_optimize_attachment';
 
-    private const string HOOK_OPTIMIZE_IMAGE = 'sproutset_optimize_image';
+    private const HOOK_OPTIMIZE_IMAGE = 'sproutset_optimize_image';
 
     public static function init(): void
     {

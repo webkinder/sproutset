@@ -11,16 +11,14 @@ The package consists of:
 - **Core Image Service**: Handles image size registration and responsive image generation
 - **Blade Components**: Provides a easy-to-use component for rendering responsive images
 - **Image Optimizer Integration**: Automatic image optimization via Spatie Image Optimizer
-- **ACF Integration**: Seamless integration with Advanced Custom Fields image fields
 
 ## Getting Started
 
-### Prerequisites
+### Tested With
 
-- PHP ~8.4.0
+- PHP ^8.2
 - Roots Acorn ^5.0
-- WordPress 6.8+
-- A Roots Bedrock + Sage project setup
+- WordPress ^6.8
 
 ### Installation
 
