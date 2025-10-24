@@ -36,8 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed Rector configuration to automatically remove unused imports by @marcoluzi
-- Changed Rector configuration to remove `strictBooleans` rule from preparation rules by @marcoluzi
+- Changed Rector configuration to automatically remove unused imports by @marcoluzi in #89
+- Changed Rector configuration to remove `strictBooleans` rule from preparation rules by @marcoluzi in #89
 - Changed pint to use parallel processing by @marcoluzi in #72
 - Changed pint configuration by @marcoluzi in #72
 - Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
