@@ -12,7 +12,7 @@ Fixes #
 
 <!-- Put an `x` in the box that applies -->
 
-- [ ] Feature branch → develop (Will use squash/rebase merge)
+- [ ] Feature branch → develop (Will use squash merge)
 - [ ] Release branch → main and develop (Will use --no-ff merge commit)
 - [ ] Hotfix branch → main and develop (Will use --no-ff merge commit)
 
@@ -33,8 +33,6 @@ Fixes #
 
 - [ ] My code follows the project's coding standards
 - [ ] I have updated the documentation accordingly
-- [ ] I have added tests to cover my changes TODO
-- [ ] All new and existing tests passed TODO
 - [ ] I have updated the changelog
 - [ ] I have checked for and resolved any merge conflicts
 - [ ] I have confirmed the correct merge strategy will be used (see Branch Type above)

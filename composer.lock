@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "154ca7523ce4e13d84daa4bcb1872743",
+    "content-hash": "769ee1d7dcd137f4b7fa07f3e577d309",
     "packages": [
         {
             "name": "brick/math",
@@ -3988,6 +3988,77 @@
             "time": "2024-05-08T21:05:03+00:00"
         },
         {
+            "name": "roots/wordpress-no-content",
+            "version": "6.8.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/WordPress.git",
+                "reference": "6.8.3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://downloads.wordpress.org/release/wordpress-6.8.3-no-content.zip",
+                "reference": "6.8.3",
+                "shasum": "2c34ba506afd8061d96cde50b2c92f109c10d2c8"
+            },
+            "require": {
+                "php": ">= 7.2.24"
+            },
+            "provide": {
+                "wordpress/core-implementation": "6.8.3"
+            },
+            "suggest": {
+                "ext-curl": "Performs remote request operations.",
+                "ext-dom": "Used to validate Text Widget content and to automatically configuring IIS7+.",
+                "ext-exif": "Works with metadata stored in images.",
+                "ext-fileinfo": "Used to detect mimetype of file uploads.",
+                "ext-hash": "Used for hashing, including passwords and update packages.",
+                "ext-imagick": "Provides better image quality for media uploads.",
+                "ext-json": "Used for communications with other servers.",
+                "ext-libsodium": "Validates Signatures and provides securely random bytes.",
+                "ext-mbstring": "Used to properly handle UTF8 text.",
+                "ext-mysqli": "Connects to MySQL for database interactions.",
+                "ext-openssl": "Permits SSL-based connections to other hosts.",
+                "ext-pcre": "Increases performance of pattern matching in code searches.",
+                "ext-xml": "Used for XML parsing, such as from a third-party site.",
+                "ext-zip": "Used for decompressing Plugins, Themes, and WordPress update packages."
+            },
+            "type": "wordpress-core",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "WordPress Community",
+                    "homepage": "https://wordpress.org/about/"
+                }
+            ],
+            "description": "WordPress is open source software you can use to create a beautiful website, blog, or app.",
+            "homepage": "https://wordpress.org/",
+            "keywords": [
+                "blog",
+                "cms",
+                "wordpress"
+            ],
+            "support": {
+                "docs": "https://developer.wordpress.org/",
+                "forum": "https://wordpress.org/support/",
+                "irc": "irc://irc.freenode.net/wordpress",
+                "issues": "https://core.trac.wordpress.org/",
+                "rss": "https://wordpress.org/news/feed/",
+                "source": "https://core.trac.wordpress.org/browser",
+                "wiki": "https://codex.wordpress.org/"
+            },
+            "funding": [
+                {
+                    "url": "https://wordpressfoundation.org/donate/",
+                    "type": "other"
+                }
+            ],
+            "time": "2025-09-30T18:16:31+00:00"
+        },
+        {
             "name": "spatie/image-optimizer",
             "version": "1.8.0",
             "source": {
@@ -6909,77 +6980,6 @@
             "time": "2025-10-23T11:22:37+00:00"
         },
         {
-            "name": "roots/wordpress-no-content",
-            "version": "6.8.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/WordPress/WordPress.git",
-                "reference": "6.8.3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://downloads.wordpress.org/release/wordpress-6.8.3-no-content.zip",
-                "reference": "6.8.3",
-                "shasum": "2c34ba506afd8061d96cde50b2c92f109c10d2c8"
-            },
-            "require": {
-                "php": ">= 7.2.24"
-            },
-            "provide": {
-                "wordpress/core-implementation": "6.8.3"
-            },
-            "suggest": {
-                "ext-curl": "Performs remote request operations.",
-                "ext-dom": "Used to validate Text Widget content and to automatically configuring IIS7+.",
-                "ext-exif": "Works with metadata stored in images.",
-                "ext-fileinfo": "Used to detect mimetype of file uploads.",
-                "ext-hash": "Used for hashing, including passwords and update packages.",
-                "ext-imagick": "Provides better image quality for media uploads.",
-                "ext-json": "Used for communications with other servers.",
-                "ext-libsodium": "Validates Signatures and provides securely random bytes.",
-                "ext-mbstring": "Used to properly handle UTF8 text.",
-                "ext-mysqli": "Connects to MySQL for database interactions.",
-                "ext-openssl": "Permits SSL-based connections to other hosts.",
-                "ext-pcre": "Increases performance of pattern matching in code searches.",
-                "ext-xml": "Used for XML parsing, such as from a third-party site.",
-                "ext-zip": "Used for decompressing Plugins, Themes, and WordPress update packages."
-            },
-            "type": "wordpress-core",
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "WordPress Community",
-                    "homepage": "https://wordpress.org/about/"
-                }
-            ],
-            "description": "WordPress is open source software you can use to create a beautiful website, blog, or app.",
-            "homepage": "https://wordpress.org/",
-            "keywords": [
-                "blog",
-                "cms",
-                "wordpress"
-            ],
-            "support": {
-                "docs": "https://developer.wordpress.org/",
-                "forum": "https://wordpress.org/support/",
-                "irc": "irc://irc.freenode.net/wordpress",
-                "issues": "https://core.trac.wordpress.org/",
-                "rss": "https://wordpress.org/news/feed/",
-                "source": "https://core.trac.wordpress.org/browser",
-                "wiki": "https://codex.wordpress.org/"
-            },
-            "funding": [
-                {
-                    "url": "https://wordpressfoundation.org/donate/",
-                    "type": "other"
-                }
-            ],
-            "time": "2025-09-30T18:16:31+00:00"
-        },
-        {
             "name": "wp-cli/i18n-command",
             "version": "v2.6.5",
             "source": {
@@ -7290,7 +7290,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~8.4.0"
+        "php": "^8.2"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
