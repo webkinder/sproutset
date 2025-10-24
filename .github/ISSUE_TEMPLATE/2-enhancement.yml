@@ -6,39 +6,35 @@ body:
   - type: markdown
     attributes:
       value: |
-        💡 Thank you for suggesting an idea to improve this project! Please fill out as much of this template as you can — it will help us better understand and evaluate your proposal.
+        Thank you for suggesting an idea to improve this project. Please fill out as much of this template as you can. It will help us better understand and evaluate your proposal.
 
-        ⚠️ *Please search existing issues before submitting a new enhancement request.*
+        *Please search existing issues before submitting a new enhancement request.*
 
   - type: textarea
     attributes:
       label: Is your enhancement related to a problem? Please describe.
       description: |
         Describe the problem or need you are trying to solve.
-
-        Example:
-        I use this project as a `note-taking app`, but I often lose track of recent notes. I would like a `recent notes` sidebar so that I can easily access my latest work.
       placeholder: |
+        Example:
         I use this project as a `...` and I would like `...` so that `...describe benefit...`.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Describe the solution you’d like
+      label: Describe the solution you'd like
       description: |
         Clearly describe the feature or improvement you have in mind.
-
-        Example:
-        Add a sidebar on the right side that shows the 5 most recently edited notes, with the ability to pin them.
       placeholder: |
-        I’d like to see `...describe the feature or idea...` which would help with `...describe benefit or use case...`.
+        Example:
+        I'd like to see `...describe the feature or idea...` which would help with `...describe benefit or use case...`.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Describe alternatives you’ve considered
+      label: Describe alternatives you've considered
       description: |
         Have you considered other ways to solve this problem? Describe any alternative solutions you explored.
       placeholder: |
@@ -52,7 +48,7 @@ body:
       description: |
         If possible, attach designs, wireframes, screenshots, or videos to help explain your idea. 
 
-        👉 Tip: Drag and drop images or files here, or paste in links.
+        Tip: Drag and drop images or files here, or paste in links.
     validations:
       required: false
 
