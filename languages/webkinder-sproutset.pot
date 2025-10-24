@@ -1,0 +1,37 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-10-23T11:10:48+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: webkinder-sproutset\n"
+
+#: src/Sproutset.php:215
+msgid "Image size settings on this page are managed by Sproutset configuration and changes here will have no effect."
+msgstr ""
+
+#. translators: %s: path to Sproutset configuration file
+#: src/Sproutset.php:219
+#, php-format
+msgid "Configure image sizes in %s."
+msgstr ""
+
+#: src/Sproutset.php:255
+msgid "Image optimization is enabled but some optimization packages are missing. Images may not be optimized."
+msgstr ""
+
+#: src/Sproutset.php:258
+msgid "Missing packages:"
+msgstr ""
+
+#. translators: 1: opening link tag, 2: closing link tag
+#: src/Sproutset.php:264
+#, php-format
+msgid "Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions."
+msgstr ""

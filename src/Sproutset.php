@@ -8,11 +8,47 @@ final readonly class Sproutset
 {
     public function __construct()
     {
+        $this->loadTextDomain();
         $this->registerImageSizes();
         $this->filterImageSizesByPostType();
         $this->filterImageSizesInUI();
         $this->addMediaSettingsNotice();
+        $this->addOptimizationBinariesNotice();
         $this->registerAvifConversion();
+        $this->registerImageOptimization();
+        $this->initCronOptimizer();
+    }
+
+    private function loadTextDomain(): void
+    {
+        add_action('init', function (): void {
+            $this->registerTextDomain();
+        });
+    }
+
+    private function registerTextDomain(): void
+    {
+        $locale = get_locale();
+        $domain = $this->getTextDomain();
+        $filePath = $this->getFilePath($locale, $domain);
+
+        if (! file_exists($filePath)) {
+            return;
+        }
+
+        load_textdomain($domain, $filePath);
+    }
+
+    private function getTextDomain(): string
+    {
+        return 'webkinder-sproutset';
+    }
+
+    private function getFilePath(string $locale, string $domain): string
+    {
+        $file = "{$domain}-{$locale}.mo";
+
+        return __DIR__."/../languages/{$file}";
     }
 
     private function registerImageSizes(): void
@@ -176,15 +212,63 @@ final readonly class Sproutset
 
             echo '<div class="notice notice-info">';
             echo '<p><strong>Sproutset:</strong> ';
-            echo esc_html__('Image size settings on this page are managed by Sproutset configuration and changes here will have no effect.', 'sproutset');
+            echo esc_html__('Image size settings on this page are managed by Sproutset configuration and changes here will have no effect.', 'webkinder-sproutset');
             echo ' ';
             echo sprintf(
-                esc_html__('Configure image sizes in %s.', 'sproutset'),
+                /* translators: %s: path to Sproutset configuration file */
+                esc_html__('Configure image sizes in %s.', 'webkinder-sproutset'),
                 '<code>config/sproutset-config.php</code>'
             );
             echo '</p>';
             echo '</div>';
         });
+    }
+
+    private function addOptimizationBinariesNotice(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        $environment = defined('WP_ENV') ? WP_ENV : 'production';
+        if (! in_array($environment, ['development', 'staging'], true)) {
+            return;
+        }
+
+        add_action('admin_notices', function (): void {
+            $optimizer = Services\ImageOptimizer::getInstance();
+            $binaries = Services\ImageOptimizer::getOptimizerBinaries();
+
+            $missingBinaries = [];
+            foreach ($binaries as $binary => $config) {
+                if (! $optimizer->isBinaryAvailable($binary)) {
+                    $missingBinaries[] = $config['name'];
+                }
+            }
+
+            if ($missingBinaries === []) {
+                return;
+            }
+
+            echo '<div class="notice notice-warning">';
+            echo '<p><strong>Sproutset:</strong> ';
+            echo esc_html__('Image optimization is enabled but some optimization packages are missing. Images may not be optimized.', 'webkinder-sproutset');
+            echo '</p>';
+            echo '<p>';
+            echo esc_html__('Missing packages:', 'webkinder-sproutset');
+            echo ' <code>'.esc_html(implode(', ', $missingBinaries)).'</code>';
+            echo '</p>';
+            echo '<p>';
+            printf(
+                /* translators: 1: opening link tag, 2: closing link tag */
+                esc_html__('Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions.', 'webkinder-sproutset'),
+                '<a href="https://github.com/spatie/image-optimizer#optimization-tools" target="_blank" rel="noopener noreferrer">',
+                '</a>'
+            );
+            echo '</p>';
+            echo '</div>';
+        });
+
     }
 
     private function registerAvifConversion(): void
@@ -199,5 +283,27 @@ final readonly class Sproutset
 
             return $output_format;
         });
+    }
+
+    private function registerImageOptimization(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        add_filter('wp_generate_attachment_metadata', function (array $metadata, int $attachmentId): array {
+            Services\CronOptimizer::scheduleAttachmentOptimization($attachmentId, $metadata);
+
+            return $metadata;
+        }, 10, 2);
+    }
+
+    private function initCronOptimizer(): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
+
+        Services\CronOptimizer::init();
     }
 }

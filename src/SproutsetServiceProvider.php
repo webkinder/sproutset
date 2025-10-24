@@ -7,6 +7,7 @@ namespace Webkinder\SproutsetPackage;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Webkinder\SproutsetPackage\Components\Image;
+use Webkinder\SproutsetPackage\Console\Optimize;
 
 final class SproutsetServiceProvider extends ServiceProvider
 {
@@ -29,5 +30,9 @@ final class SproutsetServiceProvider extends ServiceProvider
         $this->app->make('Sproutset');
 
         Blade::component('sproutset-image', Image::class);
+
+        $this->commands([
+            Optimize::class,
+        ]);
     }
 }
