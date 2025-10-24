@@ -4,7 +4,7 @@
 
 First off, thank you for considering contributing to Sproutset. It's people like you that make Sproutset such a great tool.
 
-Sproutset is an open source project and we welcome contributions from our community. There are many ways to contribute, from writing tutorials or blog posts, improving the documentation, submitting bug reports and feature requests or writing code.
+Sproutset is an open source project and we welcome contributions from our community. There are many ways to contribute, from improving the documentation, submitting bug reports and feature requests or writing code.
 
 ## Code of Conduct
 
@@ -68,7 +68,7 @@ Please **do not** disclose security-related issues publicly until a fix has been
 
 Working on your first Pull Request? You can learn how from this free guide: [First Timers Only](https://www.firsttimersonly.com/). It's a great resource that walks you through the process step by step.
 
-To help newcomers get started, we've labeled some issues as `type:good-first-issue`. These are issues that have been identified as good entry points for new contributors. You can find them [here](https://github.com/webkinder/sproutset/labels/type%3Agood-first-issue).
+To help newcomers get started, we've labeled some issues as `good-first-issue`. These are issues that have been identified as good entry points for new contributors. You can find them [here](https://github.com/webkinder/sproutset/issues?q=state%3Aopen%20label%3A%22good%20first%20issue%22).
 
 ## Development Workflow
 
@@ -104,25 +104,37 @@ To help newcomers get started, we've labeled some issues as `type:good-first-iss
    git checkout -b hotfix/critical-fix
    ```
 
-4. **TODO: Write your code** TODO
+4. **Write your code**
 
-- Follow the [PSR-12](https://www.php-fig.org/psr/psr-12/) coding standards
-- Add tests for new functionality
-- Update documentation for any changes
+   Follow our coding standards and best practices:
 
-5. **Test your changes** TODO
+   **PHP Code**
+   - We use [Laravel Pint](https://laravel.com/docs/pint) for code formatting (Laravel preset with custom rules)
+   - [Rector](https://getrector.com/) handles automated refactoring and code quality improvements
+   - Code must use strict types (`declare(strict_types=1);`)
+   - Follow Laravel conventions and best practices
+   - See `pint.json` and `rector.php` for detailed configuration
 
-```bash
-composer test      # Run PHPUnit tests
-composer phpcs     # Check coding standards
-composer phpstan   # Static analysis
-```
+   **Before Committing**
+   ```bash
+   # Format PHP code
+   ./vendor/bin/pint
+
+   # Run Rector refactoring
+   ./vendor/bin/rector
+   ```
+
+   **Note:** Pre-commit hooks automatically run these tools via `lint-staged`, but it's good practice to run them manually during development.
+
+   **Additional Guidelines**
+   - Update documentation for any changes
+   - Use meaningful variable and method names
+   - Add PHPDoc blocks for public methods (see [Coding Style](#coding-style) section)
 
 ## Pull Request Guidelines
 
 1. **Before Submitting**
 
-   - Ensure tests are passing
    - Update relevant documentation
    - Add or update PHPDoc blocks
    - Check coding style compliance
@@ -155,25 +167,47 @@ composer phpstan   # Static analysis
    - Separate subject from body with a blank line
    - Use the body to explain what and why vs. how
 
-TODO
-
 ## Coding Style
 
-### PHPDoc Blocks
+### Self-Documenting Code
 
-Use the following format for PHPDoc blocks:
+Write code that documents itself through clear naming and type hints:
 
+**Prefer Clear Naming Over Documentation**
+- Use descriptive method, function, and variable names that clearly express their purpose
+- The code should be readable without needing comments to explain what it does
+- Type hints are mandatory. They serve as inline documentation.
+
+**When to Use PHPDoc Blocks**
+
+Only add PHPDoc blocks when they provide value beyond what the code already expresses:
+- Complex business logic that needs explanation
+- Non-obvious behavior or side effects
+- Public API methods in packages
+- When `@throws` documents exceptions that aren't obvious from the code
+
+**Example: Good (Self-Documenting)**
+```php
+public function registerEventHandler(string $eventName, callable $handler): void
+{
+    if (! $this->isValidEventName($eventName)) {
+        throw new InvalidArgumentException("Invalid event name: {$eventName}");
+    }
+    
+    $this->handlers[$eventName][] = $handler;
+}
+```
+
+**Example: Avoid (Over-Documented)**
 ```php
 /**
- * Register a new handler for the given event.
+ * Register a handler
  *
- * @param  string  $event
- * @param  callable|string  $handler
+ * @param string $event The event
+ * @param callable $handler The handler
  * @return void
- *
- * @throws \InvalidArgumentException
  */
-public function register(string $event, $handler)
+public function register($event, $handler)
 {
     // ...
 }
@@ -181,11 +215,11 @@ public function register(string $event, $handler)
 
 ### Code Style
 
-- Follow PSR-12 coding standard
-- Use type hints when possible
-- Add appropriate spacing
-- Use meaningful variable names
+- Type hints are mandatory
+- Use meaningful and descriptive names for variables, methods, and classes
 - Keep methods focused and concise
+- Add appropriate spacing for readability
+- Prefer self-documenting code over comments
 
 ## Documentation
 
@@ -211,9 +245,9 @@ Both CHANGELOG.md and GitHub release notes should be identical and follow this f
 ### Examples
 
 ```markdown
-- Added dark mode support by @johndoe in #123
-- Fixed mobile navigation bug by @janedoe in #124
-- Updated documentation for API endpoints by @devuser in #125
+- Add dark mode support by @johndoe in #123
+- Fix mobile navigation bug by @janedoe in #124
+- Update documentation for API endpoints by @devuser in #125
 ```
 
 ### Categories
@@ -227,31 +261,34 @@ Group changes under these categories:
 
 ## Merge Strategy Guidelines
 
-We follow specific merge strategies for different types of branches to maintain a clean and meaningful history:
+We use different merge strategies depending on the branch type to maintain a clean and meaningful git history.
 
 ### Feature Branches → Develop
 
-- Use squash merges or rebase merges
-- This keeps the develop history clean and readable
-- Example: `feature/foo → develop` (squash or rebase merge)
+**Always use squash merge**
 
-### Release/Hotfix Branches → Main and Develop
+- Combines all feature commits into a single commit on `develop`
+- Keeps the `develop` history clean and linear
+- Each feature appears as one logical unit
+- Delete the feature branch after merging
 
-- Use merge commits with `--no-ff` flag
-- This preserves the meaningful branch structure
-- Marks release points clearly in history
-- Example:
-  ```
-  release/1.0.0 → main (merge commit)
-  release/1.0.0 → develop (merge commit)
-  ```
+### Release Branches → Main and Develop
 
-### Benefits of this Strategy
+**Always use merge commit with `--no-ff`**
 
-- `develop` maintains a readable line of squashed features
-- `main` contains only release merge commits
-- Both `main` and `develop` share identical release points
-- No "ahead/behind" branch indicators for releases
-- History remains clear, auditable, and easy to follow
+- Creates a merge commit that marks the release point
+- Preserves the release branch structure in history
+- Both `main` and `develop` get identical merge commits
+- Delete the release branch after merging to both branches
+
+### Hotfix Branches → Main and Develop
+
+**Always use merge commit with `--no-ff`**
+
+- Same strategy as release branches
+- Marks the hotfix clearly in history
+- Ensures both branches receive the fix
+
+---
 
 We aim to review pull requests within a week. Feel free to ping the team if you haven't received feedback after that time.

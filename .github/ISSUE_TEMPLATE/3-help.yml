@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        💬 Have a question that's not a bug report or feature request? You're in the right place!  
+        Have a question that's not a bug report or feature request? You're in the right place.
 
         Please fill out the template below so we can assist you as quickly as possible.
 
@@ -15,10 +15,8 @@ body:
       label: Describe your question
       description: |
         Provide a clear and concise description of your question or what you need help with.
-
-        Example:
-        I'm trying to set up the project locally, but I get an error when running `npm install`. How should I resolve this?
       placeholder: |
+        Example:
         I'm trying to `...describe what you're doing...`, but I'm running into `...describe issue or confusion...`.
     validations:
       required: true

@@ -9,12 +9,7 @@
     "blade"
   ],
   "homepage": "https://github.com/webkinder/sproutset",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Webkinder\\Sproutset\\": "src/"
-    }
-  },
+  "license": "GPL-3.0-or-later",
   "authors": [
     {
       "name": "Marco Luzi",
@@ -25,7 +20,32 @@
       "email": "raphael@webkinder.ch"
     }
   ],
+  "require": {
+    "php": "^8.2",
+    "roots/acorn": "^5.0",
+    "roots/wordpress-no-content": "^6.8",
+    "spatie/image-optimizer": "^1.8"
+  },
   "require-dev": {
-    "laravel/pint": "1.24.0"
+    "driftingly/rector-laravel": "2.1.1",
+    "laravel/pint": "1.25.1",
+    "rector/rector": " 2.2.5",
+    "wp-cli/i18n-command": "2.6.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webkinder\\SproutsetPackage\\": "src/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "extra": {
+    "acorn": {
+      "providers": [
+        "Webkinder\\SproutsetPackage\\SproutsetServiceProvider"
+      ]
+    }
   }
 }
