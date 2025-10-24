@@ -123,3 +123,23 @@ Render responsive images in your Blade templates using the `<x-sproutset::image>
 {{-- Disable lazy loading for above-the-fold images --}}
 <x-sproutset-image :id="$hero_image" size="hero_image" :lazy="false" />
 ```
+
+## Contributing
+
+We welcome contributions from the community. Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
+
+Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- How to report bugs and security vulnerabilities
+- Development workflow and branch strategy
+- Coding standards and style guidelines
+- Pull request process
+- First-time contributor resources
+
+For questions or support, feel free to open an issue on GitHub.
+
+## License
+
+Sproutset is open-source software licensed under the [GNU General Public License v3.0](LICENSE.md).
+
+This means you are free to use, modify, and distribute this software under the terms of the GPL-3.0 license. See the [LICENSE.md](LICENSE.md) file for the full license text.
