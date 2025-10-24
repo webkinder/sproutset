@@ -22,22 +22,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added admin notice on WordPress media settings page to inform users about Sproutset configuration by @marcoluzi in #74
 - Added `convert_to_avif` configuration option for automatic AVIF image conversion by @marcoluzi in #79
 - Added automatic AVIF conversion for JPEG and PNG images via `image_editor_output_format` filter by @marcoluzi in #79
-- Added `auto_optimize_images` configuration option to control automatic image optimization
-- Added `sproutset:optimize` CLI command for manual image optimization with progress tracking
-- Added `ImageOptimizer` service for optimizing images using multiple optimization binaries
-- Added `CronOptimizer` service for background image optimization via WordPress cron
-- Added automatic image optimization on upload when `auto_optimize_images` is enabled
-- Added automatic optimization for on-the-fly generated image sizes
-- Added admin notice for missing optimization binaries in development/staging environments
-- Added optimization status tracking in attachment metadata with hash verification
+- Added `auto_optimize_images` configuration option to control automatic image optimization by @marcoluzi in #86
+- Added `sproutset:optimize` CLI command for manual image optimization with progress tracking by @marcoluzi in #86
+- Added `ImageOptimizer` service for optimizing images using multiple optimization binaries by @marcoluzi in #86
+- Added `CronOptimizer` service for background image optimization via WordPress cron by @marcoluzi in #86
+- Added automatic image optimization on upload when `auto_optimize_images` is enabled by @marcoluzi in #86
+- Added automatic optimization for on-the-fly generated image sizes by @marcoluzi in #86
+- Added admin notice for missing optimization binaries in development/staging environments by @marcoluzi in #86
+- Added optimization status tracking in attachment metadata with hash verification by @marcoluzi in #86
+- Added i18n support with translations for DE, FR and IT locales by @marcoluzi in #87
 - Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
 - Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
 - Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
 
 ### Fixed
+- Fix PHP 8.2 compatibility by removing typed class constants in CronOptimizer by @marcoluzi in #93
 
 ### Changed
 
+- Changed Rector configuration to automatically remove unused imports by @marcoluzi in #89
+- Changed Rector configuration to remove `strictBooleans` rule from preparation rules by @marcoluzi in #89
 - Changed pint to use parallel processing by @marcoluzi in #72
 - Changed pint configuration by @marcoluzi in #72
 - Changed `Sproutset` class to readonly with image management functionality by @marcoluzi in #73
@@ -46,9 +50,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Changed config structure to nest image sizes under `image_sizes` key by @marcoluzi in #79
 - Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
 - Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
+- Changed package license to GPL-3.0-or-later by @marcoluzi in #92
+- Changed PHP version requirement from `~8.4.0` to `^8.2` in composer.json by @marcoluzi in #93
+- Changed `roots/wordpress-no-content` from dev dependency to regular dependency by @marcoluzi in #93
+- Changed issue templates to remove emojis and simplify formatting by @marcoluzi in #93
+- Changed CONTRIBUTING.md to update coding guidelines and remove outdated references by @marcoluzi in #93
+- Changed README.md with comprehensive documentation including installation, configuration, and usage examples by @marcoluzi in #93
 - Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 
 ### Removed
+
+- Remove ESLint configuration and dependencies by @marcoluzi in #93
+- Remove Prettier Blade plugin by @marcoluzi in #93
+- Remove `.blade.format.json` configuration file by @marcoluzi in #93
+- Remove `.prettierrc.json` configuration file by @marcoluzi in #93
+- Remove `eslint.config.mjs` configuration file by @marcoluzi in #93
+- Remove `translate:js` npm script by @marcoluzi in #93
+- Remove Blade-specific formatting from lint-staged configuration by @marcoluzi in #93
 
 ## [0.1.0-alpha.3] - 2025-08-14
 

@@ -19,16 +19,12 @@ A big thank you to everyone who has contributed to this repository!
 
 This project uses the following software libraries and packages.
 
-- [@eslint/compat](https://github.com/eslint/rewrite/tree/main/packages/compat)
-- [@eslint/js](https://github.com/eslint/eslint/tree/main/packages/js)
-- [@stylistic/eslint-plugin](https://github.com/eslint-stylistic/eslint-stylistic).
 - [driftingly/rector-laravel](https://github.com/driftingly/rector-laravel)
-- [globals](https://github.com/sindresorhus/globals)
 - [husky](https://github.com/typicode/husky)
 - [laravel/pint](https://github.com/laravel/pint)
 - [lint-staged](https://github.com/lint-staged/lint-staged)
 - [prettier](https://github.com/prettier/prettier)
-- [prettier-plugin-blade](https://www.npmjs.com/package/prettier-plugin-blade)
 - [rectorphp/rector](https://github.com/rectorphp/rector)
 - [roots/acorn](https://github.com/roots/acorn)
 - [spatie/image-optimizer](https://github.com/spatie/image-optimizer)
+- [wp-cli/i18n-command](https://github.com/wp-cli/i18n-command)

@@ -6,16 +6,15 @@ body:
   - type: markdown
     attributes:
       value: |
-        👋 Thank you for taking the time to report a bug! Please fill out as much of this template as you can — the more details you provide, the easier it will be for us to investigate and fix the issue.
+        Thank you for taking the time to report a bug. Please fill out as much of this template as you can. The more details you provide, the easier it will be for us to investigate and fix the issue.
 
-        ⚠️ *Please search existing issues before filing a new one.*
+        *Please search existing issues before filing a new one.*
 
   - type: textarea
     attributes:
       label: Describe the bug
       description: |
         Provide a clear and concise description of the bug:
-
         - What is happening?
         - What did you expect to happen?
         - If relevant, what error messages are shown?
@@ -31,13 +30,8 @@ body:
       label: Steps to Reproduce
       description: |
         Provide step-by-step instructions to reproduce the issue.
-
-        Example:
-        1. Go to 'File' menu
-        2. Click on 'Save As'
-        3. Enter filename and click 'Save'
-        4. See error message
       placeholder: |
+        Example:
         1. Go to '...'
         2. Click on '...'
         3. Scroll down to '...'
@@ -51,9 +45,7 @@ body:
       description: |
         If possible, attach a screenshot, screen recording, or code snippet that shows the bug.
 
-        👉 Tip: Drag and drop images or log files here, or paste code snippets directly.
-
-        For multiple files, consider using [GitHub Gist](https://gist.github.com).
+        Tip: Drag and drop images or log files here, or paste code snippets directly.
     validations:
       required: false
 
