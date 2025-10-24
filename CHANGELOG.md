@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING:** Changed config structure to nest image sizes under `image_sizes` key by @marcoluzi in #79
 - Changed all config references from `sproutset-image-sizes` to `sproutset-config.image_sizes` by @marcoluzi in #79
 - Changed service provider to publish `sproutset-config` instead of `sproutset-image-sizes` by @marcoluzi in #79
+- Changed package license to GPL-3.0-or-later by @marcoluzi in #92
 
 ### Removed
 

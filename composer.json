@@ -9,7 +9,7 @@
     "blade"
   ],
   "homepage": "https://github.com/webkinder/sproutset",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "authors": [
     {
       "name": "Marco Luzi",
