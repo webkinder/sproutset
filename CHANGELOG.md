@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Fixed
+
+### Changed
+
+### Removed
+
+## [0.1.0-beta.1] - 2025-xx-xx
+
+### Added
+
 - Added Sproutset service provider and service by @marcoluzi in #51
 - Added rector to pre-commit formatting by @marcoluzi in #72
 - Added image size management system with configuration by @marcoluzi in #73
@@ -114,7 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-alpha.3...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.1...develop
+
+[0.1.0-beta.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.1
 [0.1.0-alpha.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.1
