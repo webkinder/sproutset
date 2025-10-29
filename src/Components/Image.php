@@ -203,7 +203,7 @@ final class Image extends Component
 
         $parts = ['auto'];
 
-        $parts[] = $this->sizes !== null && $this->sizes !== '' && $this->sizes !== '0' ? mb_trim($this->sizes) : $this->generateDefaultSizes();
+        $parts[] = in_array($this->sizes, [null, '', '0'], true) ? $this->generateDefaultSizes() : mb_trim($this->sizes);
 
         return implode(', ', $parts);
     }
