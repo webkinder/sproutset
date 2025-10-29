@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
+- Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
+- Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
 
 ### Fixed
 
 ### Changed
+- Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 
 ### Removed
 
@@ -41,9 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added admin notice for missing optimization binaries in development/staging environments by @marcoluzi in #86
 - Added optimization status tracking in attachment metadata with hash verification by @marcoluzi in #86
 - Added i18n support with translations for DE, FR and IT locales by @marcoluzi in #87
-- Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
-- Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
-- Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
 
 ### Fixed
 - Fix PHP 8.2 compatibility by removing typed class constants in CronOptimizer by @marcoluzi in #93
@@ -66,7 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed issue templates to remove emojis and simplify formatting by @marcoluzi in #93
 - Changed CONTRIBUTING.md to update coding guidelines and remove outdated references by @marcoluzi in #93
 - Changed README.md with comprehensive documentation including installation, configuration, and usage examples by @marcoluzi in #93
-- Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 
 ### Removed
 
