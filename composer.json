@@ -29,7 +29,7 @@
   "require-dev": {
     "driftingly/rector-laravel": "2.1.1",
     "laravel/pint": "1.25.1",
-    "rector/rector": " 2.2.6",
+    "rector/rector": " 2.2.7",
     "wp-cli/i18n-command": "2.6.5"
   },
   "autoload": {
