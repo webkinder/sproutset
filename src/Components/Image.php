@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Components;
 
 use Illuminate\View\Component;
+use Webkinder\SproutsetPackage\Services\CronOptimizer;
 
 final class Image extends Component
 {
     public ?string $src = null;
 
     public ?string $srcset = null;
+
+    private static array $cache = [];
 
     public function __construct(
         public int $id,
@@ -23,11 +26,18 @@ final class Image extends Component
         public bool $lazy = true,
         public string $decoding = 'async',
     ) {
-        $this->generateImageData();
+        $cacheKey = "{$this->id}-{$this->size}-{$this->width}-{$this->height}";
 
-        if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
-            $this->sizes = $this->normalizeSizes();
+        if (isset(self::$cache[$cacheKey])) {
+            $this->loadFromCache(self::$cache[$cacheKey]);
+
+            return;
         }
+
+        $this->generateImageData();
+        $this->sizes = $this->normalizeSizes();
+
+        self::$cache[$cacheKey] = $this->getCacheableData();
     }
 
     public function render(): string
@@ -51,10 +61,22 @@ final class Image extends Component
 
     private function generateImageData(): void
     {
+        $imageData = $this->initializeProperties();
+
+        if (! $imageData) {
+            return;
+        }
+
+        $this->setDimensions($imageData);
+        $this->srcset = $this->generateSrcset();
+    }
+
+    private function initializeProperties(): ?array
+    {
         $attachment = get_post($this->id);
 
         if (! $attachment || $attachment->post_type !== 'attachment') {
-            return;
+            return null;
         }
 
         if ($this->alt === null) {
@@ -66,20 +88,89 @@ final class Image extends Component
         $imageData = wp_get_attachment_image_src($this->id, $this->size);
 
         if (! $imageData) {
-            return;
+            return null;
         }
 
         $this->src = $imageData[0];
 
-        if ($this->width === null) {
+        return $imageData;
+    }
+
+    private function setDimensions(array $imageData): void
+    {
+        $fullImageData = wp_get_attachment_image_src($this->id, 'full');
+
+        if (! $fullImageData) {
             $this->width = $imageData[1];
-        }
-
-        if ($this->height === null) {
             $this->height = $imageData[2];
+
+            return;
         }
 
-        $this->srcset = $this->generateSrcset();
+        [$fullWidth, $fullHeight] = [$fullImageData[1], $fullImageData[2]];
+
+        $sizeData = $this->getSizeData($this->size);
+        $targetWidth = $sizeData['width'] ?? $imageData[1];
+        $targetHeight = $sizeData['height'] ?? 0;
+        $crop = $sizeData['crop'] ?? false;
+
+        $calculated = $this->calculateAspectDimensions(
+            $fullWidth,
+            $fullHeight,
+            $targetWidth,
+            $targetHeight,
+            $crop
+        );
+
+        $this->width ??= $calculated['width'];
+        $this->height ??= $calculated['height'];
+
+        $this->width = min($this->width, $fullWidth);
+        $this->height = min($this->height, $fullHeight);
+    }
+
+    private function calculateAspectDimensions(
+        int $fullWidth,
+        int $fullHeight,
+        int $targetWidth,
+        int $targetHeight,
+        bool $crop
+    ): array {
+        if ($fullWidth === 0) {
+            return ['width' => 0, 'height' => 0];
+        }
+
+        $aspectRatio = $fullHeight / $fullWidth;
+
+        if ($crop) {
+            return [
+                'width' => min($targetWidth, $fullWidth),
+                'height' => $targetHeight > 0 ? min($targetHeight, $fullHeight) : $fullHeight,
+            ];
+        }
+
+        $calculatedWidth = min($targetWidth, $fullWidth);
+
+        if ($targetHeight === 0) {
+            return [
+                'width' => $calculatedWidth,
+                'height' => (int) round($calculatedWidth * $aspectRatio),
+            ];
+        }
+
+        $maxAllowedHeight = min($targetHeight, $fullHeight);
+        $maxAllowedWidth = min($targetWidth, $fullWidth);
+
+        if ($aspectRatio === 0.0) {
+            return ['width' => $maxAllowedWidth, 'height' => 0];
+        }
+
+        $heightFromWidth = (int) round($maxAllowedWidth * $aspectRatio);
+        $widthFromHeight = (int) round($maxAllowedHeight / $aspectRatio);
+
+        return $heightFromWidth <= $maxAllowedHeight
+            ? ['width' => $maxAllowedWidth, 'height' => $heightFromWidth]
+            : ['width' => $widthFromHeight, 'height' => $maxAllowedHeight];
     }
 
     private function generateSrcset(): string
@@ -99,8 +190,9 @@ final class Image extends Component
         $srcsetParts = [];
 
         $baseImage = wp_get_attachment_image_src($this->id, $this->size);
+
         if ($baseImage) {
-            $srcsetParts[] = $baseImage[0].' '.$baseImage[1].'w';
+            $srcsetParts[$baseImage[0]] = $baseImage[0].' '.$baseImage[1].'w';
         }
 
         foreach ($sizeConfig['srcset'] as $multiplier) {
@@ -111,11 +203,11 @@ final class Image extends Component
             $variantImage = wp_get_attachment_image_src($this->id, $variantSize);
 
             if ($variantImage) {
-                $srcsetParts[] = $variantImage[0].' '.$variantImage[1].'w';
+                $srcsetParts[$variantImage[0]] = $variantImage[0].' '.$variantImage[1].'w';
             }
         }
 
-        return implode(', ', $srcsetParts);
+        return implode(', ', array_values($srcsetParts));
     }
 
     private function ensureImageSizeExists(string $sizeName): void
@@ -156,10 +248,26 @@ final class Image extends Component
             return;
         }
 
+        $originalWidth = $metadata['width'] ?? 0;
+        $originalHeight = $metadata['height'] ?? 0;
+
+        if ($originalWidth === 0 || $originalHeight === 0) {
+            $imageInfo = getimagesize($file);
+
+            if ($imageInfo) {
+                [$originalWidth, $originalHeight] = $imageInfo;
+            } else {
+                return;
+            }
+        }
+
+        $targetWidth = min($sizeData['width'], $originalWidth);
+        $targetHeight = $sizeData['height'] > 0 ? min($sizeData['height'], $originalHeight) : $sizeData['height'];
+
         $resized = image_make_intermediate_size(
             $file,
-            $sizeData['width'],
-            $sizeData['height'],
+            $targetWidth,
+            $targetHeight,
             $sizeData['crop']
         );
 
@@ -168,6 +276,7 @@ final class Image extends Component
         }
 
         $metadata['sizes'][$sizeName] = $resized;
+
         wp_update_attachment_metadata($this->id, $metadata);
 
         if (config('sproutset-config.auto_optimize_images', false)) {
@@ -175,7 +284,7 @@ final class Image extends Component
             $generatedImagePath = $pathinfo['dirname'].'/'.$resized['file'];
 
             if (file_exists($generatedImagePath)) {
-                \Webkinder\SproutsetPackage\Services\CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
+                CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
             }
         }
     }
@@ -219,5 +328,27 @@ final class Image extends Component
         $width = $sizeData['width'];
 
         return "(max-width: {$width}px) 100vw, {$width}px";
+    }
+
+    private function loadFromCache(array $data): void
+    {
+        $this->src = $data['src'];
+        $this->srcset = $data['srcset'];
+        $this->width = $data['width'];
+        $this->height = $data['height'];
+        $this->alt = $data['alt'];
+        $this->sizes = $data['sizes'];
+    }
+
+    private function getCacheableData(): array
+    {
+        return [
+            'src' => $this->src,
+            'srcset' => $this->srcset,
+            'width' => $this->width,
+            'height' => $this->height,
+            'alt' => $this->alt,
+            'sizes' => $this->sizes,
+        ];
     }
 }
