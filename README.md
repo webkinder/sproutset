@@ -78,10 +78,10 @@ Add custom image sizes in `config/sproutset-config.php` under the `image_sizes` 
 
 ### Using the Image Component
 
-Render responsive images in your Blade templates using the `<x-sproutset::image>` component:
+Render responsive images in your Blade templates using the `<x-sproutset-image>` component:
 
 ```blade
-<x-sproutset::image :id="$attachment_id" size="large" />
+<x-sproutset-image :id="$attachment_id" size="large" />
 ```
 
 **Required Parameters:**

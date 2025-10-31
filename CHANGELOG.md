@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 - Changed Node.js version to 24 by @renovate[bot] in #98
+- Changed README.md to update image component syntax in documentation by @marcoluzi in #103
 
 ### Removed
 
