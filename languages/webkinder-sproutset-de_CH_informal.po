@@ -13,26 +13,36 @@ msgstr ""
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: webkinder-sproutset\n"
 
-#: src/Sproutset.php:215
+#: src/Managers/AdminNotificationManager.php:38
 msgid "Image size settings on this page are managed by Sproutset configuration and changes here will have no effect."
 msgstr "Die Einstellungen der Bildgrösse auf dieser Seite werden über die Sproutset-Konfiguration verwaltet. Änderungen hier haben keine Auswirkungen."
 
-#. translators: %s: path to Sproutset configuration file
-#: src/Sproutset.php:219
+#. translators: %s is the path to the Sproutset configuration file
+#: src/Managers/AdminNotificationManager.php:42
 #, php-format
 msgid "Configure image sizes in %s."
 msgstr "Konfiguriere die Bildgrössen in %s."
 
-#: src/Sproutset.php:258
+#: src/Managers/AdminNotificationManager.php:136
 msgid "Missing packages:"
 msgstr "Fehlende Pakete:"
 
-#. translators: 1: opening link tag, 2: closing link tag
-#: src/Sproutset.php:264
+#. translators: %1$s is the opening tag for the link to the Spatie Image Optimizer documentation, %2$s is the closing tag for the link
+#: src/Managers/AdminNotificationManager.php:142
 #, php-format
 msgid "Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions."
 msgstr "Installiere die fehlenden Pakete, um die vollständige Bildoptimierung zu ermöglichen. Installationsanweisungen findest du in der Dokumentation zu %1$sSpatie Image Optimizer%2$s."
 
-#: src/Sproutset.php:255
+#: src/Managers/AdminNotificationManager.php:133
 msgid "Image optimization is enabled but some optimization packages are missing. Images may not be optimized."
 msgstr "Die Bildoptimierung ist aktiviert, aber einige Optimierungspakete fehlen. Bilder werden möglicherweise nicht optimiert."
+
+#. translators: %s is a comma-separated list of missing image sizes
+#: src/Managers/ConfigurationValidator.php:37
+#, php-format
+msgid "Sproutset: Required image sizes are missing in config/sproutset-config.php: %s"
+msgstr "Sproutset: Erforderliche Bildgrössen fehlen in config/sproutset-config.php: %s"
+
+#: src/Managers/ConfigurationValidator.php:44
+msgid "Sproutset Configuration Error"
+msgstr "Sproutset-Konfigurationsfehler"

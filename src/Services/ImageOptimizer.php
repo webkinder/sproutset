@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Services;
 
 use Exception;
+use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 final class ImageOptimizer
 {
     private static ?self $instance = null;
 
-    private readonly \Spatie\ImageOptimizer\OptimizerChain $optimizerChain;
+    private readonly OptimizerChain $optimizerChain;
 
-    private array $uploadDir;
+    private readonly array $uploadDirectoryInfo;
 
-    private readonly string $baseDir;
+    private readonly string $uploadsBasePath;
 
     private function __construct()
     {
         $this->optimizerChain = OptimizerChainFactory::create();
-        $this->uploadDir = wp_upload_dir();
-        $this->baseDir = trailingslashit($this->uploadDir['basedir']);
+        $this->uploadDirectoryInfo = wp_upload_dir();
+        $this->uploadsBasePath = trailingslashit($this->uploadDirectoryInfo['basedir']);
     }
 
     public static function getInstance(): self
@@ -33,12 +34,7 @@ final class ImageOptimizer
         return self::$instance;
     }
 
-    /**
-     * Get optimizer binaries configuration.
-     *
-     * @return array<string, array{name: string, format: string}>
-     */
-    public static function getOptimizerBinaries(): array
+    public static function getAvailableOptimizers(): array
     {
         return [
             'jpegoptim' => ['name' => 'JpegOptim', 'format' => 'JPEG'],
@@ -51,7 +47,7 @@ final class ImageOptimizer
         ];
     }
 
-    public function optimize(string $imagePath): bool
+    public function optimizeImageFile(string $imagePath): bool
     {
         if (! file_exists($imagePath)) {
             return false;
@@ -66,20 +62,21 @@ final class ImageOptimizer
         }
     }
 
-    public function optimizeAndMark(string $imagePath, int $attachmentId): bool
+    public function optimizeAndRecordInMetadata(string $imagePath, int $attachmentId): bool
     {
-        if (! $this->optimize($imagePath)) {
+        if (! $this->optimizeImageFile($imagePath)) {
             return false;
         }
 
-        $this->markAsOptimized($imagePath, $attachmentId);
+        $this->recordOptimizationInMetadata($imagePath, $attachmentId);
 
         return true;
     }
 
-    public function isOptimized(string $imagePath, int $attachmentId): bool
+    public function hasBeenOptimized(string $imagePath, int $attachmentId): bool
     {
         $metadata = wp_get_attachment_metadata($attachmentId);
+
         if (! $metadata) {
             return false;
         }
@@ -108,9 +105,10 @@ final class ImageOptimizer
         return false;
     }
 
-    public function markAsOptimized(string $imagePath, int $attachmentId): void
+    public function recordOptimizationInMetadata(string $imagePath, int $attachmentId): void
     {
         $metadata = wp_get_attachment_metadata($attachmentId);
+
         if (! $metadata) {
             return;
         }
@@ -137,10 +135,47 @@ final class ImageOptimizer
         wp_update_attachment_metadata($attachmentId, $metadata);
     }
 
-    public function getAttachmentIdByPath(string $imagePath): ?int
+    public function findAttachmentIdByFilePath(string $imagePath): ?int
     {
-        $relativePath = mb_ltrim(str_replace($this->baseDir, '', $imagePath), '/');
+        $relativePath = $this->extractRelativePath($imagePath);
+        $directMatchId = $this->findAttachmentByExactPath($relativePath);
 
+        if ($directMatchId !== null) {
+            return $directMatchId;
+        }
+
+        return $this->findAttachmentByBaseFilename($relativePath);
+    }
+
+    public function optimizeAllAttachmentVariants(int $attachmentId, array $metadata): array
+    {
+        if ($metadata === []) {
+            return $metadata;
+        }
+
+        $this->optimizeOriginalImage($metadata);
+        $this->optimizeMainImage($metadata);
+        $this->optimizeGeneratedSizes($metadata);
+
+        return $metadata;
+    }
+
+    public function checkBinaryAvailability(string $binaryName): bool
+    {
+        $checkCommand = sprintf('command -v %s > /dev/null 2>&1', escapeshellarg($binaryName));
+
+        exec($checkCommand, $output, $returnCode);
+
+        return $returnCode === 0;
+    }
+
+    private function extractRelativePath(string $fullPath): string
+    {
+        return mb_ltrim(str_replace($this->uploadsBasePath, '', $fullPath), '/');
+    }
+
+    private function findAttachmentByExactPath(string $relativePath): ?int
+    {
         global $wpdb;
 
         $attachmentId = $wpdb->get_var(
@@ -150,15 +185,17 @@ final class ImageOptimizer
             )
         );
 
-        if ($attachmentId) {
-            return (int) $attachmentId;
-        }
+        return $attachmentId ? (int) $attachmentId : null;
+    }
+
+    private function findAttachmentByBaseFilename(string $relativePath): ?int
+    {
+        global $wpdb;
 
         $pathInfo = pathinfo($relativePath);
-
         $baseFilename = preg_replace('/-\d+x\d+$|@\d+x$|-scaled$/', '', $pathInfo['filename']);
-
         $searchPattern = ($pathInfo['dirname'] !== '.' ? $pathInfo['dirname'].'/' : '').$baseFilename.'%';
+
         $attachmentId = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1",
@@ -169,59 +206,65 @@ final class ImageOptimizer
         return $attachmentId ? (int) $attachmentId : null;
     }
 
-    public function optimizeAttachmentSizes(int $attachmentId, array $metadata): array
+    private function optimizeOriginalImage(array &$metadata): void
     {
-        if ($metadata === []) {
-            return $metadata;
+        if (! isset($metadata['original_image'])) {
+            return;
         }
 
-        $uploadDir = wp_upload_dir();
-        $baseDir = trailingslashit($uploadDir['basedir']);
+        $originalPath = $this->buildOriginalImagePath($metadata);
 
-        if (isset($metadata['original_image'])) {
-            $pathInfo = pathinfo((string) $metadata['file']);
-            $originalPath = $baseDir.$pathInfo['dirname'].'/'.$metadata['original_image'];
-            if (file_exists($originalPath) && $this->optimize($originalPath)) {
-                $metadata['original_image_sproutset_optimized'] = [
-                    'hash' => md5_file($originalPath),
-                    'timestamp' => time(),
-                ];
-            }
+        if (file_exists($originalPath) && $this->optimizeImageFile($originalPath)) {
+            $metadata['original_image_sproutset_optimized'] = $this->createOptimizationRecord($originalPath);
         }
-
-        $mainFile = $baseDir.$metadata['file'];
-        if (file_exists($mainFile) && $this->optimize($mainFile)) {
-            $metadata['sproutset_optimized'] = [
-                'hash' => md5_file($mainFile),
-                'timestamp' => time(),
-            ];
-            $metadata['filesize'] = filesize($mainFile);
-        }
-
-        if (isset($metadata['sizes']) && is_array($metadata['sizes'])) {
-            $pathInfo = pathinfo((string) $metadata['file']);
-            $dirname = $pathInfo['dirname'];
-
-            foreach ($metadata['sizes'] as $sizeName => $sizeData) {
-                $sizePath = $baseDir.$dirname.'/'.$sizeData['file'];
-                if (file_exists($sizePath) && $this->optimize($sizePath)) {
-                    $metadata['sizes'][$sizeName]['sproutset_optimized'] = [
-                        'hash' => md5_file($sizePath),
-                        'timestamp' => time(),
-                    ];
-                    $metadata['sizes'][$sizeName]['filesize'] = filesize($sizePath);
-                }
-            }
-        }
-
-        return $metadata;
     }
 
-    public function isBinaryAvailable(string $binaryName): bool
+    private function buildOriginalImagePath(array $metadata): string
     {
-        $command = sprintf('command -v %s > /dev/null 2>&1', escapeshellarg($binaryName));
-        exec($command, $output, $returnCode);
+        $pathInfo = pathinfo((string) $metadata['file']);
 
-        return $returnCode === 0;
+        return $this->uploadsBasePath.$pathInfo['dirname'].'/'.$metadata['original_image'];
+    }
+
+    private function optimizeMainImage(array &$metadata): void
+    {
+        $mainFilePath = $this->uploadsBasePath.$metadata['file'];
+
+        if (file_exists($mainFilePath) && $this->optimizeImageFile($mainFilePath)) {
+            $metadata['sproutset_optimized'] = $this->createOptimizationRecord($mainFilePath);
+            $metadata['filesize'] = filesize($mainFilePath);
+        }
+    }
+
+    private function optimizeGeneratedSizes(array &$metadata): void
+    {
+        if (! isset($metadata['sizes']) || ! is_array($metadata['sizes'])) {
+            return;
+        }
+
+        $pathInfo = pathinfo((string) $metadata['file']);
+        $directoryPath = $pathInfo['dirname'];
+
+        foreach ($metadata['sizes'] as $sizeName => $sizeData) {
+            $this->optimizeSingleSize($metadata, $sizeName, $sizeData, $directoryPath);
+        }
+    }
+
+    private function optimizeSingleSize(array &$metadata, string $sizeName, array $sizeData, string $directoryPath): void
+    {
+        $sizePath = $this->uploadsBasePath.$directoryPath.'/'.$sizeData['file'];
+
+        if (file_exists($sizePath) && $this->optimizeImageFile($sizePath)) {
+            $metadata['sizes'][$sizeName]['sproutset_optimized'] = $this->createOptimizationRecord($sizePath);
+            $metadata['sizes'][$sizeName]['filesize'] = filesize($sizePath);
+        }
+    }
+
+    private function createOptimizationRecord(string $filePath): array
+    {
+        return [
+            'hash' => md5_file($filePath),
+            'timestamp' => time(),
+        ];
     }
 }

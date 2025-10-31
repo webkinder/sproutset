@@ -13,7 +13,7 @@ final class SproutsetServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('Sproutset', fn (): Sproutset => new Sproutset());
+        $this->app->singleton(Sproutset::class, fn (): Sproutset => new Sproutset());
 
         $this->mergeConfigFrom(
             __DIR__.'/../config/sproutset-config.php',
@@ -23,14 +23,31 @@ final class SproutsetServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->publishConfiguration();
+        $this->initializeSproutset();
+        $this->registerBladeComponents();
+        $this->registerConsoleCommands();
+    }
+
+    private function publishConfiguration(): void
+    {
         $this->publishes([
             __DIR__.'/../config/sproutset-config.php' => config_path('sproutset-config.php'),
         ], 'sproutset-config');
+    }
 
-        $this->app->make('Sproutset');
+    private function initializeSproutset(): void
+    {
+        $this->app->make(Sproutset::class);
+    }
 
+    private function registerBladeComponents(): void
+    {
         Blade::component('sproutset-image', Image::class);
+    }
 
+    private function registerConsoleCommands(): void
+    {
         $this->commands([
             Optimize::class,
         ]);
