@@ -12,14 +12,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
 - Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
 - Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
+- Added `ConfigurationValidator` manager class for config validation by @marcoluzi in #104
+- Added `TextDomainManager` manager class for i18n text domain loading by @marcoluzi in #104
+- Added `ImageSizeManager` manager class for image size registration and filtering by @marcoluzi in #104
+- Added `AdminNotificationManager` manager class for admin notices and UI by @marcoluzi in #104
+- Added `OptimizationManager` manager class for optimization features by @marcoluzi in #104
+- Added automatic `object-fit: cover` inline style when images are smaller than configured dimensions by @marcoluzi in #104
 
 ### Fixed
+
+- Fixed dimension detection to prioritize configured dimensions over actual image dimensions by @marcoluzi in #104
+- Fixed responsive image behavior to prevent stretching on small screens by @marcoluzi in #104
+- Fixed `sizes` attribute generation to use actual image width for optimal browser selection by @marcoluzi in #104
 
 ### Changed
 
 - Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 - Changed Node.js version to 24 by @renovate[bot] in #98
 - Changed README.md to update image component syntax in documentation by @marcoluzi in #103
+- Changed `Sproutset` class architecture to use focused manager classes following SOLID principles by @marcoluzi in #104
+- Changed all code to follow self-documenting principles with descriptive naming by @marcoluzi in #104
+- Changed PHPDoc usage to only include when adding value beyond code by @marcoluzi in #104
+- Changed README.md structure by @marcoluzi in #104
+- Changed CONTRIBUTING.md structure by @marcoluzi in #104
 
 ### Removed
 
