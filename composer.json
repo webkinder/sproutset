@@ -27,7 +27,7 @@
     "spatie/image-optimizer": "^1.8"
   },
   "require-dev": {
-    "driftingly/rector-laravel": "2.1.2",
+    "driftingly/rector-laravel": "2.1.3",
     "laravel/pint": "1.25.1",
     "rector/rector": " 2.2.7",
     "wp-cli/i18n-command": "2.6.5"
