@@ -15,6 +15,8 @@ final class Image extends Component
 
     public ?string $inlineStyle = null;
 
+    private static array $cache = [];
+
     public function __construct(
         public readonly int $id,
         public readonly string $sizeName = 'large',
@@ -26,11 +28,21 @@ final class Image extends Component
         public readonly bool $useLazyLoading = true,
         public readonly string $decodingMode = 'async',
     ) {
+        $cacheKey = $this->generateCacheKey();
+
+        if (isset(self::$cache[$cacheKey])) {
+            $this->loadDataFromCache(self::$cache[$cacheKey]);
+
+            return;
+        }
+
         $this->initializeImageData();
 
         if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
+
+        self::$cache[$cacheKey] = $this->getCacheableData();
     }
 
     public function render(): string
@@ -105,62 +117,89 @@ final class Image extends Component
         }
 
         $this->sourcePath = $imageData[0];
+
+        $this->calculateAndSetDimensions($imageData);
+    }
+
+    private function calculateAndSetDimensions(array $imageData): void
+    {
+        $fullImageData = wp_get_attachment_image_src($this->id, 'full');
+
+        if (! $fullImageData) {
+            $this->width ??= $imageData[1];
+            $this->height ??= $imageData[2];
+
+            return;
+        }
+
+        [$fullWidth, $fullHeight] = [$fullImageData[1], $fullImageData[2]];
+
+        $sizeConfiguration = $this->getSizeConfiguration();
+        $targetWidth = $sizeConfiguration['width'] ?? $imageData[1];
+        $targetHeight = $sizeConfiguration['height'] ?? 0;
+        $crop = $sizeConfiguration['crop'] ?? false;
+
+        $calculated = $this->calculateAspectRatioDimensions(
+            $fullWidth,
+            $fullHeight,
+            $targetWidth,
+            $targetHeight,
+            $crop
+        );
+
+        $this->width ??= $calculated['width'];
+        $this->height ??= $calculated['height'];
+
         $actualWidth = $imageData[1];
         $actualHeight = $imageData[2];
 
-        if ($this->width === null) {
-            $this->width = $this->getConfiguredOrActualWidth($actualWidth);
-        }
-
-        if ($this->height === null) {
-            $this->height = $this->getConfiguredOrActualHeight($actualHeight);
-        }
-
-        $this->applyObjectFitIfNeeded($actualWidth, $actualHeight);
-    }
-
-    private function getConfiguredOrActualWidth(int $actualWidth): int
-    {
-        $sizeConfiguration = $this->getSizeConfiguration();
-
-        if ($sizeConfiguration['width'] === 0) {
-            return $actualWidth;
-        }
-
-        return $sizeConfiguration['width'];
-    }
-
-    private function getConfiguredOrActualHeight(int $actualHeight): int
-    {
-        $sizeConfiguration = $this->getSizeConfiguration();
-
-        if ($sizeConfiguration['height'] === 0) {
-            return $actualHeight;
-        }
-
-        return $sizeConfiguration['height'];
-    }
-
-    private function applyObjectFitIfNeeded(int $actualWidth, int $actualHeight): void
-    {
-        $sizeConfiguration = $this->getSizeConfiguration();
-
-        if ($sizeConfiguration === null) {
-            return;
-        }
-
-        $configuredWidth = $sizeConfiguration['width'] ?? 0;
-        $configuredHeight = $sizeConfiguration['height'] ?? 0;
-
-        if ($configuredWidth === 0 || $configuredHeight === 0) {
-            return;
-        }
-
-        $needsObjectFit = $actualWidth < $configuredWidth || $actualHeight < $configuredHeight;
-
-        if ($needsObjectFit) {
+        if ($crop && ($actualWidth < $targetWidth || $actualHeight < $targetHeight)) {
+            $this->width = $targetWidth;
+            $this->height = $targetHeight > 0 ? $targetHeight : $actualHeight;
             $this->inlineStyle = 'object-fit: cover;';
+        } else {
+            $this->width = min($this->width, $fullWidth);
+            $this->height = min($this->height, $fullHeight);
         }
+    }
+
+    private function calculateAspectRatioDimensions(int $fullWidth, int $fullHeight, int $targetWidth, int $targetHeight, bool $crop): array
+    {
+        if ($fullWidth === 0) {
+            return ['width' => 0, 'height' => 0];
+        }
+
+        $aspectRatio = $fullHeight / $fullWidth;
+
+        if ($crop) {
+            return [
+                'width' => min($targetWidth, $fullWidth),
+                'height' => $targetHeight > 0 ? min($targetHeight, $fullHeight) : $fullHeight,
+            ];
+        }
+
+        $calculatedWidth = min($targetWidth, $fullWidth);
+
+        if ($targetHeight === 0) {
+            return [
+                'width' => $calculatedWidth,
+                'height' => (int) round($calculatedWidth * $aspectRatio),
+            ];
+        }
+
+        $maxAllowedHeight = min($targetHeight, $fullHeight);
+        $maxAllowedWidth = min($targetWidth, $fullWidth);
+
+        if ($aspectRatio === 0.0) {
+            return ['width' => $maxAllowedWidth, 'height' => 0];
+        }
+
+        $heightFromWidth = (int) round($maxAllowedWidth * $aspectRatio);
+        $widthFromHeight = (int) round($maxAllowedHeight / $aspectRatio);
+
+        return $heightFromWidth <= $maxAllowedHeight
+            ? ['width' => $maxAllowedWidth, 'height' => $heightFromWidth]
+            : ['width' => $widthFromHeight, 'height' => $maxAllowedHeight];
     }
 
     private function buildResponsiveSourceSet(): string
@@ -346,5 +385,34 @@ final class Image extends Component
         }
 
         return "(max-width: {$this->width}px) 100vw, {$this->width}px";
+    }
+
+    private function generateCacheKey(): string
+    {
+        return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}";
+    }
+
+    private function loadDataFromCache(array $cachedData): void
+    {
+        $this->sourcePath = $cachedData['sourcePath'];
+        $this->responsiveSourceSet = $cachedData['responsiveSourceSet'];
+        $this->inlineStyle = $cachedData['inlineStyle'];
+        $this->width = $cachedData['width'];
+        $this->height = $cachedData['height'];
+        $this->alt = $cachedData['alt'];
+        $this->sizes = $cachedData['sizes'];
+    }
+
+    private function getCacheableData(): array
+    {
+        return [
+            'sourcePath' => $this->sourcePath,
+            'responsiveSourceSet' => $this->responsiveSourceSet,
+            'inlineStyle' => $this->inlineStyle,
+            'width' => $this->width,
+            'height' => $this->height,
+            'alt' => $this->alt,
+            'sizes' => $this->sizes,
+        ];
     }
 }
