@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
 - Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
 - Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
+- Added in-request caching to the `Image` component to boost performance by preventing redundant processing for identical images on the same page load by @marcoluzi in #102
 
 ### Fixed
 
@@ -20,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed conditional logic in `Image` component to use `in_array()` for better readability by @marcoluzi in #88
 - Changed Node.js version to 24 by @renovate[bot] in #98
 - Changed README.md to update image component syntax in documentation by @marcoluzi in #103
+- Changed the `Image` component by refactoring its internal logic into smaller, single-responsibility methods, improving maintainability and adherence to SOLID principles by @marcoluzi in #102
+- Changed the `Image` component to more accurately calculate aspect ratios and dimensions, ensuring images never exceed their original size and correctly handle crop/non-crop settings by @marcoluzi in #102
 
 ### Removed
 
