@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Fixed
+
+### Changed
+
+### Removed
+
+## [v0.1.0-beta.2]
+
+### Added
+
 - Added validation for required WordPress image sizes (`thumbnail`, `medium`, `medium_large`, `large`) in configuration by @marcoluzi in #88
 - Added automatic synchronization of image size configurations from config file to WordPress database options by @marcoluzi in #88
 - Added readonly/disabled styling and attributes to media settings fields in WordPress admin by @marcoluzi in #88
@@ -40,9 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed README.md structure by @marcoluzi in #104
 - Changed CONTRIBUTING.md structure by @marcoluzi in #104
 
-### Removed
-
-## [0.1.0-beta.1] - 2025-10-24
+## [v0.1.0-beta.1] - 2025-10-24
 
 ### Added
 
@@ -102,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `translate:js` npm script by @marcoluzi in #93
 - Remove Blade-specific formatting from lint-staged configuration by @marcoluzi in #93
 
-## [0.1.0-alpha.3] - 2025-08-14
+## [v0.1.0-alpha.3] - 2025-08-14
 
 ### Added
 
@@ -112,13 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Node.js version definition to .node-version by @marcoluzi in #13
 - Added pre-commit formatting and linting by @marcoluzi in #14
 
-### Fixed
-
-### Changed
-
-### Removed
-
-## [0.1.0-alpha.2] - 2025-05-09
+## [v0.1.0-alpha.2] - 2025-05-09
 
 ### Added
 
@@ -126,13 +128,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added release notes formatting guidelines by @marcoluzi in #4
 - Add package metadata and license information to composer.json by @marcoluzi in #5
 
-### Fixed
-
-### Changed
-
-### Removed
-
-## [0.1.0-alpha.1] - 2025-05-09
+## [v0.1.0-alpha.1] - 2025-05-09
 
 ### Added
 
@@ -146,15 +142,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-### Fixed
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.2...develop
 
-### Changed
-
-### Removed
-
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.1...develop
-
-[0.1.0-beta.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.1
-[0.1.0-alpha.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.3
-[0.1.0-alpha.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.2
-[0.1.0-alpha.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.1
+[v0.1.0-beta.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.2
+[v0.1.0-beta.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.1
+[v0.1.0-alpha.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.3
+[v0.1.0-alpha.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.2
+[v0.1.0-alpha.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.1
