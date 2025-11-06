@@ -6,9 +6,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | General configuration
+    | AVIF Conversion
     |--------------------------------------------------------------------------
     |
+    | Automatically convert JPEG and PNG images to AVIF format on upload
+    | or on request.
     |
     */
 
@@ -16,13 +18,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Image Optimization
+    | Auto Optimize Images
     |--------------------------------------------------------------------------
     |
-    | Enable automatic image optimization. When enabled, images will be
-    | optimized automatically on upload and when generating image sizes
-    | on-the-fly. When disabled, images will only be optimized when running
-    | the sproutset:optimize command manually.
+    | Automatically optimize images using available optimizer binaries
+    | (jpegoptim, optipng, pngquant, cwebp, avifenc, etc.) on upload
+    | or on request.
     |
     */
 
@@ -30,9 +31,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Image Sizes configuration
+    | Image Sizes
     |--------------------------------------------------------------------------
     |
+    | Define all image sizes with their dimensions, crop behavior, and
+    | responsive variants. Required sizes: thumbnail, medium, medium_large, large
+    |
+    | Available properties per size:
+    |
+    | - width: Image width in pixels
+    | - height: Image height in pixels (0 for auto)
+    | - crop: Hard crop (true) or proportional resize (false)
+    | - srcset: Array of multipliers for responsive variants (e.g., [0.5, 2])
+    | - show_in_ui: Show in WordPress media UI (true, false, or custom label string)
+    | - post_types: Array of post types to limit this size to (e.g., ['post', 'page'])
     |
     */
 
@@ -70,4 +82,5 @@ return [
             'show_in_ui' => true,
         ],
     ],
+
 ];

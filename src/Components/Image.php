@@ -9,33 +9,38 @@ use Webkinder\SproutsetPackage\Services\CronOptimizer;
 
 final class Image extends Component
 {
-    public ?string $src = null;
+    public ?string $sourcePath = null;
 
-    public ?string $srcset = null;
+    public ?string $responsiveSourceSet = null;
+
+    public ?string $inlineStyle = null;
 
     private static array $cache = [];
 
     public function __construct(
-        public int $id,
-        public string $size = 'large',
+        public readonly int $id,
+        public readonly string $sizeName = 'large',
         public ?string $sizes = null,
         public ?string $alt = null,
         public ?int $width = null,
         public ?int $height = null,
-        public ?string $class = null,
-        public bool $lazy = true,
-        public string $decoding = 'async',
+        public readonly ?string $class = null,
+        public readonly bool $useLazyLoading = true,
+        public readonly string $decodingMode = 'async',
     ) {
-        $cacheKey = "{$this->id}-{$this->size}-{$this->width}-{$this->height}";
+        $cacheKey = $this->generateCacheKey();
 
         if (isset(self::$cache[$cacheKey])) {
-            $this->loadFromCache(self::$cache[$cacheKey]);
+            $this->loadDataFromCache(self::$cache[$cacheKey]);
 
             return;
         }
 
-        $this->generateImageData();
-        $this->sizes = $this->normalizeSizes();
+        $this->initializeImageData();
+
+        if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
+            $this->sizes = $this->normalizeResponsiveSizesAttribute();
+        }
 
         self::$cache[$cacheKey] = $this->getCacheableData();
     }
@@ -43,78 +48,98 @@ final class Image extends Component
     public function render(): string
     {
         return <<<'blade'
-            @if($src)
+            @if($sourcePath)
                 <img
-                    src="{{ $src }}"
+                    src="{{ $sourcePath }}"
                     @if($width) width="{{ $width }}" @endif
                     @if($height) height="{{ $height }}" @endif
-                    @if($srcset) srcset="{{ $srcset }}" @endif
+                    @if($responsiveSourceSet) srcset="{{ $responsiveSourceSet }}" @endif
                     @if($sizes) sizes="{{ $sizes }}" @endif
                     @if($alt) alt="{{ $alt }}" @endif
                     @if($class) class="{{ $class }}" @endif
-                    @if($lazy) loading="lazy" @endif
-                    @if($decoding) decoding="{{ $decoding }}" @endif
+                    @if($inlineStyle) style="{{ $inlineStyle }}" @endif
+                    @if($useLazyLoading) loading="lazy" @endif
+                    @if($decodingMode) decoding="{{ $decodingMode }}" @endif
                 >
             @endif
         blade;
     }
 
-    private function generateImageData(): void
+    private function initializeImageData(): void
     {
-        $imageData = $this->initializeProperties();
+        if (! $this->isValidAttachment()) {
+            return;
+        }
+
+        $this->loadAlternativeTextIfNeeded();
+        $this->ensureRequestedSizeIsAvailable();
+        $this->loadImageDimensions();
+        $this->responsiveSourceSet = $this->buildResponsiveSourceSet();
+    }
+
+    private function isValidAttachment(): bool
+    {
+        $attachment = get_post($this->id);
+
+        return $attachment && $attachment->post_type === 'attachment';
+    }
+
+    private function loadAlternativeTextIfNeeded(): void
+    {
+        if ($this->alt !== null) {
+            return;
+        }
+
+        $this->alt = get_post_meta($this->id, '_wp_attachment_image_alt', true) ?: '';
+    }
+
+    private function ensureRequestedSizeIsAvailable(): void
+    {
+        $metadata = wp_get_attachment_metadata($this->id);
+
+        if (! $metadata || ! is_array($metadata)) {
+            return;
+        }
+
+        if (isset($metadata['sizes'][$this->sizeName])) {
+            return;
+        }
+
+        $this->generateMissingImageSize($metadata);
+    }
+
+    private function loadImageDimensions(): void
+    {
+        $imageData = wp_get_attachment_image_src($this->id, $this->sizeName);
 
         if (! $imageData) {
             return;
         }
 
-        $this->setDimensions($imageData);
-        $this->srcset = $this->generateSrcset();
+        $this->sourcePath = $imageData[0];
+
+        $this->calculateAndSetDimensions($imageData);
     }
 
-    private function initializeProperties(): ?array
-    {
-        $attachment = get_post($this->id);
-
-        if (! $attachment || $attachment->post_type !== 'attachment') {
-            return null;
-        }
-
-        if ($this->alt === null) {
-            $this->alt = get_post_meta($this->id, '_wp_attachment_image_alt', true) ?: '';
-        }
-
-        $this->ensureImageSizeExists($this->size);
-
-        $imageData = wp_get_attachment_image_src($this->id, $this->size);
-
-        if (! $imageData) {
-            return null;
-        }
-
-        $this->src = $imageData[0];
-
-        return $imageData;
-    }
-
-    private function setDimensions(array $imageData): void
+    private function calculateAndSetDimensions(array $imageData): void
     {
         $fullImageData = wp_get_attachment_image_src($this->id, 'full');
 
         if (! $fullImageData) {
-            $this->width = $imageData[1];
-            $this->height = $imageData[2];
+            $this->width ??= $imageData[1];
+            $this->height ??= $imageData[2];
 
             return;
         }
 
         [$fullWidth, $fullHeight] = [$fullImageData[1], $fullImageData[2]];
 
-        $sizeData = $this->getSizeData($this->size);
-        $targetWidth = $sizeData['width'] ?? $imageData[1];
-        $targetHeight = $sizeData['height'] ?? 0;
-        $crop = $sizeData['crop'] ?? false;
+        $sizeConfiguration = $this->getSizeConfiguration();
+        $targetWidth = $sizeConfiguration['width'] ?? $imageData[1];
+        $targetHeight = $sizeConfiguration['height'] ?? 0;
+        $crop = $sizeConfiguration['crop'] ?? false;
 
-        $calculated = $this->calculateAspectDimensions(
+        $calculated = $this->calculateAspectRatioDimensions(
             $fullWidth,
             $fullHeight,
             $targetWidth,
@@ -125,17 +150,21 @@ final class Image extends Component
         $this->width ??= $calculated['width'];
         $this->height ??= $calculated['height'];
 
-        $this->width = min($this->width, $fullWidth);
-        $this->height = min($this->height, $fullHeight);
+        $actualWidth = $imageData[1];
+        $actualHeight = $imageData[2];
+
+        if ($crop && ($actualWidth < $targetWidth || $actualHeight < $targetHeight)) {
+            $this->width = $targetWidth;
+            $this->height = $targetHeight > 0 ? $targetHeight : $actualHeight;
+            $this->inlineStyle = 'object-fit: cover;';
+        } else {
+            $this->width = min($this->width, $fullWidth);
+            $this->height = min($this->height, $fullHeight);
+        }
     }
 
-    private function calculateAspectDimensions(
-        int $fullWidth,
-        int $fullHeight,
-        int $targetWidth,
-        int $targetHeight,
-        bool $crop
-    ): array {
+    private function calculateAspectRatioDimensions(int $fullWidth, int $fullHeight, int $targetWidth, int $targetHeight, bool $crop): array
+    {
         if ($fullWidth === 0) {
             return ['width' => 0, 'height' => 0];
         }
@@ -173,44 +202,62 @@ final class Image extends Component
             : ['width' => $widthFromHeight, 'height' => $maxAllowedHeight];
     }
 
-    private function generateSrcset(): string
+    private function buildResponsiveSourceSet(): string
+    {
+        $sizeConfiguration = $this->getSizeConfiguration();
+
+        if (! $this->hasConfiguredSourceSetVariants($sizeConfiguration)) {
+            return wp_get_attachment_image_srcset($this->id, $this->sizeName) ?: '';
+        }
+
+        return $this->assembleSourceSetFromVariants($sizeConfiguration['srcset']);
+    }
+
+    private function getSizeConfiguration(): array
     {
         $imageSizes = config('sproutset-config.image_sizes', []);
 
-        if (! isset($imageSizes[$this->size])) {
-            return wp_get_attachment_image_srcset($this->id, $this->size) ?: '';
-        }
+        return $imageSizes[$this->sizeName] ?? [];
+    }
 
-        $sizeConfig = $imageSizes[$this->size];
+    private function hasConfiguredSourceSetVariants(array $sizeConfiguration): bool
+    {
+        return isset($sizeConfiguration['srcset']) && is_array($sizeConfiguration['srcset']);
+    }
 
-        if (! isset($sizeConfig['srcset']) || ! is_array($sizeConfig['srcset'])) {
-            return wp_get_attachment_image_srcset($this->id, $this->size) ?: '';
-        }
+    private function assembleSourceSetFromVariants(array $multipliers): string
+    {
+        $sourceSetParts = $this->collectBaseImageSource();
 
-        $srcsetParts = [];
-
-        $baseImage = wp_get_attachment_image_src($this->id, $this->size);
-
-        if ($baseImage) {
-            $srcsetParts[$baseImage[0]] = $baseImage[0].' '.$baseImage[1].'w';
-        }
-
-        foreach ($sizeConfig['srcset'] as $multiplier) {
-            $variantSize = "{$this->size}@{$multiplier}x";
-
-            $this->ensureImageSizeExists($variantSize);
-
-            $variantImage = wp_get_attachment_image_src($this->id, $variantSize);
-
-            if ($variantImage) {
-                $srcsetParts[$variantImage[0]] = $variantImage[0].' '.$variantImage[1].'w';
+        foreach ($multipliers as $multiplier) {
+            $variantSource = $this->collectVariantSource($multiplier);
+            if ($variantSource !== null) {
+                $sourceSetParts[] = $variantSource;
             }
         }
 
-        return implode(', ', array_values($srcsetParts));
+        return implode(', ', $sourceSetParts);
     }
 
-    private function ensureImageSizeExists(string $sizeName): void
+    private function collectBaseImageSource(): array
+    {
+        $baseImage = wp_get_attachment_image_src($this->id, $this->sizeName);
+
+        return $baseImage ? [$baseImage[0].' '.$baseImage[1].'w'] : [];
+    }
+
+    private function collectVariantSource(float $multiplier): ?string
+    {
+        $variantSizeName = "{$this->sizeName}@{$multiplier}x";
+
+        $this->ensureVariantSizeExists($variantSizeName);
+
+        $variantImage = wp_get_attachment_image_src($this->id, $variantSizeName);
+
+        return $variantImage ? $variantImage[0].' '.$variantImage[1].'w' : null;
+    }
+
+    private function ensureVariantSizeExists(string $variantSizeName): void
     {
         $metadata = wp_get_attachment_metadata($this->id);
 
@@ -218,78 +265,83 @@ final class Image extends Component
             return;
         }
 
-        if (isset($metadata['sizes'][$sizeName])) {
+        if (isset($metadata['sizes'][$variantSizeName])) {
             return;
         }
 
-        $this->generateImageSize($sizeName, $metadata);
+        $this->generateMissingImageSize($metadata, $variantSizeName);
     }
 
-    private function generateImageSize(string $sizeName, array $metadata): void
+    private function generateMissingImageSize(array $metadata, ?string $sizeName = null): void
     {
-        $file = get_attached_file($this->id);
+        $targetSizeName = $sizeName ?? $this->sizeName;
+        $attachmentFilePath = get_attached_file($this->id);
 
-        if (! $file || ! file_exists($file)) {
+        if (! $attachmentFilePath || ! file_exists($attachmentFilePath)) {
             return;
         }
 
-        if (! empty($metadata['original_image'])) {
-            $pathinfo = pathinfo($file);
-            $originalFile = $pathinfo['dirname'].'/'.$metadata['original_image'];
+        $sourceFilePath = $this->determineSourceFilePath($attachmentFilePath, $metadata);
+        $sizeConfiguration = $this->loadSizeConfiguration($targetSizeName);
 
-            if (file_exists($originalFile)) {
-                $file = $originalFile;
-            }
-        }
-
-        $sizeData = $this->getSizeData($sizeName);
-
-        if ($sizeData === null || $sizeData === []) {
+        if ($sizeConfiguration === null || $sizeConfiguration === []) {
             return;
         }
 
-        $originalWidth = $metadata['width'] ?? 0;
-        $originalHeight = $metadata['height'] ?? 0;
+        $this->processSizeGeneration($sourceFilePath, $targetSizeName, $sizeConfiguration, $metadata);
+    }
 
-        if ($originalWidth === 0 || $originalHeight === 0) {
-            $imageInfo = getimagesize($file);
-
-            if ($imageInfo) {
-                [$originalWidth, $originalHeight] = $imageInfo;
-            } else {
-                return;
-            }
+    private function determineSourceFilePath(string $attachmentFilePath, array $metadata): string
+    {
+        if (empty($metadata['original_image'])) {
+            return $attachmentFilePath;
         }
 
-        $targetWidth = min($sizeData['width'], $originalWidth);
-        $targetHeight = $sizeData['height'] > 0 ? min($sizeData['height'], $originalHeight) : $sizeData['height'];
+        $pathinfo = pathinfo($attachmentFilePath);
+        $originalFilePath = $pathinfo['dirname'].'/'.$metadata['original_image'];
 
-        $resized = image_make_intermediate_size(
-            $file,
-            $targetWidth,
-            $targetHeight,
-            $sizeData['crop']
+        return file_exists($originalFilePath) ? $originalFilePath : $attachmentFilePath;
+    }
+
+    private function processSizeGeneration(string $sourceFilePath, string $sizeName, array $sizeConfiguration, array $metadata): void
+    {
+        $generatedImage = image_make_intermediate_size(
+            $sourceFilePath,
+            $sizeConfiguration['width'],
+            $sizeConfiguration['height'],
+            $sizeConfiguration['crop']
         );
 
-        if (! $resized || is_wp_error($resized)) {
+        if (! $generatedImage || is_wp_error($generatedImage)) {
             return;
         }
 
-        $metadata['sizes'][$sizeName] = $resized;
+        $this->saveGeneratedSizeMetadata($sizeName, $generatedImage, $metadata);
+        $this->scheduleOptimizationIfEnabled($sourceFilePath, $generatedImage);
+    }
+
+    private function saveGeneratedSizeMetadata(string $sizeName, array $generatedImage, array $metadata): void
+    {
+        $metadata['sizes'][$sizeName] = $generatedImage;
 
         wp_update_attachment_metadata($this->id, $metadata);
+    }
 
-        if (config('sproutset-config.auto_optimize_images', false)) {
-            $pathinfo = pathinfo($file);
-            $generatedImagePath = $pathinfo['dirname'].'/'.$resized['file'];
+    private function scheduleOptimizationIfEnabled(string $sourceFilePath, array $generatedImage): void
+    {
+        if (! config('sproutset-config.auto_optimize_images', false)) {
+            return;
+        }
 
-            if (file_exists($generatedImagePath)) {
-                CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
-            }
+        $pathinfo = pathinfo($sourceFilePath);
+        $generatedImagePath = $pathinfo['dirname'].'/'.$generatedImage['file'];
+
+        if (file_exists($generatedImagePath)) {
+            CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
         }
     }
 
-    private function getSizeData(string $sizeName): ?array
+    private function loadSizeConfiguration(string $sizeName): ?array
     {
         global $_wp_additional_image_sizes;
 
@@ -304,47 +356,59 @@ final class Image extends Component
         ];
     }
 
-    private function normalizeSizes(): string
+    private function normalizeResponsiveSizesAttribute(): string
     {
         if ($this->sizes && str_starts_with(mb_trim($this->sizes), 'auto')) {
             return $this->sizes;
         }
 
-        $parts = ['auto'];
+        $autoPrefix = ['auto'];
+        $sizesValue = $this->determineResponsiveSizesValue();
+        $autoPrefix[] = $sizesValue;
 
-        $parts[] = in_array($this->sizes, [null, '', '0'], true) ? $this->generateDefaultSizes() : mb_trim($this->sizes);
-
-        return implode(', ', $parts);
+        return implode(', ', $autoPrefix);
     }
 
-    private function generateDefaultSizes(): string
+    private function determineResponsiveSizesValue(): string
     {
-        $sizeData = $this->getSizeData($this->size);
+        $hasCustomSizes = ! in_array($this->sizes, [null, '', '0'], true);
 
-        if ($sizeData === null || $sizeData === [] || $sizeData['width'] === 0) {
+        return $hasCustomSizes
+            ? mb_trim($this->sizes)
+            : $this->generateDefaultResponsiveSizes();
+    }
+
+    private function generateDefaultResponsiveSizes(): string
+    {
+        if ($this->width === null || $this->width === 0) {
             return '100vw';
         }
 
-        $width = $sizeData['width'];
-
-        return "(max-width: {$width}px) 100vw, {$width}px";
+        return "(max-width: {$this->width}px) 100vw, {$this->width}px";
     }
 
-    private function loadFromCache(array $data): void
+    private function generateCacheKey(): string
     {
-        $this->src = $data['src'];
-        $this->srcset = $data['srcset'];
-        $this->width = $data['width'];
-        $this->height = $data['height'];
-        $this->alt = $data['alt'];
-        $this->sizes = $data['sizes'];
+        return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}";
+    }
+
+    private function loadDataFromCache(array $cachedData): void
+    {
+        $this->sourcePath = $cachedData['sourcePath'];
+        $this->responsiveSourceSet = $cachedData['responsiveSourceSet'];
+        $this->inlineStyle = $cachedData['inlineStyle'];
+        $this->width = $cachedData['width'];
+        $this->height = $cachedData['height'];
+        $this->alt = $cachedData['alt'];
+        $this->sizes = $cachedData['sizes'];
     }
 
     private function getCacheableData(): array
     {
         return [
-            'src' => $this->src,
-            'srcset' => $this->srcset,
+            'sourcePath' => $this->sourcePath,
+            'responsiveSourceSet' => $this->responsiveSourceSet,
+            'inlineStyle' => $this->inlineStyle,
             'width' => $this->width,
             'height' => $this->height,
             'alt' => $this->alt,
