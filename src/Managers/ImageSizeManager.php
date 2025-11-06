@@ -209,7 +209,8 @@ final class ImageSizeManager
     {
         return function (array $sizes): array {
             $imageSizes = config('sproutset-config.image_sizes', []);
-            $filteredSizes = [];
+
+            $filteredSizes = $sizes;
 
             foreach ($imageSizes as $sizeName => $sizeConfig) {
                 if (! isset($sizeConfig['show_in_ui'])) {
@@ -219,15 +220,12 @@ final class ImageSizeManager
                 $showInUi = $sizeConfig['show_in_ui'];
 
                 if ($showInUi === true) {
-                    $label = $sizes[$sizeName] ?? $this->generateSizeLabel($sizeName);
-                    $filteredSizes[$sizeName] = $label;
+                    if (! isset($filteredSizes[$sizeName])) {
+                        $filteredSizes[$sizeName] = $this->generateSizeLabel($sizeName);
+                    }
                 } elseif (is_string($showInUi)) {
                     $filteredSizes[$sizeName] = $showInUi;
                 }
-            }
-
-            if (isset($sizes['full'])) {
-                $filteredSizes['full'] = $sizes['full'];
             }
 
             return $filteredSizes;

@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed dimension detection to prioritize configured dimensions over actual image dimensions by @marcoluzi in #104
 - Fixed responsive image behavior to prevent stretching on small screens by @marcoluzi in #104
 - Fixed `sizes` attribute generation to use actual image width for optimal browser selection by @marcoluzi in #104
+- Fixed an issue where WP Media Folder plugin threw errors due to missing core image size labels by @marcoluzi in #108
 
 ### Changed
 
