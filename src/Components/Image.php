@@ -17,6 +17,8 @@ final class Image extends Component
 
     private static array $cache = [];
 
+    private bool $isSvg = false;
+
     public function __construct(
         public readonly int $id,
         public readonly string $sizeName = 'large',
@@ -36,6 +38,8 @@ final class Image extends Component
             return;
         }
 
+        $this->isSvg = $this->isSvgAttachment();
+
         $this->initializeImageData();
 
         if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
@@ -47,7 +51,17 @@ final class Image extends Component
 
     public function render(): string
     {
-        return <<<'blade'
+        return $this->isSvg ? <<<'blade'
+            @if($sourcePath)
+                <img
+                    src="{{ $sourcePath }}"
+                    @if($alt) alt="{{ $alt }}" @endif
+                    @if($class) class="{{ $class }}" @endif
+                    @if($inlineStyle) style="{{ $inlineStyle }}" @endif
+                >
+            @endif
+        blade
+        : <<<'blade'
             @if($sourcePath)
                 <img
                     src="{{ $sourcePath }}"
@@ -72,6 +86,12 @@ final class Image extends Component
         }
 
         $this->loadAlternativeTextIfNeeded();
+
+        if ($this->isSvg) {
+            $this->sourcePath = wp_get_attachment_url($this->id);
+            return;
+        }
+
         $this->ensureRequestedSizeIsAvailable();
         $this->loadImageDimensions();
         $this->responsiveSourceSet = $this->buildResponsiveSourceSet();
@@ -414,5 +434,18 @@ final class Image extends Component
             'alt' => $this->alt,
             'sizes' => $this->sizes,
         ];
+    }
+
+    private function isSvgAttachment(): bool
+    {
+        $mimeType = get_post_mime_type($this->id);
+
+        if ($mimeType === 'image/svg+xml') {
+            return true;
+        }
+
+        $filePath = get_attached_file($this->id);
+
+        return $filePath && strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) === 'svg';
     }
 }
