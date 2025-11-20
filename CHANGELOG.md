@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated contributing guidelines to better explain merge strategies by @marcoluzi in #112
 - Updated PR template to include changes to merge strategy by @marcoluzi in #112
+- Changed WordPress version requirement to ^5.9 || ^6.0 by @marcoluzi in #120
 
 ### Removed
 
