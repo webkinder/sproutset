@@ -5,15 +5,38 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Managers;
 
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
+use Webkinder\SproutsetPackage\Support\SyncStrategy;
 
 final class ImageSizeManager
 {
+    private const IMAGE_SIZE_HASH_OPTION = '_sproutset_image_sizes_hash';
+
+    private const SYNC_CRON_HOOK = 'sproutset_sync_core_image_sizes';
+
+    private const DEFAULT_SYNC_STRATEGY = SyncStrategy::ADMIN_REQUEST;
+
     public function initializeImageSizes(): void
     {
         add_action('after_setup_theme', $this->registerAllImageSizes(...), 10);
-        add_action('after_setup_theme', $this->synchronizeImageSizeOptionsToDatabase(...), 11);
+        $this->initializeSynchronizationStrategy();
         add_filter('intermediate_image_sizes_advanced', $this->createPostTypeFilter(), 10, 3);
         add_filter('image_size_names_choose', $this->createUIFilter(), 10);
+    }
+
+    public function synchronizeImageSizeOptionsToDatabase(bool $force = false): bool
+    {
+        $imageSizes = ImageSizeConfigNormalizer::getAll();
+        $configHash = md5(serialize($imageSizes));
+        $storedHash = get_option(self::IMAGE_SIZE_HASH_OPTION, '');
+
+        if (! $force && $configHash === $storedHash) {
+            return false;
+        }
+
+        $this->updateDatabaseOptions($imageSizes);
+        update_option(self::IMAGE_SIZE_HASH_OPTION, $configHash);
+
+        return true;
     }
 
     private function registerAllImageSizes(): void
@@ -65,20 +88,6 @@ final class ImageSizeManager
 
             add_image_size($variantName, $variantWidth, $variantHeight, $crop);
         }
-    }
-
-    private function synchronizeImageSizeOptionsToDatabase(): void
-    {
-        $imageSizes = ImageSizeConfigNormalizer::getAll();
-        $configHash = md5(serialize($imageSizes));
-        $storedHash = get_option('_sproutset_image_sizes_hash', '');
-
-        if ($configHash === $storedHash) {
-            return;
-        }
-
-        $this->updateDatabaseOptions($imageSizes);
-        update_option('_sproutset_image_sizes_hash', $configHash);
     }
 
     private function updateDatabaseOptions(array $imageSizes): void
@@ -237,5 +246,120 @@ final class ImageSizeManager
     private function generateSizeLabel(string $sizeName): string
     {
         return ucwords(str_replace(['-', '_'], ' ', $sizeName));
+    }
+
+    private function initializeSynchronizationStrategy(): void
+    {
+        $strategy = $this->determineSyncStrategy();
+
+        if ($strategy === SyncStrategy::REQUEST) {
+            add_action('after_setup_theme', $this->synchronizeImageSizeOptionsToDatabase(...), 11);
+            $this->clearScheduledSyncEvent();
+
+            return;
+        }
+
+        if ($strategy === SyncStrategy::ADMIN_REQUEST) {
+            if ($this->isNonFrontendExecutionContext()) {
+                add_action('after_setup_theme', $this->synchronizeImageSizeOptionsToDatabase(...), 11);
+            }
+
+            $this->clearScheduledSyncEvent();
+
+            return;
+        }
+
+        if ($strategy === SyncStrategy::CRON) {
+            add_action('init', $this->registerCronSynchronization(...), 10, 0);
+
+            return;
+        }
+
+        $this->clearScheduledSyncEvent();
+    }
+
+    private function determineSyncStrategy(): SyncStrategy
+    {
+        $configStrategy = SyncStrategy::fromString($this->getImageSizeSyncConfig()['strategy'] ?? null);
+        $strategy = $configStrategy ?? self::DEFAULT_SYNC_STRATEGY;
+
+        if (defined('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY')) {
+            $strategy = SyncStrategy::fromString(constant('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY')) ?? $strategy;
+        }
+
+        $envStrategy = getenv('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY');
+        if (is_string($envStrategy) && $envStrategy !== '') {
+            $strategy = SyncStrategy::fromString($envStrategy) ?? $strategy;
+        }
+
+        $filteredStrategy = SyncStrategy::fromString(
+            apply_filters('sproutset_image_size_sync_strategy', $strategy->value)
+        );
+
+        return $filteredStrategy ?? $strategy;
+    }
+
+    private function isNonFrontendExecutionContext(): bool
+    {
+        if (function_exists('wp_doing_cron') && wp_doing_cron()) {
+            return true;
+        }
+
+        if (defined('WP_CLI') && WP_CLI) {
+            return true;
+        }
+
+        if (function_exists('wp_doing_ajax') && wp_doing_ajax()) {
+            return true;
+        }
+
+        return is_admin();
+    }
+
+    private function registerCronSynchronization(): void
+    {
+        add_action(self::SYNC_CRON_HOOK, $this->synchronizeImageSizeOptionsToDatabase(...));
+
+        if (! function_exists('wp_next_scheduled') || ! function_exists('wp_schedule_event')) {
+            return;
+        }
+
+        $interval = $this->getCronInterval();
+        if ($interval === null) {
+            return;
+        }
+
+        if (! wp_next_scheduled(self::SYNC_CRON_HOOK)) {
+            $firstRun = time() + (defined('MINUTE_IN_SECONDS') ? MINUTE_IN_SECONDS : 60);
+            wp_schedule_event($firstRun, $interval, self::SYNC_CRON_HOOK);
+        }
+    }
+
+    private function clearScheduledSyncEvent(): void
+    {
+        if (function_exists('wp_clear_scheduled_hook')) {
+            wp_clear_scheduled_hook(self::SYNC_CRON_HOOK);
+        }
+    }
+
+    private function getCronInterval(): string
+    {
+        $interval = $this->getImageSizeSyncConfig()['cron_interval'] ?? 'daily';
+        $interval = is_string($interval) ? mb_strtolower($interval) : 'daily';
+
+        if (! function_exists('wp_get_schedules')) {
+            return $interval;
+        }
+
+        $schedules = wp_get_schedules();
+
+        return isset($schedules[$interval]) ? $interval : 'daily';
+    }
+
+    private function getImageSizeSyncConfig(): array
+    {
+        $config = config('sproutset-config.image_size_sync');
+
+        return is_array($config) ? $config : [];
     }
 }
