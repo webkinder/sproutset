@@ -6,6 +6,7 @@ namespace Webkinder\SproutsetPackage\Components;
 
 use Illuminate\View\Component;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
+use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 
 final class Image extends Component
 {
@@ -89,6 +90,7 @@ final class Image extends Component
 
         if ($this->isSvg) {
             $this->sourcePath = wp_get_attachment_url($this->id);
+
             return;
         }
 
@@ -130,9 +132,9 @@ final class Image extends Component
 
     private function loadImageDimensions(): void
     {
-        $imageData = wp_get_attachment_image_src($this->id, $this->sizeName);
+        $imageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $this->sizeName));
 
-        if (! $imageData) {
+        if ($imageData === null) {
             return;
         }
 
@@ -143,9 +145,9 @@ final class Image extends Component
 
     private function calculateAndSetDimensions(array $imageData): void
     {
-        $fullImageData = wp_get_attachment_image_src($this->id, 'full');
+        $fullImageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, 'full'));
 
-        if (! $fullImageData) {
+        if ($fullImageData === null) {
             $this->width ??= $imageData[1];
             $this->height ??= $imageData[2];
 
@@ -154,7 +156,7 @@ final class Image extends Component
 
         [$fullWidth, $fullHeight] = [$fullImageData[1], $fullImageData[2]];
 
-        $sizeConfiguration = $this->getSizeConfiguration();
+        $sizeConfiguration = ImageSizeConfigNormalizer::get($this->sizeName);
         $targetWidth = $sizeConfiguration['width'] ?? $imageData[1];
         $targetHeight = $sizeConfiguration['height'] ?? 0;
         $crop = $sizeConfiguration['crop'] ?? false;
@@ -224,7 +226,7 @@ final class Image extends Component
 
     private function buildResponsiveSourceSet(): string
     {
-        $sizeConfiguration = $this->getSizeConfiguration();
+        $sizeConfiguration = ImageSizeConfigNormalizer::get($this->sizeName);
 
         if (! $this->hasConfiguredSourceSetVariants($sizeConfiguration)) {
             return wp_get_attachment_image_srcset($this->id, $this->sizeName) ?: '';
@@ -233,16 +235,9 @@ final class Image extends Component
         return $this->assembleSourceSetFromVariants($sizeConfiguration['srcset']);
     }
 
-    private function getSizeConfiguration(): array
-    {
-        $imageSizes = config('sproutset-config.image_sizes', []);
-
-        return $imageSizes[$this->sizeName] ?? [];
-    }
-
     private function hasConfiguredSourceSetVariants(array $sizeConfiguration): bool
     {
-        return isset($sizeConfiguration['srcset']) && is_array($sizeConfiguration['srcset']);
+        return isset($sizeConfiguration['srcset']) && $sizeConfiguration['srcset'] !== [];
     }
 
     private function assembleSourceSetFromVariants(array $multipliers): string
@@ -261,7 +256,7 @@ final class Image extends Component
 
     private function collectBaseImageSource(): array
     {
-        $baseImage = wp_get_attachment_image_src($this->id, $this->sizeName);
+        $baseImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $this->sizeName));
 
         return $baseImage ? [$baseImage[0].' '.$baseImage[1].'w'] : [];
     }
@@ -272,7 +267,7 @@ final class Image extends Component
 
         $this->ensureVariantSizeExists($variantSizeName);
 
-        $variantImage = wp_get_attachment_image_src($this->id, $variantSizeName);
+        $variantImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $variantSizeName));
 
         return $variantImage ? $variantImage[0].' '.$variantImage[1].'w' : null;
     }
@@ -369,10 +364,12 @@ final class Image extends Component
             return null;
         }
 
+        $size = $_wp_additional_image_sizes[$sizeName];
+
         return [
-            'width' => $_wp_additional_image_sizes[$sizeName]['width'],
-            'height' => $_wp_additional_image_sizes[$sizeName]['height'],
-            'crop' => $_wp_additional_image_sizes[$sizeName]['crop'],
+            'width' => isset($size['width']) ? (int) $size['width'] : 0,
+            'height' => isset($size['height']) ? (int) $size['height'] : 0,
+            'crop' => $size['crop'] ?? false,
         ];
     }
 
@@ -412,6 +409,18 @@ final class Image extends Component
         return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}";
     }
 
+    private function normalizeImageSourceData(?array $imageData): ?array
+    {
+        if (! is_array($imageData) || ! isset($imageData[0], $imageData[1], $imageData[2])) {
+            return null;
+        }
+
+        $imageData[1] = (int) $imageData[1];
+        $imageData[2] = (int) $imageData[2];
+
+        return $imageData;
+    }
+
     private function loadDataFromCache(array $cachedData): void
     {
         $this->sourcePath = $cachedData['sourcePath'];
@@ -446,6 +455,6 @@ final class Image extends Component
 
         $filePath = get_attached_file($this->id);
 
-        return $filePath && strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) === 'svg';
+        return $filePath && mb_strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) === 'svg';
     }
 }
