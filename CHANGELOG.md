@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added logic to handle SVG attachments by @marcoluzi in #116
 - Added helper class for normalizing image size configurations by @marcoluzi in #118
 - Added `normalizeImageSourceData` method to `Image` component by @marcoluzi in #118
+- Added configurable image size synchronization strategy and `sproutset:sync-image-sizes` CLI command by @marcoluzi in #119
 
 ### Fixed
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated contributing guidelines to better explain merge strategies by @marcoluzi in #112
 - Updated PR template to include changes to merge strategy by @marcoluzi in #112
 - Changed WordPress version requirement to ^5.9 || ^6.0 by @marcoluzi in #120
+- Refined image size option synchronization to use a `SyncStrategy` enum and avoid unnecessary work on frontend requests by @marcoluzi in #119
 
 ### Removed
 
