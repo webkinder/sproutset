@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Webkinder\SproutsetPackage\Managers;
 
+use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
+
 final class ImageSizeManager
 {
     public function initializeImageSizes(): void
@@ -29,7 +31,7 @@ final class ImageSizeManager
 
     private function registerConfiguredImageSizes(): void
     {
-        $imageSizes = config('sproutset-config.image_sizes', []);
+        $imageSizes = ImageSizeConfigNormalizer::getAll();
 
         foreach ($imageSizes as $sizeName => $sizeConfig) {
             $this->registerSingleImageSize($sizeName, $sizeConfig);
@@ -39,22 +41,22 @@ final class ImageSizeManager
 
     private function registerSingleImageSize(string $sizeName, array $sizeConfig): void
     {
-        $width = $sizeConfig['width'] ?? 0;
-        $height = $sizeConfig['height'] ?? 0;
-        $crop = $sizeConfig['crop'] ?? false;
+        $width = $sizeConfig['width'];
+        $height = $sizeConfig['height'];
+        $crop = $sizeConfig['crop'];
 
         add_image_size($sizeName, $width, $height, $crop);
     }
 
     private function registerSrcsetVariantsForSize(string $sizeName, array $sizeConfig): void
     {
-        if (! isset($sizeConfig['srcset']) || ! is_array($sizeConfig['srcset'])) {
+        if (! isset($sizeConfig['srcset']) || $sizeConfig['srcset'] === []) {
             return;
         }
 
-        $width = $sizeConfig['width'] ?? 0;
-        $height = $sizeConfig['height'] ?? 0;
-        $crop = $sizeConfig['crop'] ?? false;
+        $width = $sizeConfig['width'];
+        $height = $sizeConfig['height'];
+        $crop = $sizeConfig['crop'];
 
         foreach ($sizeConfig['srcset'] as $multiplier) {
             $variantWidth = $width > 0 ? (int) ($width * $multiplier) : 0;
@@ -67,7 +69,7 @@ final class ImageSizeManager
 
     private function synchronizeImageSizeOptionsToDatabase(): void
     {
-        $imageSizes = config('sproutset-config.image_sizes', []);
+        $imageSizes = ImageSizeConfigNormalizer::getAll();
         $configHash = md5(serialize($imageSizes));
         $storedHash = get_option('_sproutset_image_sizes_hash', '');
 
@@ -118,11 +120,11 @@ final class ImageSizeManager
     private function updateSizeOptions(array $sizeConfig, array $options): void
     {
         if (isset($options['width'])) {
-            $this->updateOptionIfChanged($options['width'], $sizeConfig['width'] ?? 0);
+            $this->updateOptionIfChanged($options['width'], $sizeConfig['width']);
         }
 
         if (isset($options['height'])) {
-            $this->updateOptionIfChanged($options['height'], $sizeConfig['height'] ?? 0);
+            $this->updateOptionIfChanged($options['height'], $sizeConfig['height']);
         }
 
         if (isset($options['crop'])) {
@@ -163,7 +165,7 @@ final class ImageSizeManager
 
     private function filterSizesByPostType(array $sizes, ?string $postType): array
     {
-        $imageSizes = config('sproutset-config.image_sizes', []);
+        $imageSizes = ImageSizeConfigNormalizer::getAll();
         $filteredSizes = [];
 
         foreach ($sizes as $sizeName => $sizeData) {
@@ -189,7 +191,7 @@ final class ImageSizeManager
             return true;
         }
 
-        if (! isset($sizeConfig['post_types']) || ! is_array($sizeConfig['post_types'])) {
+        if (! array_key_exists('post_types', $sizeConfig)) {
             return true;
         }
 
@@ -208,7 +210,7 @@ final class ImageSizeManager
     private function createUIFilter(): callable
     {
         return function (array $sizes): array {
-            $imageSizes = config('sproutset-config.image_sizes', []);
+            $imageSizes = ImageSizeConfigNormalizer::getAll();
 
             $filteredSizes = $sizes;
 

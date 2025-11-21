@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `Release` and `Other` types to PR template by @marcoluzi in #112
 - Added logic to handle SVG attachments by @marcoluzi in #116
+- Added helper class for normalizing image size configurations by @marcoluzi in #118
+- Added `normalizeImageSourceData` method to `Image` component by @marcoluzi in #118
 
 ### Fixed
 
