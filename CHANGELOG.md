@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added helper class for normalizing image size configurations by @marcoluzi in #118
 - Added `normalizeImageSourceData` method to `Image` component by @marcoluzi in #118
 - Added configurable image size synchronization strategy and `sproutset:sync-image-sizes` CLI command by @marcoluzi in #119
+- Added check for image file type before rendering component by @marcoluzi in #121
 
 ### Fixed
 
