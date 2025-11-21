@@ -280,19 +280,19 @@ final class ImageSizeManager
 
     private function determineSyncStrategy(): SyncStrategy
     {
-        $configStrategy = SyncStrategy::fromString($this->getImageSizeSyncConfig()['strategy'] ?? null);
+        $configStrategy = SyncStrategy::from($this->getImageSizeSyncConfig()['strategy'] ?? null);
         $strategy = $configStrategy ?? self::DEFAULT_SYNC_STRATEGY;
 
         if (defined('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY')) {
-            $strategy = SyncStrategy::fromString(constant('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY')) ?? $strategy;
+            $strategy = SyncStrategy::from(constant('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY')) ?? $strategy;
         }
 
         $envStrategy = getenv('SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY');
         if (is_string($envStrategy) && $envStrategy !== '') {
-            $strategy = SyncStrategy::fromString($envStrategy) ?? $strategy;
+            $strategy = SyncStrategy::from($envStrategy) ?? $strategy;
         }
 
-        $filteredStrategy = SyncStrategy::fromString(
+        $filteredStrategy = SyncStrategy::from(
             apply_filters('sproutset_image_size_sync_strategy', $strategy->value)
         );
 
