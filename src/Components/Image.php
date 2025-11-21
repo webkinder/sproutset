@@ -82,7 +82,7 @@ final class Image extends Component
 
     private function initializeImageData(): void
     {
-        if (! $this->isValidAttachment()) {
+        if (! $this->isValidAttachment() || ! $this->isRenderableImageAttachment()) {
             return;
         }
 
@@ -104,6 +104,11 @@ final class Image extends Component
         $attachment = get_post($this->id);
 
         return $attachment && $attachment->post_type === 'attachment';
+    }
+
+    private function isRenderableImageAttachment(): bool
+    {
+        return $this->isSvg || wp_attachment_is_image($this->id);
     }
 
     private function loadAlternativeTextIfNeeded(): void
