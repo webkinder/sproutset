@@ -149,7 +149,17 @@ CHANGELOG.md and GitHub release notes should be identical. Format:
 - Squash merge (keeps history clean)
 - Delete branch after merge
 
-**Release/Hotfix branches → main and develop:**
+**Release branches → main:**
+
+- Merge commit with `--no-ff`
+- Delete branch after merge
+
+**Hotfix branches → main and develop:**
+
+- Merge commit with `--no-ff`
+- Delete branch after merge
+
+**Main branch → develop:**
 
 - Merge commit with `--no-ff`
 - Delete branch after merge

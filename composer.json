@@ -23,13 +23,13 @@
   "require": {
     "php": "^8.2",
     "roots/acorn": "^5.0",
-    "roots/wordpress-no-content": "^6.8",
+    "roots/wordpress-no-content": "^5.9 || ^6.0",
     "spatie/image-optimizer": "^1.8"
   },
   "require-dev": {
     "driftingly/rector-laravel": "2.1.3",
     "laravel/pint": "1.25.1",
-    "rector/rector": " 2.2.7",
+    "rector/rector": " 2.2.8",
     "wp-cli/i18n-command": "2.6.5"
   },
   "autoload": {

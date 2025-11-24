@@ -13,8 +13,9 @@ Fixes #
 <!-- Put an `x` in the box that applies -->
 
 - [ ] Feature branch → develop (Will use squash merge)
-- [ ] Release branch → main and develop (Will use --no-ff merge commit)
+- [ ] Release branch → main (Will use --no-ff merge commit)
 - [ ] Hotfix branch → main and develop (Will use --no-ff merge commit)
+- [ ] Main branch → develop (Will use --no-ff merge commit)
 
 ## Type of Change
 
@@ -26,6 +27,8 @@ Fixes #
 - [ ] Documentation update
 - [ ] Code refactoring
 - [ ] Performance improvement
+- [ ] Release
+- [ ] Other
 
 ## Checklist
 

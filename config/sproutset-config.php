@@ -31,6 +31,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Image Size Synchronization
+    |--------------------------------------------------------------------------
+    |
+    | Controls how Sproutset synchronizes required WordPress image size
+    | options (thumbnail, medium, medium_large, large) with the configuration
+    | defined below. Available strategies:
+    |
+    | - request: Run on every request.
+    | - admin_request: Run only on privileged requests (admin, AJAX, cron, CLI).
+    | - cron: Schedule a WP-Cron job (see cron_interval below).
+    | - manual: Only run via CLI or custom code.
+    |
+    | The strategy can also be overridden via the environment variable
+    | or PHP constant `SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY`.
+    |
+    */
+
+    'image_size_sync' => [
+        'strategy' => 'admin_request',
+        'cron_interval' => 'daily',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Image Sizes
     |--------------------------------------------------------------------------
     |

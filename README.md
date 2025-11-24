@@ -16,7 +16,7 @@ Modern responsive image management for projects using the Roots Acorn framework.
 
 - PHP ^8.2
 - Roots Acorn ^5.0
-- WordPress ^6.8
+- WordPress ^5.9 || ^6.0
 
 ## Installation
 
@@ -35,6 +35,10 @@ Edit `config/sproutset-config.php`:
 return [
   'convert_to_avif' => true,
   'auto_optimize_images' => true,
+  'image_size_sync' => [
+    'strategy' => 'admin_request',
+    'cron_interval' => 'daily',
+  ],
   'image_sizes' => [
     'thumbnail' => [
       'width' => 150,
@@ -73,6 +77,8 @@ return [
 
 - **`convert_to_avif`**: Enable automatic AVIF conversion for JPEG/PNG images
 - **`auto_optimize_images`**: Optimize images on upload (requires optimization binaries)
+- **`image_size_sync.strategy`**: Controls when WordPress image size options are synchronized with the Sproutset config. Supported values: `request`, `admin_request` (default), `cron`, `manual`.
+- **`image_size_sync.cron_interval`**: WP-Cron schedule key used when the strategy is `cron` (for example `daily`, `hourly`, or a custom schedule registered by your project).
 
 ### Image Size Options
 
@@ -96,6 +102,17 @@ return [
   'show_in_ui' => 'Hero Image',
   'post_types' => ['post', 'page'],
 ],
+```
+
+### Image Size Synchronization
+
+Sproutset keeps WordPress' core image size options (for example `thumbnail_size_w`, `medium_size_w`, etc.) in sync with the `image_sizes` configuration. This ensures that functions like `wp_get_attachment_image_src()` and other plugins that read these options always see the correct dimensions. Synchronization is guarded by a configuration hash so it only runs when the underlying configuration actually changes. When needed, you can influence when this synchronization happens via the `image_size_sync.strategy` option, the `SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY` env/constant, or the `sproutset_image_size_sync_strategy` filter.
+
+In environments where you prefer not to run synchronization logic during web requests, you can switch the strategy to `cron` or `manual` and trigger updates explicitly using the CLI command:
+
+```bash
+wp acorn sproutset:sync-image-sizes           # Sync core image size options with Sproutset config
+wp acorn sproutset:sync-image-sizes --force   # Force sync even if no config change is detected
 ```
 
 ## Usage
