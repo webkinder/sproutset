@@ -30,11 +30,17 @@ final class Image extends Component
         public readonly ?string $class = null,
         public readonly bool $useLazyLoading = true,
         public readonly string $decodingMode = 'async',
+        public readonly bool $focalPoint = false,
+        public readonly ?float $focalPointX = null,
+        public readonly ?float $focalPointY = null,
     ) {
         $cacheKey = $this->generateCacheKey();
 
         if (isset(self::$cache[$cacheKey])) {
             $this->loadDataFromCache(self::$cache[$cacheKey]);
+
+            dump($cacheKey);
+            dump(self::$cache[$cacheKey]);
 
             return;
         }
@@ -46,6 +52,8 @@ final class Image extends Component
         if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
+
+        $this->applyFocalPointIfEnabled();
 
         self::$cache[$cacheKey] = $this->getCacheableData();
     }
@@ -188,6 +196,35 @@ final class Image extends Component
             $this->width = min($this->width, $fullWidth);
             $this->height = min($this->height, $fullHeight);
         }
+    }
+
+    private function applyFocalPointIfEnabled(): void
+    {
+        if (! $this->focalPoint || $this->isSvg) {
+            return;
+        }
+
+        $metadata = wp_get_attachment_metadata($this->id);
+
+        if (! is_array($metadata)) {
+            $metadata = [];
+        }
+
+        $x = $this->focalPointX ?? (array_key_exists('sproutset_focal_point_x', $metadata) ? (float) $metadata['sproutset_focal_point_x'] : 50.0);
+        $y = $this->focalPointY ?? (array_key_exists('sproutset_focal_point_y', $metadata) ? (float) $metadata['sproutset_focal_point_y'] : 50.0);
+
+        $x = max(0.0, min(100.0, $x));
+        $y = max(0.0, min(100.0, $y));
+
+        $focalStyle = sprintf('object-fit: cover; object-position: %s%% %s%%;', $x, $y);
+
+        if ($this->inlineStyle === null || $this->inlineStyle === '') {
+            $this->inlineStyle = $focalStyle;
+
+            return;
+        }
+
+        $this->inlineStyle = rtrim($this->inlineStyle).' '.$focalStyle;
     }
 
     private function calculateAspectRatioDimensions(int $fullWidth, int $fullHeight, int $targetWidth, int $targetHeight, bool $crop): array
@@ -411,7 +448,11 @@ final class Image extends Component
 
     private function generateCacheKey(): string
     {
-        return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}";
+        $focalSuffix = $this->focalPoint ? 'fp1' : 'fp0';
+        $overrideXSuffix = $this->focalPointX !== null ? (string) $this->focalPointX : 'xnull';
+        $overrideYSuffix = $this->focalPointY !== null ? (string) $this->focalPointY : 'ynull';
+
+        return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
     }
 
     private function normalizeImageSourceData(?array $imageData): ?array
