@@ -4,28 +4,84 @@ declare(strict_types=1);
 
 namespace Webkinder\SproutsetPackage\Managers;
 
+use Webkinder\SproutsetPackage\Services\CronOptimizer;
+use Webkinder\SproutsetPackage\Services\FocalPointCropper;
+use Webkinder\SproutsetPackage\Support\CronScheduler;
+use Webkinder\SproutsetPackage\Support\FocalPointConfig;
+use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
+
 final class FocalPointManager
 {
-    private const META_KEY_X = 'sproutset_focal_point_x';
-
-    private const META_KEY_Y = 'sproutset_focal_point_y';
-
-    private const DEFAULT_PERCENT = '50';
-
-    private const MIN_PERCENT = 0;
-
-    private const MAX_PERCENT = 100;
+    private const FOCAL_CROP_CRON_HOOK = 'sproutset_reapply_focal_crop';
 
     public function initializeFocalPointFeatures(): void
     {
-        add_filter('attachment_fields_to_edit', $this->handleAttachmentFieldsToEdit(...), 10, 2);
-        add_filter('attachment_fields_to_save', $this->handleAttachmentFieldsToSave(...), 10, 2);
+        add_filter('attachment_fields_to_edit', $this->addFocalPointFieldToAttachmentEditForm(...), 10, 2);
+        add_filter('attachment_fields_to_save', $this->saveFocalPointFieldFromAttachmentForm(...), 10, 2);
         add_action('admin_head', $this->printFocalPointAssetsInAdminHead(...));
+        add_filter('wp_generate_attachment_metadata', $this->maybeApplyFocalCroppingOnUpload(...), 9, 2);
+        add_action(self::FOCAL_CROP_CRON_HOOK, $this->executeFocalCropCron(...), 10, 1);
     }
 
-    private function handleAttachmentFieldsToEdit(array $formFields, \WP_Post $attachment): array
+    public function executeFocalCropCron(int $attachmentId): void
+    {
+        if (! wp_attachment_is_image($attachmentId) || ! FocalPointConfig::isEnabled()) {
+            return;
+        }
+
+        $metadata = wp_get_attachment_metadata($attachmentId);
+
+        if (! is_array($metadata) || $metadata === []) {
+            return;
+        }
+
+        $updatedMetadata = FocalPointCropper::applyFocalCropToAllSizes(
+            $attachmentId,
+            $metadata
+        );
+
+        wp_update_attachment_metadata($attachmentId, $updatedMetadata);
+
+        if (config('sproutset-config.auto_optimize_images', false)) {
+            CronOptimizer::scheduleAttachmentOptimization($attachmentId);
+        }
+    }
+
+    private function maybeApplyFocalCroppingOnUpload(array $metadata, int $attachmentId): array
+    {
+        if (! wp_attachment_is_image($attachmentId)) {
+            return $metadata;
+        }
+
+        if (! FocalPointConfig::isEnabled()) {
+            return $metadata;
+        }
+
+        $strategy = FocalPointConfig::getStrategy();
+
+        if ($strategy === 'immediate') {
+            return FocalPointCropper::applyFocalCropToAllSizes(
+                $attachmentId,
+                $metadata
+            );
+        }
+
+        if ($strategy === 'cron') {
+            $this->scheduleFocalCropJob($attachmentId);
+
+            return $metadata;
+        }
+
+        return $metadata;
+    }
+
+    private function addFocalPointFieldToAttachmentEditForm(array $formFields, \WP_Post $attachment): array
     {
         if (! wp_attachment_is_image($attachment->ID)) {
+            return $formFields;
+        }
+
+        if (! FocalPointConfig::isEnabled()) {
             return $formFields;
         }
 
@@ -55,11 +111,15 @@ final class FocalPointManager
         return $formFields;
     }
 
-    private function handleAttachmentFieldsToSave(array $post, array $attachment): array
+    private function saveFocalPointFieldFromAttachmentForm(array $post, array $attachment): array
     {
         $attachmentId = isset($post['ID']) ? (int) $post['ID'] : 0;
 
         if ($attachmentId <= 0) {
+            return $post;
+        }
+
+        if (! FocalPointConfig::isEnabled()) {
             return $post;
         }
 
@@ -80,13 +140,15 @@ final class FocalPointManager
 
         if (! is_array($metadata)) {
             return [
-                'x' => self::DEFAULT_PERCENT,
-                'y' => self::DEFAULT_PERCENT,
+                'x' => FocalPointMetadata::getDefaultPercentAsString(),
+                'y' => FocalPointMetadata::getDefaultPercentAsString(),
             ];
         }
 
-        $x = isset($metadata[self::META_KEY_X]) ? (string) $metadata[self::META_KEY_X] : self::DEFAULT_PERCENT;
-        $y = isset($metadata[self::META_KEY_Y]) ? (string) $metadata[self::META_KEY_Y] : self::DEFAULT_PERCENT;
+        [$xFloat, $yFloat] = FocalPointMetadata::readCoordinatesFromMetadataArray($metadata);
+
+        $x = (string) $xFloat;
+        $y = (string) $yFloat;
 
         return [
             'x' => $x,
@@ -100,16 +162,16 @@ final class FocalPointManager
         $namePrefix = "attachments[$attachmentId]";
 
         return [
-            'id_x' => $idPrefix.self::META_KEY_X,
-            'name_x' => $namePrefix.'['.self::META_KEY_X.']',
-            'id_y' => $idPrefix.self::META_KEY_Y,
-            'name_y' => $namePrefix.'['.self::META_KEY_Y.']',
+            'id_x' => $idPrefix.FocalPointMetadata::META_KEY_X,
+            'name_x' => $namePrefix.'['.FocalPointMetadata::META_KEY_X.']',
+            'id_y' => $idPrefix.FocalPointMetadata::META_KEY_Y,
+            'name_y' => $namePrefix.'['.FocalPointMetadata::META_KEY_Y.']',
         ];
     }
 
     private function sanitizeFocalPointInput(array $attachment): array
     {
-        $keys = [self::META_KEY_X, self::META_KEY_Y];
+        $keys = [FocalPointMetadata::META_KEY_X, FocalPointMetadata::META_KEY_Y];
         $sanitized = [];
 
         foreach ($keys as $key) {
@@ -120,7 +182,7 @@ final class FocalPointManager
             $rawValue = $attachment[$key];
 
             if ($rawValue === '') {
-                $sanitized[$key] = self::DEFAULT_PERCENT;
+                $sanitized[$key] = FocalPointMetadata::getDefaultPercentAsString();
 
                 continue;
             }
@@ -130,7 +192,7 @@ final class FocalPointManager
             }
 
             $floatValue = (float) $rawValue;
-            $clampedValue = max(self::MIN_PERCENT, min(self::MAX_PERCENT, $floatValue));
+            $clampedValue = max((int) FocalPointMetadata::MIN_PERCENT, min((int) FocalPointMetadata::MAX_PERCENT, $floatValue));
             $sanitized[$key] = (string) $clampedValue;
         }
 
@@ -149,7 +211,47 @@ final class FocalPointManager
             $metadata[$key] = $value;
         }
 
+        if (! wp_attachment_is_image($attachmentId) || ! FocalPointConfig::isEnabled()) {
+            wp_update_attachment_metadata($attachmentId, $metadata);
+
+            return;
+        }
+
+        $strategy = FocalPointConfig::getStrategy();
+
+        if ($strategy === 'immediate') {
+            $metadata = FocalPointCropper::applyFocalCropToAllSizes(
+                $attachmentId,
+                $metadata
+            );
+
+            wp_update_attachment_metadata($attachmentId, $metadata);
+
+            if (config('sproutset-config.auto_optimize_images', false)) {
+                CronOptimizer::scheduleAttachmentOptimization($attachmentId);
+            }
+
+            return;
+        }
+
+        if ($strategy === 'cron') {
+            $this->scheduleFocalCropJob($attachmentId);
+
+            wp_update_attachment_metadata($attachmentId, $metadata);
+
+            return;
+        }
+
         wp_update_attachment_metadata($attachmentId, $metadata);
+    }
+
+    private function scheduleFocalCropJob(int $attachmentId): void
+    {
+        CronScheduler::scheduleSingleEventIfNotScheduled(
+            self::FOCAL_CROP_CRON_HOOK,
+            [$attachmentId],
+            FocalPointConfig::getDelayInSeconds()
+        );
     }
 
     private function renderFocalPointPreview(\WP_Post $attachment, string $inputIdX, string $inputNameX, string $inputIdY, string $inputNameY, string $focalPointX, string $focalPointY): string
@@ -182,7 +284,7 @@ final class FocalPointManager
                 <button
                     type="button"
                     class="sproutset-focal-handle"
-                    aria-label="<?php echo esc_attr__('Drag to set focal point', 'webkinder-sproutset'); ?>"
+                    aria-label="<?php echo esc_attr__('Drag the handle to adjust the focal point.', 'webkinder-sproutset'); ?>"
                 ></button>
             </div>
             <p class="description"><?php echo esc_html__('Drag the handle to adjust the focal point.', 'webkinder-sproutset'); ?></p>
@@ -474,6 +576,20 @@ final class FocalPointManager
 
     private function printFocalPointAssetsInAdminHead(): void
     {
+        if (! FocalPointConfig::isEnabled()) {
+            return;
+        }
+
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+
+        if ($screen !== null && isset($screen->base)) {
+            $allowedBases = ['upload', 'media', 'post', 'post-new', 'customize', 'site-editor'];
+
+            if (! in_array($screen->base, $allowedBases, true)) {
+                return;
+            }
+        }
+
         echo $this->getFocalPointStylesMarkup().$this->getFocalPointScriptMarkup();
     }
 }

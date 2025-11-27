@@ -46,7 +46,7 @@ final class OptimizationManager
     private function createOptimizationScheduler(): callable
     {
         return function (array $metadata, int $attachmentId): array {
-            CronOptimizer::scheduleAttachmentOptimization($attachmentId, $metadata);
+            CronOptimizer::scheduleAttachmentOptimization($attachmentId);
 
             return $metadata;
         };

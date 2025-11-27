@@ -6,6 +6,9 @@ namespace Webkinder\SproutsetPackage\Components;
 
 use Illuminate\View\Component;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
+use Webkinder\SproutsetPackage\Services\FocalPointCropper;
+use Webkinder\SproutsetPackage\Support\FocalPointConfig;
+use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 
 final class Image extends Component
@@ -38,9 +41,6 @@ final class Image extends Component
 
         if (isset(self::$cache[$cacheKey])) {
             $this->loadDataFromCache(self::$cache[$cacheKey]);
-
-            dump($cacheKey);
-            dump(self::$cache[$cacheKey]);
 
             return;
         }
@@ -104,7 +104,7 @@ final class Image extends Component
 
         $this->ensureRequestedSizeIsAvailable();
         $this->loadImageDimensions();
-        $this->responsiveSourceSet = $this->buildResponsiveSourceSet();
+        $this->buildResponsiveSourceSet();
     }
 
     private function isValidAttachment(): bool
@@ -210,11 +210,13 @@ final class Image extends Component
             $metadata = [];
         }
 
-        $x = $this->focalPointX ?? (array_key_exists('sproutset_focal_point_x', $metadata) ? (float) $metadata['sproutset_focal_point_x'] : 50.0);
-        $y = $this->focalPointY ?? (array_key_exists('sproutset_focal_point_y', $metadata) ? (float) $metadata['sproutset_focal_point_y'] : 50.0);
+        [$metaX, $metaY] = FocalPointMetadata::readCoordinatesFromMetadataArray($metadata);
 
-        $x = max(0.0, min(100.0, $x));
-        $y = max(0.0, min(100.0, $y));
+        $x = $this->focalPointX ?? $metaX;
+        $y = $this->focalPointY ?? $metaY;
+
+        $x = max(FocalPointMetadata::MIN_PERCENT, min(FocalPointMetadata::MAX_PERCENT, $x));
+        $y = max(FocalPointMetadata::MIN_PERCENT, min(FocalPointMetadata::MAX_PERCENT, $y));
 
         $focalStyle = sprintf('object-fit: cover; object-position: %s%% %s%%;', $x, $y);
 
@@ -266,15 +268,17 @@ final class Image extends Component
             : ['width' => $widthFromHeight, 'height' => $maxAllowedHeight];
     }
 
-    private function buildResponsiveSourceSet(): string
+    private function buildResponsiveSourceSet(): void
     {
         $sizeConfiguration = ImageSizeConfigNormalizer::get($this->sizeName);
 
         if (! $this->hasConfiguredSourceSetVariants($sizeConfiguration)) {
-            return wp_get_attachment_image_srcset($this->id, $this->sizeName) ?: '';
+            $this->responsiveSourceSet = wp_get_attachment_image_srcset($this->id, $this->sizeName) ?: '';
+
+            return;
         }
 
-        return $this->assembleSourceSetFromVariants($sizeConfiguration['srcset']);
+        $this->responsiveSourceSet = $this->assembleSourceSetFromVariants($sizeConfiguration['srcset']);
     }
 
     private function hasConfiguredSourceSetVariants(array $sizeConfiguration): bool
@@ -346,6 +350,31 @@ final class Image extends Component
         }
 
         $this->processSizeGeneration($sourceFilePath, $targetSizeName, $sizeConfiguration, $metadata);
+
+        if (! FocalPointConfig::isEnabled()) {
+            return;
+        }
+
+        $currentMetadata = wp_get_attachment_metadata($this->id);
+
+        if (! is_array($currentMetadata)) {
+            return;
+        }
+
+        $targetWidth = isset($sizeConfiguration['width']) ? (int) $sizeConfiguration['width'] : 0;
+        $targetHeight = isset($sizeConfiguration['height']) ? (int) $sizeConfiguration['height'] : 0;
+        $crop = (bool) ($sizeConfiguration['crop'] ?? false);
+
+        $updatedMetadata = FocalPointCropper::applyFocalCropToSingleSizeWithConfiguration(
+            $this->id,
+            $targetSizeName,
+            $currentMetadata,
+            $targetWidth,
+            $targetHeight,
+            $crop
+        );
+
+        wp_update_attachment_metadata($this->id, $updatedMetadata);
     }
 
     private function determineSourceFilePath(string $attachmentFilePath, array $metadata): string

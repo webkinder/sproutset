@@ -31,6 +31,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Focal Point Cropping & On-Demand Generation
+    |--------------------------------------------------------------------------
+    |
+    | Controls if and how Sproutset crops images around a defined focal point.
+    |
+    | The `focal_point_cropping` option accepts these values:
+    |
+    |   - false / null
+    |       Disable all focal‑point based recropping.
+    |
+    |   - true
+    |       Enable focal cropping with the default strategy ('immediate').
+    |
+    |   - [] (empty array)
+    |       Equivalent to `['strategy' => 'immediate']`.
+    |
+    |   - ['strategy' => 'immediate'|'cron', 'delay_seconds' => int>=0]
+    |       Fine‑grained control over how and when recropping happens:
+    |
+    |       strategy:
+    |         'immediate' – crop all hard‑cropped sizes immediately on upload, when generated on-the-fly and
+    |                       when the focal point is changed in the media library.
+    |         'cron'      – defer recropping of all sizes to a WP‑Cron job.
+    |
+    |       delay_seconds:
+    |         Delay (in seconds) before scheduling the cron recrop when using
+    |         the 'cron' strategy. Defaults to 30 seconds.
+    |
+    */
+
+    'focal_point_cropping' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Image Size Synchronization
     |--------------------------------------------------------------------------
     |
