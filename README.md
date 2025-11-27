@@ -172,6 +172,8 @@ Sproutset lets you define a focal point per image in the WordPress media library
 - **CLI:** Run `wp acorn sproutset:reapply-focal-crop [--optimize]` to reapply focal crops for existing attachments. The `--optimize` flag will also optimize the images.
 - **On-demand generation:** On-the-fly generation of missing sizes respects `max_on_demand_generations_per_request` to avoid heavy single requests.
 
+**Note:** When you run `wp media regenerate`, WordPress recreates attachment metadata from scratch. This will drop Sproutset focal point coordinates stored in the metadata. After regenerating media, you need to set focal points again in the media library.
+
 ### Automatic Behavior
 
 - Auto-generated `sizes` attribute based on actual image width
@@ -197,6 +199,8 @@ When `auto_optimize_images` is enabled:
 - Generated sizes are optimized on-the-fly
 - Runs in background via WordPress cron
 - Already optimized images are skipped
+
+**Note:** Running `wp media regenerate` also recreates attachment metadata and removes Sproutset image optimization markers. After regenerating media, you should re-run optimization, for example via `wp acorn sproutset:optimize --force` (and optionally `wp acorn sproutset:reapply-focal-crop --optimize` if you want to combine recropping with optimization).
 
 ### CLI Batch Optimization
 
