@@ -13,27 +13,27 @@ msgstr ""
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: webkinder-sproutset\n"
 
-#: src/Managers/AdminNotificationManager.php:38
+#: src/Managers/AdminNotificationManager.php:36
 msgid "Image size settings on this page are managed by Sproutset configuration and changes here will have no effect."
 msgstr "Die Einstellungen der Bildgröße auf dieser Seite werden über die Sproutset-Konfiguration verwaltet. Änderungen hier haben keine Auswirkungen."
 
 #. translators: %s is the path to the Sproutset configuration file
-#: src/Managers/AdminNotificationManager.php:42
+#: src/Managers/AdminNotificationManager.php:40
 #, php-format
 msgid "Configure image sizes in %s."
 msgstr "Konfigurieren Sie die Bildgrößen in %s."
 
-#: src/Managers/AdminNotificationManager.php:136
+#: src/Managers/AdminNotificationManager.php:132
 msgid "Missing packages:"
 msgstr "Fehlende Pakete:"
 
 #. translators: %1$s is the opening tag for the link to the Spatie Image Optimizer documentation, %2$s is the closing tag for the link
-#: src/Managers/AdminNotificationManager.php:142
+#: src/Managers/AdminNotificationManager.php:138
 #, php-format
 msgid "Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions."
 msgstr "Installieren Sie die fehlenden Pakete, um die vollständige Bildoptimierung zu ermöglichen. Installationsanweisungen finden Sie in der Dokumentation zu %1$sSpatie Image Optimizer%2$s."
 
-#: src/Managers/AdminNotificationManager.php:133
+#: src/Managers/AdminNotificationManager.php:129
 msgid "Image optimization is enabled but some optimization packages are missing. Images may not be optimized."
 msgstr "Die Bildoptimierung ist aktiviert, aber einige Optimierungspakete fehlen. Bilder werden möglicherweise nicht optimiert."
 
@@ -46,3 +46,20 @@ msgstr "Sproutset: Erforderliche Bildgrößen fehlen in config/sproutset-config.
 #: src/Managers/ConfigurationValidator.php:44
 msgid "Sproutset Configuration Error"
 msgstr "Sproutset-Konfigurationsfehler"
+
+#: src/Managers/FocalPointManager.php:106
+msgid "Focal point"
+msgstr "Fokuspunkt"
+
+#: src/Managers/FocalPointManager.php:287
+#: src/Managers/FocalPointManager.php:290
+msgid "Drag the handle to adjust the focal point."
+msgstr "Ziehen Sie den Griff, um den Fokuspunkt anzupassen."
+
+#: src/Managers/FocalPointManager.php:293
+msgid "X (%)"
+msgstr "X (%)"
+
+#: src/Managers/FocalPointManager.php:306
+msgid "Y (%)"
+msgstr "Y (%)"

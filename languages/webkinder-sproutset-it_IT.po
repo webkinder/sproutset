@@ -13,27 +13,27 @@ msgstr ""
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: webkinder-sproutset\n"
 
-#: src/Managers/AdminNotificationManager.php:38
+#: src/Managers/AdminNotificationManager.php:36
 msgid "Image size settings on this page are managed by Sproutset configuration and changes here will have no effect."
 msgstr "Le impostazioni relative alle dimensioni delle immagini in questa pagina sono gestite dalla configurazione Sproutset e le modifiche apportate qui non avranno alcun effetto."
 
 #. translators: %s is the path to the Sproutset configuration file
-#: src/Managers/AdminNotificationManager.php:42
+#: src/Managers/AdminNotificationManager.php:40
 #, php-format
 msgid "Configure image sizes in %s."
 msgstr "Configura le dimensioni delle immagini in %s."
 
-#: src/Managers/AdminNotificationManager.php:136
+#: src/Managers/AdminNotificationManager.php:132
 msgid "Missing packages:"
 msgstr "Pacchetti mancanti:"
 
 #. translators: %1$s is the opening tag for the link to the Spatie Image Optimizer documentation, %2$s is the closing tag for the link
-#: src/Managers/AdminNotificationManager.php:142
+#: src/Managers/AdminNotificationManager.php:138
 #, php-format
 msgid "Install the missing packages to enable full image optimization. See the %1$sSpatie Image Optimizer documentation%2$s for installation instructions."
 msgstr "Installa i pacchetti mancanti per abilitare l'ottimizzazione completa delle immagini. Consulta la documentazione %1$sSpatie Image Optimizer%2$s per le istruzioni di installazione."
 
-#: src/Managers/AdminNotificationManager.php:133
+#: src/Managers/AdminNotificationManager.php:129
 msgid "Image optimization is enabled but some optimization packages are missing. Images may not be optimized."
 msgstr "L'ottimizzazione delle immagini è abilitata, ma mancano alcuni pacchetti di ottimizzazione. Le immagini potrebbero non essere ottimizzate."
 
@@ -46,3 +46,20 @@ msgstr "Sproutset: Le dimensioni delle immagini richieste non sono presenti in c
 #: src/Managers/ConfigurationValidator.php:44
 msgid "Sproutset Configuration Error"
 msgstr "Errore di configurazione di Sproutset"
+
+#: src/Managers/FocalPointManager.php:106
+msgid "Focal point"
+msgstr "Punto focale"
+
+#: src/Managers/FocalPointManager.php:287
+#: src/Managers/FocalPointManager.php:290
+msgid "Drag the handle to adjust the focal point."
+msgstr "Trascina la maniglia per regolare il punto focale."
+
+#: src/Managers/FocalPointManager.php:293
+msgid "X (%)"
+msgstr "X (%)"
+
+#: src/Managers/FocalPointManager.php:306
+msgid "Y (%)"
+msgstr "Y (%)"
