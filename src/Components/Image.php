@@ -23,6 +23,8 @@ final class Image extends Component
 
     private bool $isSvg = false;
 
+    private static int $generatedSizesInCurrentRequest = 0;
+
     public function __construct(
         public readonly int $id,
         public readonly string $sizeName = 'large',
@@ -335,6 +337,10 @@ final class Image extends Component
 
     private function generateMissingImageSize(array $metadata, ?string $sizeName = null): void
     {
+        if (! $this->canGenerateAnotherSizeInCurrentRequest()) {
+            return;
+        }
+
         $targetSizeName = $sizeName ?? $this->sizeName;
         $attachmentFilePath = get_attached_file($this->id);
 
@@ -348,6 +354,8 @@ final class Image extends Component
         if ($sizeConfiguration === null || $sizeConfiguration === []) {
             return;
         }
+
+        self::$generatedSizesInCurrentRequest++;
 
         $this->processSizeGeneration($sourceFilePath, $targetSizeName, $sizeConfiguration, $metadata);
 
@@ -375,6 +383,17 @@ final class Image extends Component
         );
 
         wp_update_attachment_metadata($this->id, $updatedMetadata);
+    }
+
+    private function canGenerateAnotherSizeInCurrentRequest(): bool
+    {
+        $limit = (int) (config('sproutset-config.max_on_demand_generations_per_request', 0) ?? 0);
+
+        if ($limit <= 0) {
+            return true;
+        }
+
+        return self::$generatedSizesInCurrentRequest < $limit;
     }
 
     private function determineSourceFilePath(string $attachmentFilePath, array $metadata): string

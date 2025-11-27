@@ -65,6 +65,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | On-Demand Size Generation Limit
+    |--------------------------------------------------------------------------
+    |
+    | Limits how many missing image sizes may be generated (and focal‑cropped) on-the-fly
+    | during a single web request. Use 0 to disable the limit.
+    |
+    */
+
+    'max_on_demand_generations_per_request' => 5,
+
+    /*
+    |--------------------------------------------------------------------------
     | Image Size Synchronization
     |--------------------------------------------------------------------------
     |
