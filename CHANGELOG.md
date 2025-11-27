@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added focal point cropping support and configuration (`focal_point_cropping`, `max_on_demand_generations_per_request`) powered by `spatie/image`, including focal-aware rendering in the `Image` component by @marcoluzi in #129
+- Added WordPress media focal point UI (drag handle + X/Y fields), updated translations, and `sproutset:reapply-focal-crop` CLI command to reapply focal crops (optionally with optimization) by @marcoluzi in #129
+
 ### Fixed
 
 ### Changed
+
+- Changed cron-based optimization and focal recropping to use the shared `CronScheduler` helper and updated `CronOptimizer` logic by @marcoluzi in #129
 
 ### Removed
 
