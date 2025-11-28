@@ -138,7 +138,7 @@ Basic usage:
 - **`alt`**: Alt text (default: from WordPress metadata)
 - **`width`** / **`height`**: Custom dimensions (default: auto-detected)
 - **`class`**: For custom classes
-- **`use-lazy-oading`**: Enable lazy loading (default: `true`)
+- **`use-lazy-loading`**: Enable lazy loading (default: `true`)
 - **`decoding-mode`**: Decoding strategy (default: `'async'`)
 - **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
 - **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
