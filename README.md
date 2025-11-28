@@ -79,6 +79,8 @@ return [
 - **`auto_optimize_images`**: Optimize images on upload (requires optimization binaries)
 - **`image_size_sync.strategy`**: Controls when WordPress image size options are synchronized with the Sproutset config. Supported values: `request`, `admin_request` (default), `cron`, `manual`.
 - **`image_size_sync.cron_interval`**: WP-Cron schedule key used when the strategy is `cron` (for example `daily`, `hourly`, or a custom schedule registered by your project).
+- **`focal_point_cropping`**: Controls if and how focal-point-based recropping runs. Accepts `false`/`null` (disabled), `true` (immediate), or an array with `strategy` (`immediate` or `cron`) and optional `delay_seconds`.
+- **`max_on_demand_generations_per_request`**: Limits how many missing sizes may be generated (and focal-cropped) on-the-fly during a single web request. Use `0` to disable the limit.
 
 ### Image Size Options
 
@@ -131,29 +133,44 @@ Basic usage:
 
 **Optional:**
 
-- **`sizeName`**: Image size name (default: `'large'`)
+- **`size-name`**: Image size name (default: `'large'`)
 - **`sizes`**: Custom `sizes` attribute (default: auto-generated)
 - **`alt`**: Alt text (default: from WordPress metadata)
 - **`width`** / **`height`**: Custom dimensions (default: auto-detected)
 - **`class`**: For custom classes
-- **`useLazyLoading`**: Enable lazy loading (default: `true`)
-- **`decodingMode`**: Decoding strategy (default: `'async'`)
+- **`use-lazy-loading`**: Enable lazy loading (default: `true`)
+- **`decoding-mode`**: Decoding strategy (default: `'async'`)
+- **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
+- **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
 
 ### Examples
 
 ```blade
 {{-- Basic --}}
-<x-sproutset-image :id="123" sizeName="medium" />
+<x-sproutset-image id="123" size-name="medium" />
 
 {{-- Custom alt and class --}}
-<x-sproutset-image :id="$post->thumbnail()->id" sizeName="hero" alt="Hero banner" class="w-full" />
+<x-sproutset-image :id="$post->thumbnail()->id" size-name="hero" alt="Hero banner" class="w-full" />
 
 {{-- Custom sizes attribute --}}
-<x-sproutset-image :id="$id" sizeName="large" sizes="(max-width: 768px) 100vw, 50vw" />
+<x-sproutset-image :id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
 
 {{-- Disable lazy loading (above-the-fold images) --}}
-<x-sproutset-image :id="$hero" sizeName="hero" :useLazyLoading="false" />
+<x-sproutset-image :id="$hero" size-name="hero" use-lazy-loading="false" />
+ 
+{{-- Use media library focal point --}}
+<x-sproutset-image :id="$hero" size-name="hero" focal-point="true" />
 ```
+
+### Focal Point Cropping
+
+Sproutset lets you define a focal point per image in the WordPress media library and uses it when cropping hard-cropped sizes.
+
+- **Configuration:** Enable via `focal_point_cropping` (boolean or array with `strategy` = `immediate` or `cron` and optional `delay_seconds`).
+- **Media UI:** Set the focal point using the drag handle in the media modal. The coordinates are stored on the attachment.
+- **Component usage:** Pass `focal-point="true"` (and optionally `focal-point-x` / `focal-point-y`) to apply the focal point via `object-position`.
+- **CLI:** Run `wp acorn sproutset:reapply-focal-crop [--optimize]` to reapply focal crops for existing attachments. The `--optimize` flag will also optimize the images.
+- **On-demand generation:** On-the-fly generation of missing sizes respects `max_on_demand_generations_per_request` to avoid heavy single requests.
 
 ### Automatic Behavior
 
