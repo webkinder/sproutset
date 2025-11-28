@@ -20,6 +20,7 @@ final class FocalPointManager
         add_filter('attachment_fields_to_save', $this->saveFocalPointFieldFromAttachmentForm(...), 10, 2);
         add_action('admin_head', $this->printFocalPointAssetsInAdminHead(...));
         add_filter('wp_generate_attachment_metadata', $this->maybeApplyFocalCroppingOnUpload(...), 9, 2);
+        add_filter('wp_update_attachment_metadata', $this->preserveFocalPointMetadataOnUpdate(...), 10, 2);
         add_action(self::FOCAL_CROP_CRON_HOOK, $this->executeFocalCropCron(...), 10, 1);
     }
 
@@ -197,6 +198,28 @@ final class FocalPointManager
         }
 
         return $sanitized;
+    }
+
+    private function preserveFocalPointMetadataOnUpdate(array $newMetadata, int $attachmentId): array
+    {
+
+        if (! wp_attachment_is_image($attachmentId) || ! FocalPointConfig::isEnabled()) {
+            return $newMetadata;
+        }
+
+        $existingMetadata = wp_get_attachment_metadata($attachmentId);
+
+        if (! is_array($existingMetadata)) {
+            return $newMetadata;
+        }
+
+        foreach ([FocalPointMetadata::META_KEY_X, FocalPointMetadata::META_KEY_Y] as $key) {
+            if (isset($existingMetadata[$key]) && ! isset($newMetadata[$key])) {
+                $newMetadata[$key] = $existingMetadata[$key];
+            }
+        }
+
+        return $newMetadata;
     }
 
     private function updateFocalPointMetadata(int $attachmentId, array $sanitizedValues): void

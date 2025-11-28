@@ -237,11 +237,17 @@ final class FocalPointCropper
     private static function resolveFocalPoint(int $attachmentId, ?array $metadata = null): array
     {
         if (! is_array($metadata)) {
-            $metadata = wp_get_attachment_metadata($attachmentId);
+            $metadata = [];
         }
 
-        if (! is_array($metadata)) {
-            $metadata = [];
+        $storedMetadata = wp_get_attachment_metadata($attachmentId);
+
+        if (is_array($storedMetadata)) {
+            foreach ([FocalPointMetadata::META_KEY_X, FocalPointMetadata::META_KEY_Y] as $key) {
+                if (isset($storedMetadata[$key]) && ! isset($metadata[$key])) {
+                    $metadata[$key] = $storedMetadata[$key];
+                }
+            }
         }
 
         return FocalPointMetadata::readCoordinatesFromMetadataArray($metadata);
