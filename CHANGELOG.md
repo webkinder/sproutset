@@ -15,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.4] - 2025-12-01
+
+### Added
+
+- Added focal point cropping support and configuration (`focal_point_cropping`, `max_on_demand_generations_per_request`) powered by `spatie/image`, including focal-aware rendering in the `Image` component by @marcoluzi in #129
+- Added WordPress media focal point UI (drag handle + X/Y fields), updated translations, and `sproutset:reapply-focal-crop` CLI command to reapply focal crops (optionally with optimization) by @marcoluzi in #129
+
+### Fixed
+
+### Changed
+
+- Changed cron-based optimization and focal recropping to use the shared `CronScheduler` helper and updated `CronOptimizer` logic by @marcoluzi in #129
+
+### Removed
+
 ## [v0.1.0-beta.3] - 2025-11-24
 
 ### Added
@@ -164,8 +179,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.2...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.4...develop
 
+[v0.1.0-beta.4]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.4
+[v0.1.0-beta.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.3
 [v0.1.0-beta.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.2
 [v0.1.0-beta.1]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.1
 [v0.1.0-alpha.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-alpha.3
