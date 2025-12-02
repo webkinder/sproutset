@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9b45ded05520d138951b213ffcf6f29",
+    "content-hash": "6541450ce937cf8b83ce18e418517d61",
     "packages": [
         {
             "name": "brick/math",
@@ -6587,16 +6587,16 @@
     "packages-dev": [
         {
             "name": "driftingly/rector-laravel",
-            "version": "2.1.4",
+            "version": "2.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/driftingly/rector-laravel.git",
-                "reference": "b84b1877ac4f6686f718bc259c9a68d914b514fa"
+                "reference": "45507a8006e5c24356eec71c14f8296ecf6abcbc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/b84b1877ac4f6686f718bc259c9a68d914b514fa",
-                "reference": "b84b1877ac4f6686f718bc259c9a68d914b514fa",
+                "url": "https://api.github.com/repos/driftingly/rector-laravel/zipball/45507a8006e5c24356eec71c14f8296ecf6abcbc",
+                "reference": "45507a8006e5c24356eec71c14f8296ecf6abcbc",
                 "shasum": ""
             },
             "require": {
@@ -6617,9 +6617,9 @@
             "description": "Rector upgrades rules for Laravel Framework",
             "support": {
                 "issues": "https://github.com/driftingly/rector-laravel/issues",
-                "source": "https://github.com/driftingly/rector-laravel/tree/2.1.4"
+                "source": "https://github.com/driftingly/rector-laravel/tree/2.1.5"
             },
-            "time": "2025-11-30T21:38:38+00:00"
+            "time": "2025-12-02T00:54:29+00:00"
         },
         {
             "name": "eftec/bladeone",
