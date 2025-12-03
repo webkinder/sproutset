@@ -3,7 +3,7 @@
   "devDependencies": {
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
-    "prettier": "3.7.2"
+    "prettier": "3.7.3"
   },
   "scripts": {
     "translate": "npm run translate:pot && npm run translate:update && npm run translate:compile",
