@@ -1,6 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices", ":rebaseStalePrs"],
+  "extends": [
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":configMigration",
+    "abandonments:recommended",
+    "security:minimumReleaseAgeNpm",
+    ":rebaseStalePrs"
+  ],
   "branchPrefix": "deps/",
   "labels": ["type:dependency"],
   "baseBranchPatterns": ["develop"],
