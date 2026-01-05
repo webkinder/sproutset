@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Fixed
+- Fixed caching collision issue in Image component where `alt` and `sizes` attributes were incorrectly cached from the first instance by @marcoluzi in #155
+- Fixed `isSvg` state not being persisted in Image component cache by @marcoluzi in #155
 
 ### Changed
 
