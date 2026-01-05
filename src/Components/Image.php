@@ -43,21 +43,21 @@ final class Image extends Component
 
         if (isset(self::$cache[$cacheKey])) {
             $this->loadDataFromCache(self::$cache[$cacheKey]);
+        } else {
+            $this->isSvg = $this->isSvgAttachment();
 
-            return;
+            $this->initializeImageData();
+
+            $this->applyFocalPointIfEnabled();
+
+            self::$cache[$cacheKey] = $this->getCacheableData();
         }
 
-        $this->isSvg = $this->isSvgAttachment();
-
-        $this->initializeImageData();
+        $this->loadAlternativeTextIfNeeded();
 
         if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
-
-        $this->applyFocalPointIfEnabled();
-
-        self::$cache[$cacheKey] = $this->getCacheableData();
     }
 
     public function render(): string
@@ -95,8 +95,6 @@ final class Image extends Component
         if (! $this->isValidAttachment() || ! $this->isRenderableImageAttachment()) {
             return;
         }
-
-        $this->loadAlternativeTextIfNeeded();
 
         if ($this->isSvg) {
             $this->sourcePath = wp_get_attachment_url($this->id);
@@ -522,8 +520,7 @@ final class Image extends Component
         $this->inlineStyle = $cachedData['inlineStyle'];
         $this->width = $cachedData['width'];
         $this->height = $cachedData['height'];
-        $this->alt = $cachedData['alt'];
-        $this->sizes = $cachedData['sizes'];
+        $this->isSvg = $cachedData['isSvg'] ?? false;
     }
 
     private function getCacheableData(): array
@@ -534,8 +531,7 @@ final class Image extends Component
             'inlineStyle' => $this->inlineStyle,
             'width' => $this->width,
             'height' => $this->height,
-            'alt' => $this->alt,
-            'sizes' => $this->sizes,
+            'isSvg' => $this->isSvg,
         ];
     }
 
