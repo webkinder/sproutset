@@ -10,12 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Fixed
-- Fixed caching collision issue in Image component where `alt` and `sizes` attributes were incorrectly cached from the first instance by @marcoluzi in #155
-- Fixed `isSvg` state not being persisted in Image component cache by @marcoluzi in #155
 
 ### Changed
 
 ### Removed
+
+## [v0.1.0-beta.5] - 2026-01-05
+
+### Fixed
+- Fixed caching collision issue in Image component where `alt` and `sizes` attributes were incorrectly cached from the first instance by @marcoluzi in #155
+- Fixed `isSvg` state not being persisted in Image component cache by @marcoluzi in #155
 
 ## [v0.1.0-beta.4] - 2025-12-01
 
@@ -24,13 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added focal point cropping support and configuration (`focal_point_cropping`, `max_on_demand_generations_per_request`) powered by `spatie/image`, including focal-aware rendering in the `Image` component by @marcoluzi in #129
 - Added WordPress media focal point UI (drag handle + X/Y fields), updated translations, and `sproutset:reapply-focal-crop` CLI command to reapply focal crops (optionally with optimization) by @marcoluzi in #129
 
-### Fixed
-
 ### Changed
 
 - Changed cron-based optimization and focal recropping to use the shared `CronScheduler` helper and updated `CronOptimizer` logic by @marcoluzi in #129
-
-### Removed
 
 ## [v0.1.0-beta.3] - 2025-11-24
 
@@ -43,16 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added configurable image size synchronization strategy and `sproutset:sync-image-sizes` CLI command by @marcoluzi in #119
 - Added check for image file type before rendering component by @marcoluzi in #121
 
-### Fixed
-
 ### Changed
 
 - Updated contributing guidelines to better explain merge strategies by @marcoluzi in #112
 - Updated PR template to include changes to merge strategy by @marcoluzi in #112
 - Changed WordPress version requirement to ^5.9 || ^6.0 by @marcoluzi in #120
 - Refined image size option synchronization to use a `SyncStrategy` enum and avoid unnecessary work on frontend requests by @marcoluzi in #119
-
-### Removed
 
 ## [v0.1.0-beta.2]  - 2025-11-06
 
@@ -181,8 +177,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.4...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.5...develop
 
+[v0.1.0-beta.5]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.5
 [v0.1.0-beta.4]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.4
 [v0.1.0-beta.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.3
 [v0.1.0-beta.2]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.2
