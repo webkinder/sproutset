@@ -122,14 +122,14 @@ wp acorn sproutset:sync-image-sizes --force   # Force sync even if no config cha
 Basic usage:
 
 ```blade
-<x-sproutset-image :id="$attachment_id" sizeName="large" />
+<x-sproutset-image :attachment-id="$attachment_id" size-name="large" />
 ```
 
 ### Parameters
 
 **Required:**
 
-- **`id`**: WordPress attachment ID
+- **`attachment-id`**: WordPress attachment ID
 
 **Optional:**
 
@@ -147,19 +147,19 @@ Basic usage:
 
 ```blade
 {{-- Basic --}}
-<x-sproutset-image id="123" size-name="medium" />
+<x-sproutset-image attachment-id="123" size-name="medium" />
 
 {{-- Custom alt and class --}}
-<x-sproutset-image :id="$post->thumbnail()->id" size-name="hero" alt="Hero banner" class="w-full" />
+<x-sproutset-image :attachment-id="$post->thumbnail()->id" size-name="hero" alt="Hero banner" class="w-full" />
 
 {{-- Custom sizes attribute --}}
-<x-sproutset-image :id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
+<x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
 
 {{-- Disable lazy loading (above-the-fold images) --}}
-<x-sproutset-image :id="$hero" size-name="hero" use-lazy-loading="false" />
- 
+<x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="false" />
+
 {{-- Use media library focal point --}}
-<x-sproutset-image :id="$hero" size-name="hero" focal-point="true" />
+<x-sproutset-image :attachment-id="$hero" size-name="hero" focal-point="true" />
 ```
 
 ### Focal Point Cropping
