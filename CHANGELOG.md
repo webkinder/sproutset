@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for arbitrary HTML attributes in Image component by @marcoluzi in #179
+- Updated `normalizeId()` to accept both `int` and numeric `string` for attachment IDs by @marcoluzi in #179
+
 ### Fixed
 
 ### Changed
+
+- **BREAKING**: Renamed Image component `id` parameter to `attachmentId` to avoid collision with HTML `id` attribute by @marcoluzi in #179
 
 ### Removed
 
