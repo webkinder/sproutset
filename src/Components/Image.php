@@ -21,8 +21,6 @@ final class Image extends Component
 
     public readonly int $attachmentId;
 
-    public readonly ?string $id;
-
     public array $htmlAttributes = [];
 
     private static array $cache = [];
@@ -44,10 +42,9 @@ final class Image extends Component
         public readonly bool $focalPoint = false,
         public readonly ?float $focalPointX = null,
         public readonly ?float $focalPointY = null,
-        ?string $id = null,
+        public readonly ?string $id = null,
     ) {
-        $this->attachmentId = self::normalizeId($attachmentId);
-        $this->id = $id;
+        $this->attachmentId = $this->normalizeId($attachmentId);
 
         $cacheKey = $this->generateCacheKey();
 
@@ -527,7 +524,7 @@ final class Image extends Component
         return "{$this->attachmentId}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
     }
 
-    private static function normalizeId(int|string $attachmentId): int
+    private function normalizeId(int|string $attachmentId): int
     {
         if (is_int($attachmentId)) {
             return $attachmentId;
