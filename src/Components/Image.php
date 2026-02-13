@@ -19,6 +19,10 @@ final class Image extends Component
 
     public ?string $inlineStyle = null;
 
+    public readonly int $attachmentId;
+
+    public array $htmlAttributes = [];
+
     private static array $cache = [];
 
     private bool $isSvg = false;
@@ -26,7 +30,7 @@ final class Image extends Component
     private static int $generatedSizesInCurrentRequest = 0;
 
     public function __construct(
-        public readonly int $id,
+        int|string $attachmentId,
         public readonly string $sizeName = 'large',
         public ?string $sizes = null,
         public ?string $alt = null,
@@ -38,7 +42,10 @@ final class Image extends Component
         public readonly bool $focalPoint = false,
         public readonly ?float $focalPointX = null,
         public readonly ?float $focalPointY = null,
+        public readonly ?string $id = null,
     ) {
+        $this->attachmentId = $this->normalizeId($attachmentId);
+
         $cacheKey = $this->generateCacheKey();
 
         if (isset(self::$cache[$cacheKey])) {
@@ -58,36 +65,52 @@ final class Image extends Component
         if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
+
+        $this->htmlAttributes = $this->isSvg
+            ? $this->buildSvgAttributes()
+            : $this->buildImageAttributes();
     }
 
     public function render(): string
     {
         return $this->isSvg ? <<<'blade'
             @if($sourcePath)
-                <img
-                    src="{{ $sourcePath }}"
-                    @if($alt) alt="{{ $alt }}" @endif
-                    @if($class) class="{{ $class }}" @endif
-                    @if($inlineStyle) style="{{ $inlineStyle }}" @endif
-                >
+                <img {{ $attributes->merge($htmlAttributes) }}>
             @endif
         blade
         : <<<'blade'
             @if($sourcePath)
-                <img
-                    src="{{ $sourcePath }}"
-                    @if($width) width="{{ $width }}" @endif
-                    @if($height) height="{{ $height }}" @endif
-                    @if($responsiveSourceSet) srcset="{{ $responsiveSourceSet }}" @endif
-                    @if($sizes) sizes="{{ $sizes }}" @endif
-                    @if($alt) alt="{{ $alt }}" @endif
-                    @if($class) class="{{ $class }}" @endif
-                    @if($inlineStyle) style="{{ $inlineStyle }}" @endif
-                    @if($useLazyLoading) loading="lazy" @endif
-                    @if($decodingMode) decoding="{{ $decodingMode }}" @endif
-                >
+                <img {{ $attributes->merge($htmlAttributes) }}>
             @endif
         blade;
+    }
+
+    public function buildSvgAttributes(): array
+    {
+        return array_filter([
+            'src' => $this->sourcePath,
+            'alt' => $this->alt,
+            'class' => $this->class,
+            'style' => $this->inlineStyle,
+            'id' => $this->id,
+        ]);
+    }
+
+    public function buildImageAttributes(): array
+    {
+        return array_filter([
+            'src' => $this->sourcePath,
+            'width' => $this->width,
+            'height' => $this->height,
+            'srcset' => $this->responsiveSourceSet,
+            'sizes' => $this->sizes,
+            'alt' => $this->alt,
+            'class' => $this->class,
+            'style' => $this->inlineStyle,
+            'id' => $this->id,
+            'loading' => $this->useLazyLoading ? 'lazy' : null,
+            'decoding' => $this->decodingMode ?: null,
+        ]);
     }
 
     private function initializeImageData(): void
@@ -97,7 +120,7 @@ final class Image extends Component
         }
 
         if ($this->isSvg) {
-            $this->sourcePath = wp_get_attachment_url($this->id);
+            $this->sourcePath = wp_get_attachment_url($this->attachmentId);
 
             return;
         }
@@ -109,14 +132,14 @@ final class Image extends Component
 
     private function isValidAttachment(): bool
     {
-        $attachment = get_post($this->id);
+        $attachment = get_post($this->attachmentId);
 
         return $attachment && $attachment->post_type === 'attachment';
     }
 
     private function isRenderableImageAttachment(): bool
     {
-        return $this->isSvg || wp_attachment_is_image($this->id);
+        return $this->isSvg || wp_attachment_is_image($this->attachmentId);
     }
 
     private function loadAlternativeTextIfNeeded(): void
@@ -125,12 +148,12 @@ final class Image extends Component
             return;
         }
 
-        $this->alt = get_post_meta($this->id, '_wp_attachment_image_alt', true) ?: '';
+        $this->alt = get_post_meta($this->attachmentId, '_wp_attachment_image_alt', true) ?: '';
     }
 
     private function ensureRequestedSizeIsAvailable(): void
     {
-        $metadata = wp_get_attachment_metadata($this->id);
+        $metadata = wp_get_attachment_metadata($this->attachmentId);
 
         if (! $metadata || ! is_array($metadata)) {
             return;
@@ -145,7 +168,7 @@ final class Image extends Component
 
     private function loadImageDimensions(): void
     {
-        $imageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $this->sizeName));
+        $imageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->attachmentId, $this->sizeName));
 
         if ($imageData === null) {
             return;
@@ -158,7 +181,7 @@ final class Image extends Component
 
     private function calculateAndSetDimensions(array $imageData): void
     {
-        $fullImageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, 'full'));
+        $fullImageData = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->attachmentId, 'full'));
 
         if ($fullImageData === null) {
             $this->width ??= $imageData[1];
@@ -204,7 +227,7 @@ final class Image extends Component
             return;
         }
 
-        $metadata = wp_get_attachment_metadata($this->id);
+        $metadata = wp_get_attachment_metadata($this->attachmentId);
 
         if (! is_array($metadata)) {
             $metadata = [];
@@ -273,7 +296,7 @@ final class Image extends Component
         $sizeConfiguration = ImageSizeConfigNormalizer::get($this->sizeName);
 
         if (! $this->hasConfiguredSourceSetVariants($sizeConfiguration)) {
-            $this->responsiveSourceSet = wp_get_attachment_image_srcset($this->id, $this->sizeName) ?: '';
+            $this->responsiveSourceSet = wp_get_attachment_image_srcset($this->attachmentId, $this->sizeName) ?: '';
 
             return;
         }
@@ -302,7 +325,7 @@ final class Image extends Component
 
     private function collectBaseImageSource(): array
     {
-        $baseImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $this->sizeName));
+        $baseImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->attachmentId, $this->sizeName));
 
         return $baseImage ? [$baseImage[0].' '.$baseImage[1].'w'] : [];
     }
@@ -313,14 +336,14 @@ final class Image extends Component
 
         $this->ensureVariantSizeExists($variantSizeName);
 
-        $variantImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->id, $variantSizeName));
+        $variantImage = $this->normalizeImageSourceData(wp_get_attachment_image_src($this->attachmentId, $variantSizeName));
 
         return $variantImage ? $variantImage[0].' '.$variantImage[1].'w' : null;
     }
 
     private function ensureVariantSizeExists(string $variantSizeName): void
     {
-        $metadata = wp_get_attachment_metadata($this->id);
+        $metadata = wp_get_attachment_metadata($this->attachmentId);
 
         if (! $metadata || ! is_array($metadata)) {
             return;
@@ -340,7 +363,7 @@ final class Image extends Component
         }
 
         $targetSizeName = $sizeName ?? $this->sizeName;
-        $attachmentFilePath = get_attached_file($this->id);
+        $attachmentFilePath = get_attached_file($this->attachmentId);
 
         if (! $attachmentFilePath || ! file_exists($attachmentFilePath)) {
             return;
@@ -361,7 +384,7 @@ final class Image extends Component
             return;
         }
 
-        $currentMetadata = wp_get_attachment_metadata($this->id);
+        $currentMetadata = wp_get_attachment_metadata($this->attachmentId);
 
         if (! is_array($currentMetadata)) {
             return;
@@ -372,7 +395,7 @@ final class Image extends Component
         $crop = (bool) ($sizeConfiguration['crop'] ?? false);
 
         $updatedMetadata = FocalPointCropper::applyFocalCropToSingleSizeWithConfiguration(
-            $this->id,
+            $this->attachmentId,
             $targetSizeName,
             $currentMetadata,
             $targetWidth,
@@ -380,7 +403,7 @@ final class Image extends Component
             $crop
         );
 
-        wp_update_attachment_metadata($this->id, $updatedMetadata);
+        wp_update_attachment_metadata($this->attachmentId, $updatedMetadata);
     }
 
     private function canGenerateAnotherSizeInCurrentRequest(): bool
@@ -427,7 +450,7 @@ final class Image extends Component
     {
         $metadata['sizes'][$sizeName] = $generatedImage;
 
-        wp_update_attachment_metadata($this->id, $metadata);
+        wp_update_attachment_metadata($this->attachmentId, $metadata);
     }
 
     private function scheduleOptimizationIfEnabled(string $sourceFilePath, array $generatedImage): void
@@ -440,7 +463,7 @@ final class Image extends Component
         $generatedImagePath = $pathinfo['dirname'].'/'.$generatedImage['file'];
 
         if (file_exists($generatedImagePath)) {
-            CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->id);
+            CronOptimizer::scheduleImageOptimization($generatedImagePath, $this->attachmentId);
         }
     }
 
@@ -498,7 +521,28 @@ final class Image extends Component
         $overrideXSuffix = $this->focalPointX !== null ? (string) $this->focalPointX : 'xnull';
         $overrideYSuffix = $this->focalPointY !== null ? (string) $this->focalPointY : 'ynull';
 
-        return "{$this->id}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
+        return "{$this->attachmentId}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
+    }
+
+    private function normalizeId(int|string $attachmentId): int
+    {
+        if (is_int($attachmentId)) {
+            return $attachmentId;
+        }
+
+        $attachmentId = trim($attachmentId);
+
+        if ($attachmentId === '') {
+            return 0;
+        }
+
+        if (ctype_digit($attachmentId)) {
+            return (int) $attachmentId;
+        }
+
+        $validated = filter_var($attachmentId, FILTER_VALIDATE_INT);
+
+        return $validated !== false ? (int) $validated : 0;
     }
 
     private function normalizeImageSourceData(?array $imageData): ?array
@@ -537,13 +581,13 @@ final class Image extends Component
 
     private function isSvgAttachment(): bool
     {
-        $mimeType = get_post_mime_type($this->id);
+        $mimeType = get_post_mime_type($this->attachmentId);
 
         if ($mimeType === 'image/svg+xml') {
             return true;
         }
 
-        $filePath = get_attached_file($this->id);
+        $filePath = get_attached_file($this->attachmentId);
 
         return $filePath && mb_strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) === 'svg';
     }

@@ -40,6 +40,9 @@
   },
   "config": {
     "optimize-autoloader": true,
+    "platform": {
+      "php": "8.2.29"
+    },
     "sort-packages": true
   },
   "extra": {

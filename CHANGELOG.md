@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.6] - 2026-02-13
+
+### Added
+
+- Added support for arbitrary HTML attributes in Image component by @marcoluzi in #179
+- Updated `normalizeId()` to accept both `int` and numeric `string` for attachment IDs by @marcoluzi in #179
+
+### Fixed
+
+- **BREAKING**: Renamed Image component `id` parameter to `attachmentId` to avoid collision with HTML `id` attribute by @marcoluzi in #179
+
 ## [v0.1.0-beta.5] - 2026-01-05
 
 ### Fixed
@@ -177,8 +188,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.5...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.6...develop
 
+[v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6
 [v0.1.0-beta.5]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.5
 [v0.1.0-beta.4]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.4
 [v0.1.0-beta.3]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.3
