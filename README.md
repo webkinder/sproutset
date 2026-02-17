@@ -140,6 +140,7 @@ Basic usage:
 - **`class`**: For custom classes
 - **`use-lazy-loading`**: Enable lazy loading (default: `true`)
 - **`decoding-mode`**: Decoding strategy (default: `'async'`)
+- **`use-auto-sizes`**: Add `auto,` prefix to the `sizes` attribute (default: `true`)
 - **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
 - **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
 
@@ -157,6 +158,9 @@ Basic usage:
 
 {{-- Disable lazy loading (above-the-fold images) --}}
 <x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="false" />
+
+{{-- Disable auto prefix for sizes --}}
+<x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" :use-auto-sizes="false" />
 
 {{-- Use media library focal point --}}
 <x-sproutset-image :attachment-id="$hero" size-name="hero" focal-point="true" />
