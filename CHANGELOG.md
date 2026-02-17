@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `use-auto-sizes` flag on the Image component to allow opting out of the automatic `auto,` prefix on the `sizes` attribute @marcoluzi in #184
 
 ### Fixed
+- Normalized boolean handling for component attributes (e.g., `use-auto-sizes="false"`) to correctly interpret string, int, and bool inputs @marcoluzi in #184
 
 ### Changed
 
