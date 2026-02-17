@@ -19,6 +19,8 @@ final class Image extends Component
 
     public ?string $inlineStyle = null;
 
+    public readonly bool $useAutoSizes;
+
     public readonly int $attachmentId;
 
     public array $htmlAttributes = [];
@@ -39,12 +41,14 @@ final class Image extends Component
         public readonly ?string $class = null,
         public readonly bool $useLazyLoading = true,
         public readonly string $decodingMode = 'async',
+        bool|int|string|null $useAutoSizes = true,
         public readonly bool $focalPoint = false,
         public readonly ?float $focalPointX = null,
         public readonly ?float $focalPointY = null,
         public readonly ?string $id = null,
     ) {
         $this->attachmentId = $this->normalizeId($attachmentId);
+        $this->useAutoSizes = $this->normalizeBoolean($useAutoSizes);
 
         $cacheKey = $this->generateCacheKey();
 
@@ -62,7 +66,7 @@ final class Image extends Component
 
         $this->loadAlternativeTextIfNeeded();
 
-        if ($this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
+        if (! $this->useAutoSizes || $this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
 
@@ -486,8 +490,18 @@ final class Image extends Component
 
     private function normalizeResponsiveSizesAttribute(): string
     {
-        if ($this->sizes && str_starts_with(mb_trim($this->sizes), 'auto')) {
-            return $this->sizes;
+        $trimmedSizes = $this->sizes !== null ? mb_trim($this->sizes) : null;
+
+        if (! $this->useAutoSizes) {
+            if ($trimmedSizes !== null && $trimmedSizes !== '') {
+                return $trimmedSizes;
+            }
+
+            return $this->determineResponsiveSizesValue();
+        }
+
+        if ($trimmedSizes && str_starts_with($trimmedSizes, 'auto')) {
+            return $trimmedSizes;
         }
 
         $autoPrefix = ['auto'];
@@ -495,6 +509,31 @@ final class Image extends Component
         $autoPrefix[] = $sizesValue;
 
         return implode(', ', $autoPrefix);
+    }
+
+    private function normalizeBoolean(bool|int|string|null $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value === 1;
+        }
+
+        if (is_string($value)) {
+            $normalized = mb_strtolower(trim($value));
+
+            if ($normalized === '' || $normalized === 'false' || $normalized === '0' || $normalized === 'off' || $normalized === 'no') {
+                return false;
+            }
+
+            if ($normalized === 'true' || $normalized === '1' || $normalized === 'on' || $normalized === 'yes') {
+                return true;
+            }
+        }
+
+        return (bool) $value;
     }
 
     private function determineResponsiveSizesValue(): string

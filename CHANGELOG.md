@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.7] - 2026-02-17
+
+### Added
+- Added `use-auto-sizes` flag on the Image component to allow opting out of the automatic `auto,` prefix on the `sizes` attribute @marcoluzi in #184
+
+### Fixed
+- Normalized boolean handling for component attributes (e.g., `use-auto-sizes="false"`) to correctly interpret string, int, and bool inputs @marcoluzi in #184
+
 ## [v0.1.0-beta.6] - 2026-02-13
 
 ### Added
@@ -188,8 +196,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.6...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.7...develop
 
+[v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
 [v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6
 [v0.1.0-beta.5]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.5
 [v0.1.0-beta.4]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.4
