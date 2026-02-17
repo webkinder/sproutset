@@ -127,43 +127,67 @@ Basic usage:
 
 ### Parameters
 
+The component accepts loose types for all parameters (strings, integers, booleans, null) and normalizes them internally. You can pass values as strings from HTML attributes or as typed values from PHP/Blade.
+
 **Required:**
 
-- **`attachment-id`**: WordPress attachment ID
+- **`attachment-id`**: WordPress attachment ID (accepts `int`, `string`, or numeric values)
 
 **Optional:**
 
 - **`size-name`**: Image size name (default: `'large'`)
 - **`sizes`**: Custom `sizes` attribute (default: auto-generated)
 - **`alt`**: Alt text (default: from WordPress metadata)
-- **`width`** / **`height`**: Custom dimensions (default: auto-detected)
-- **`class`**: For custom classes
-- **`use-lazy-loading`**: Enable lazy loading (default: `true`)
-- **`decoding-mode`**: Decoding strategy (default: `'async'`)
+- **`width`** / **`height`**: Custom dimensions (default: auto-detected, accepts numeric strings)
+- **`class`**: CSS classes (merged with any classes passed via attribute bag)
+- **`use-lazy-loading`**: Enable lazy loading (default: `true`, accepts `'true'`/`'false'`, `1`/`0`, booleans)
+- **`decoding-mode`**: Decoding strategy - `'async'`, `'sync'`, or `'auto'` (default: `'async'`)
 - **`use-auto-sizes`**: Add `auto,` prefix to the `sizes` attribute (default: `true`)
 - **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
 - **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
 
+**Arbitrary HTML Attributes:**
+
+Any additional attributes (like `id`, `data-*`, `aria-*`, `title`, etc.) are automatically passed through Laravel's attribute bag and merged into the rendered `<img>` tag.
+
 ### Examples
 
 ```blade
-{{-- Basic --}}
+{{-- Basic usage with string ID --}}
 <x-sproutset-image attachment-id="123" size-name="medium" />
+
+{{-- With PHP variable (integer) --}}
+<x-sproutset-image :attachment-id="$post->thumbnail()->id" size-name="hero" />
 
 {{-- Custom alt and class --}}
 <x-sproutset-image :attachment-id="$post->thumbnail()->id" size-name="hero" alt="Hero banner" class="w-full" />
+
+{{-- Multiple classes (component class + user class) --}}
+<x-sproutset-image :attachment-id="$id" size-name="large" class="rounded-lg shadow-md" />
 
 {{-- Custom sizes attribute --}}
 <x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
 
 {{-- Disable lazy loading (above-the-fold images) --}}
 <x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="false" />
+{{-- Or with string --}}
+<x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="0" />
 
 {{-- Disable auto prefix for sizes --}}
 <x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" :use-auto-sizes="false" />
 
 {{-- Use media library focal point --}}
 <x-sproutset-image :attachment-id="$hero" size-name="hero" focal-point="true" />
+
+{{-- With arbitrary HTML attributes (id, data-*, aria-*, etc.) --}}
+<x-sproutset-image
+    :attachment-id="$id"
+    size-name="large"
+    id="hero-image"
+    data-gallery="main"
+    aria-describedby="image-caption"
+    title="Hero image"
+/>
 ```
 
 ### Focal Point Cropping
