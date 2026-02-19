@@ -157,7 +157,7 @@ final class Image extends Component
             'sizes' => $this->sizes,
             'alt' => $this->alt,
             'style' => $this->inlineStyle,
-            'loading' => $this->useLazyLoading ? 'lazy' : null,
+            'loading' => $this->useLazyLoading ? 'lazy' : 'eager',
             'decoding' => $this->decodingMode ?: null,
         ]);
     }

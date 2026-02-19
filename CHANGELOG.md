@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Prevented WordPress from adding the `auto,` sizes prefix when `use-auto-sizes` is disabled on the Image component by @marcoluzi in #188
+- Ensured the Image component outputs `loading="eager"` when `use-lazy-loading` is set to false by @marcoluzi in #189
 
 ### Changed
 
