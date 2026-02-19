@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Components;
 
 use Illuminate\View\Component;
+use Webkinder\SproutsetPackage\Managers\AutoSizesManager;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Services\FocalPointCropper;
 use Webkinder\SproutsetPackage\Support\FocalPointConfig;
 use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
+use Webkinder\SproutsetPackage\Support\ImageComponentInputNormalizer;
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 
 final class Image extends Component
@@ -19,9 +21,31 @@ final class Image extends Component
 
     public ?string $inlineStyle = null;
 
-    public readonly bool $useAutoSizes;
+    public int $attachmentId;
 
-    public readonly int $attachmentId;
+    public string $sizeName;
+
+    public ?string $sizes;
+
+    public ?string $alt;
+
+    public ?int $width;
+
+    public ?int $height;
+
+    public ?string $class;
+
+    public string $loading;
+
+    public string $decoding;
+
+    public bool $useAutoSizes;
+
+    public bool $focalPoint;
+
+    public ?float $focalPointX;
+
+    public ?float $focalPointY;
 
     public array $htmlAttributes = [];
 
@@ -32,23 +56,49 @@ final class Image extends Component
     private static int $generatedSizesInCurrentRequest = 0;
 
     public function __construct(
-        int|string $attachmentId,
-        public readonly string $sizeName = 'large',
-        public ?string $sizes = null,
-        public ?string $alt = null,
-        public ?int $width = null,
-        public ?int $height = null,
-        public readonly ?string $class = null,
-        public readonly bool $useLazyLoading = true,
-        public readonly string $decodingMode = 'async',
-        bool|int|string|null $useAutoSizes = true,
-        public readonly bool $focalPoint = false,
-        public readonly ?float $focalPointX = null,
-        public readonly ?float $focalPointY = null,
-        public readonly ?string $id = null,
+        mixed $attachmentId,
+        mixed $sizeName = 'large',
+        mixed $sizes = null,
+        mixed $alt = null,
+        mixed $width = null,
+        mixed $height = null,
+        mixed $class = null,
+        mixed $loading = 'lazy',
+        mixed $decoding = 'async',
+        mixed $useAutoSizes = true,
+        mixed $focalPoint = false,
+        mixed $focalPointX = null,
+        mixed $focalPointY = null,
     ) {
-        $this->attachmentId = $this->normalizeId($attachmentId);
-        $this->useAutoSizes = $this->normalizeBoolean($useAutoSizes);
+        $input = ImageComponentInputNormalizer::normalize(
+            $attachmentId,
+            $sizeName,
+            $sizes,
+            $alt,
+            $width,
+            $height,
+            $class,
+            $loading,
+            $decoding,
+            $useAutoSizes,
+            $focalPoint,
+            $focalPointX,
+            $focalPointY,
+        );
+
+        $this->attachmentId = $input->attachmentId;
+        $this->sizeName = $input->sizeName;
+        $this->sizes = $input->sizes;
+        $this->alt = $input->alt;
+        $this->width = $input->width;
+        $this->height = $input->height;
+        $this->class = $input->class;
+        $this->loading = $input->loading;
+        $this->decoding = $input->decoding;
+        $this->useAutoSizes = $input->useAutoSizes;
+        $this->focalPoint = $input->focalPoint;
+        $this->focalPointX = $input->focalPointX;
+        $this->focalPointY = $input->focalPointY;
 
         $cacheKey = $this->generateCacheKey();
 
@@ -66,6 +116,10 @@ final class Image extends Component
 
         $this->loadAlternativeTextIfNeeded();
 
+        if (! $this->useAutoSizes) {
+            AutoSizesManager::registerImageWithAutoSizesDisabled();
+        }
+
         if (! $this->useAutoSizes || $this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
         }
@@ -77,14 +131,9 @@ final class Image extends Component
 
     public function render(): string
     {
-        return $this->isSvg ? <<<'blade'
+        return <<<'blade'
             @if($sourcePath)
-                <img {{ $attributes->merge($htmlAttributes) }}>
-            @endif
-        blade
-        : <<<'blade'
-            @if($sourcePath)
-                <img {{ $attributes->merge($htmlAttributes) }}>
+                <img {{ $attributes->class($class)->merge($htmlAttributes) }}>
             @endif
         blade;
     }
@@ -94,9 +143,7 @@ final class Image extends Component
         return array_filter([
             'src' => $this->sourcePath,
             'alt' => $this->alt,
-            'class' => $this->class,
             'style' => $this->inlineStyle,
-            'id' => $this->id,
         ]);
     }
 
@@ -109,11 +156,9 @@ final class Image extends Component
             'srcset' => $this->responsiveSourceSet,
             'sizes' => $this->sizes,
             'alt' => $this->alt,
-            'class' => $this->class,
             'style' => $this->inlineStyle,
-            'id' => $this->id,
-            'loading' => $this->useLazyLoading ? 'lazy' : null,
-            'decoding' => $this->decodingMode ?: null,
+            'loading' => $this->loading,
+            'decoding' => $this->decoding,
         ]);
     }
 
@@ -511,31 +556,6 @@ final class Image extends Component
         return implode(', ', $autoPrefix);
     }
 
-    private function normalizeBoolean(bool|int|string|null $value): bool
-    {
-        if (is_bool($value)) {
-            return $value;
-        }
-
-        if (is_int($value)) {
-            return $value === 1;
-        }
-
-        if (is_string($value)) {
-            $normalized = mb_strtolower(trim($value));
-
-            if ($normalized === '' || $normalized === 'false' || $normalized === '0' || $normalized === 'off' || $normalized === 'no') {
-                return false;
-            }
-
-            if ($normalized === 'true' || $normalized === '1' || $normalized === 'on' || $normalized === 'yes') {
-                return true;
-            }
-        }
-
-        return (bool) $value;
-    }
-
     private function determineResponsiveSizesValue(): string
     {
         $hasCustomSizes = ! in_array($this->sizes, [null, '', '0'], true);
@@ -561,27 +581,6 @@ final class Image extends Component
         $overrideYSuffix = $this->focalPointY !== null ? (string) $this->focalPointY : 'ynull';
 
         return "{$this->attachmentId}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
-    }
-
-    private function normalizeId(int|string $attachmentId): int
-    {
-        if (is_int($attachmentId)) {
-            return $attachmentId;
-        }
-
-        $attachmentId = trim($attachmentId);
-
-        if ($attachmentId === '') {
-            return 0;
-        }
-
-        if (ctype_digit($attachmentId)) {
-            return (int) $attachmentId;
-        }
-
-        $validated = filter_var($attachmentId, FILTER_VALIDATE_INT);
-
-        return $validated !== false ? (int) $validated : 0;
     }
 
     private function normalizeImageSourceData(?array $imageData): ?array

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage;
 
 use Webkinder\SproutsetPackage\Managers\AdminNotificationManager;
+use Webkinder\SproutsetPackage\Managers\AutoSizesManager;
 use Webkinder\SproutsetPackage\Managers\ConfigurationValidator;
 use Webkinder\SproutsetPackage\Managers\FocalPointManager;
 use Webkinder\SproutsetPackage\Managers\ImageSizeManager;
@@ -25,6 +26,8 @@ final readonly class Sproutset
 
     private FocalPointManager $focalPointManager;
 
+    private AutoSizesManager $autoSizesManager;
+
     public function __construct()
     {
         $this->initializeManagers();
@@ -39,6 +42,7 @@ final readonly class Sproutset
         $this->optimizationManager = new OptimizationManager();
         $this->adminNotificationManager = new AdminNotificationManager();
         $this->focalPointManager = new FocalPointManager();
+        $this->autoSizesManager = new AutoSizesManager();
     }
 
     private function bootstrapPackage(): void
@@ -49,5 +53,6 @@ final readonly class Sproutset
         $this->optimizationManager->initializeOptimizationFeatures();
         $this->adminNotificationManager->initializeAdminNotifications();
         $this->focalPointManager->initializeFocalPointFeatures();
+        $this->autoSizesManager->initializeAutoSizesFilters();
     }
 }

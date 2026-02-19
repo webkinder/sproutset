@@ -15,12 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.8] - 2026-02-19
+
+### Fixed
+
+- Prevented WordPress from adding the `auto,` sizes prefix when `use-auto-sizes` is disabled on the Image component by @marcoluzi in #188
+- Ensured the Image component outputs `loading="eager"` when `use-lazy-loading` is set to false by @marcoluzi in #189
+
+### Changed
+
+- Refactored Image component attribute handling to normalize loose input types via a shared normalizer and merge classes from the attribute bag by @marcoluzi in #187
+- Changed Image component to use standard HTML `loading` attribute instead of `use-lazy-loading` boolean by @marcoluzi in #190
+- Changed Image component to use standard HTML `decoding` attribute instead of `decoding-mode` boolean by @marcoluzi in #190
+
 ## [v0.1.0-beta.7] - 2026-02-17
 
 ### Added
+
 - Added `use-auto-sizes` flag on the Image component to allow opting out of the automatic `auto,` prefix on the `sizes` attribute @marcoluzi in #184
 
 ### Fixed
+
 - Normalized boolean handling for component attributes (e.g., `use-auto-sizes="false"`) to correctly interpret string, int, and bool inputs @marcoluzi in #184
 
 ## [v0.1.0-beta.6] - 2026-02-13
@@ -37,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.1.0-beta.5] - 2026-01-05
 
 ### Fixed
+
 - Fixed caching collision issue in Image component where `alt` and `sizes` attributes were incorrectly cached from the first instance by @marcoluzi in #155
 - Fixed `isSvg` state not being persisted in Image component cache by @marcoluzi in #155
 
@@ -69,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed WordPress version requirement to ^5.9 || ^6.0 by @marcoluzi in #120
 - Refined image size option synchronization to use a `SyncStrategy` enum and avoid unnecessary work on frontend requests by @marcoluzi in #119
 
-## [v0.1.0-beta.2]  - 2025-11-06
+## [v0.1.0-beta.2] - 2025-11-06
 
 ### Added
 
@@ -196,8 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.7...develop
-
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.8...develop
+[v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8
 [v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
 [v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6
 [v0.1.0-beta.5]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.5
