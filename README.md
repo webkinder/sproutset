@@ -140,8 +140,8 @@ The component accepts loose types for all parameters (strings, integers, boolean
 - **`alt`**: Alt text (default: from WordPress metadata)
 - **`width`** / **`height`**: Custom dimensions (default: auto-detected, accepts numeric strings)
 - **`class`**: CSS classes (merged with any classes passed via attribute bag)
-- **`use-lazy-loading`**: Enable lazy loading (default: `true`, accepts `'true'`/`'false'`, `1`/`0`, booleans)
-- **`decoding-mode`**: Decoding strategy - `'async'`, `'sync'`, or `'auto'` (default: `'async'`)
+- **`loading`**: Loading strategy (default: `'lazy'`). Allowed values: `'lazy'`, `'eager'`.
+- **`decoding`**: Decoding strategy (default: `'async'`). Allowed values: `'async'`, `'sync'`, `'auto'`.
 - **`use-auto-sizes`**: Add `auto,` prefix to the `sizes` attribute (default: `true`)
 - **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
 - **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
@@ -169,9 +169,7 @@ Any additional attributes (like `id`, `data-*`, `aria-*`, `title`, etc.) are aut
 <x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
 
 {{-- Disable lazy loading (above-the-fold images) --}}
-<x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="false" />
-{{-- Or with string --}}
-<x-sproutset-image :attachment-id="$hero" size-name="hero" use-lazy-loading="0" />
+<x-sproutset-image :attachment-id="$hero" size-name="hero" loading="eager" />
 
 {{-- Disable auto prefix for sizes --}}
 <x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" :use-auto-sizes="false" />
