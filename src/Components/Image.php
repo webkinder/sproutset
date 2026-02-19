@@ -35,9 +35,9 @@ final class Image extends Component
 
     public ?string $class;
 
-    public bool $useLazyLoading;
+    public string $loading;
 
-    public string $decodingMode;
+    public string $decoding;
 
     public bool $useAutoSizes;
 
@@ -63,8 +63,8 @@ final class Image extends Component
         mixed $width = null,
         mixed $height = null,
         mixed $class = null,
-        mixed $useLazyLoading = true,
-        mixed $decodingMode = 'async',
+        mixed $loading = 'lazy',
+        mixed $decoding = 'async',
         mixed $useAutoSizes = true,
         mixed $focalPoint = false,
         mixed $focalPointX = null,
@@ -78,8 +78,8 @@ final class Image extends Component
             $width,
             $height,
             $class,
-            $useLazyLoading,
-            $decodingMode,
+            $loading,
+            $decoding,
             $useAutoSizes,
             $focalPoint,
             $focalPointX,
@@ -93,8 +93,8 @@ final class Image extends Component
         $this->width = $input->width;
         $this->height = $input->height;
         $this->class = $input->class;
-        $this->useLazyLoading = $input->useLazyLoading;
-        $this->decodingMode = $input->decodingMode;
+        $this->loading = $input->loading;
+        $this->decoding = $input->decoding;
         $this->useAutoSizes = $input->useAutoSizes;
         $this->focalPoint = $input->focalPoint;
         $this->focalPointX = $input->focalPointX;
@@ -157,8 +157,8 @@ final class Image extends Component
             'sizes' => $this->sizes,
             'alt' => $this->alt,
             'style' => $this->inlineStyle,
-            'loading' => $this->useLazyLoading ? 'lazy' : 'eager',
-            'decoding' => $this->decodingMode ?: null,
+            'loading' => $this->loading,
+            'decoding' => $this->decoding,
         ]);
     }
 
