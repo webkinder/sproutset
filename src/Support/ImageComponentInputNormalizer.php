@@ -8,9 +8,13 @@ final class ImageComponentInputNormalizer
 {
     private const DEFAULT_SIZE_NAME = 'large';
 
-    private const DEFAULT_DECODING_MODE = 'async';
+    private const DEFAULT_DECODING = 'async';
+
+    private const DEFAULT_LOADING = 'lazy';
 
     private const ALLOWED_DECODING_MODES = ['async', 'sync', 'auto'];
+
+    private const ALLOWED_LOADING_MODES = ['lazy', 'eager'];
 
     public static function normalize(
         mixed $attachmentId,
@@ -20,8 +24,8 @@ final class ImageComponentInputNormalizer
         mixed $width = null,
         mixed $height = null,
         mixed $class = null,
-        mixed $useLazyLoading = true,
-        mixed $decodingMode = self::DEFAULT_DECODING_MODE,
+        mixed $loading = self::DEFAULT_LOADING,
+        mixed $decoding = self::DEFAULT_DECODING,
         mixed $useAutoSizes = true,
         mixed $focalPoint = false,
         mixed $focalPointX = null,
@@ -35,13 +39,26 @@ final class ImageComponentInputNormalizer
             width: self::normalizeNullableInt($width),
             height: self::normalizeNullableInt($height),
             class: self::normalizeNullableString($class),
-            useLazyLoading: self::normalizeBool($useLazyLoading, true),
-            decodingMode: self::normalizeDecodingMode($decodingMode),
+            loading: self::normalizeEnum($loading, self::ALLOWED_LOADING_MODES, self::DEFAULT_LOADING),
+            decoding: self::normalizeEnum($decoding, self::ALLOWED_DECODING_MODES, self::DEFAULT_DECODING),
             useAutoSizes: self::normalizeBool($useAutoSizes, true),
             focalPoint: self::normalizeBool($focalPoint, false),
             focalPointX: self::normalizeNullableFloat($focalPointX),
             focalPointY: self::normalizeNullableFloat($focalPointY),
         );
+    }
+
+    public static function normalizeEnum(mixed $value, array $allowed, string $default): string
+    {
+        if (is_string($value)) {
+            $trimmed = mb_strtolower(trim($value));
+
+            if ($trimmed !== '' && in_array($trimmed, $allowed, true)) {
+                return $trimmed;
+            }
+        }
+
+        return $default;
     }
 
     public static function normalizeAttachmentId(mixed $value): int
@@ -137,7 +154,7 @@ final class ImageComponentInputNormalizer
         }
 
         if (is_string($value)) {
-            $lower = strtolower(trim($value));
+            $lower = mb_strtolower(trim($value));
 
             if (in_array($lower, ['true', '1', 'yes', 'on'], true)) {
                 return true;
@@ -151,19 +168,6 @@ final class ImageComponentInputNormalizer
         }
 
         return $default;
-    }
-
-    public static function normalizeDecodingMode(mixed $value): string
-    {
-        if (! is_string($value)) {
-            return self::DEFAULT_DECODING_MODE;
-        }
-
-        $trimmed = strtolower(trim($value));
-
-        return in_array($trimmed, self::ALLOWED_DECODING_MODES, true)
-            ? $trimmed
-            : self::DEFAULT_DECODING_MODE;
     }
 
     public static function normalizeNullableFloat(mixed $value): ?float
