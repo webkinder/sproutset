@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Prevented WordPress from adding the `auto,` sizes prefix when `use-auto-sizes` is disabled on the Image component by @marcoluzi in #188
+
 ### Changed
 
 - Refactored Image component attribute handling to normalize loose input types via a shared normalizer and merge classes from the attribute bag by @marcoluzi in #187
