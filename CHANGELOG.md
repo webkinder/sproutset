@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored Image component attribute handling to normalize loose input types via a shared normalizer and merge classes from the attribute bag by @marcoluzi in #187
+
 ### Removed
 
 ## [v0.1.0-beta.7] - 2026-02-17
