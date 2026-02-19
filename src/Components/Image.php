@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Components;
 
 use Illuminate\View\Component;
+use Webkinder\SproutsetPackage\Managers\AutoSizesManager;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Services\FocalPointCropper;
 use Webkinder\SproutsetPackage\Support\FocalPointConfig;
@@ -114,6 +115,10 @@ final class Image extends Component
         }
 
         $this->loadAlternativeTextIfNeeded();
+
+        if (! $this->useAutoSizes) {
+            AutoSizesManager::registerImageWithAutoSizesDisabled();
+        }
 
         if (! $this->useAutoSizes || $this->sizes === null || ! str_starts_with($this->sizes, 'auto')) {
             $this->sizes = $this->normalizeResponsiveSizesAttribute();
@@ -551,7 +556,6 @@ final class Image extends Component
         return implode(', ', $autoPrefix);
     }
 
-
     private function determineResponsiveSizesValue(): string
     {
         $hasCustomSizes = ! in_array($this->sizes, [null, '', '0'], true);
@@ -578,7 +582,6 @@ final class Image extends Component
 
         return "{$this->attachmentId}-{$this->sizeName}-{$this->width}-{$this->height}-{$focalSuffix}-{$overrideXSuffix}-{$overrideYSuffix}";
     }
-
 
     private function normalizeImageSourceData(?array $imageData): ?array
     {
