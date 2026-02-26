@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+### Changed
+
+### Removed
+
+## [v0.1.0-beta.8] - 2026-02-19
+
+### Fixed
+
 - Prevented WordPress from adding the `auto,` sizes prefix when `use-auto-sizes` is disabled on the Image component by @marcoluzi in #188
 - Ensured the Image component outputs `loading="eager"` when `use-lazy-loading` is set to false by @marcoluzi in #189
 
@@ -19,8 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored Image component attribute handling to normalize loose input types via a shared normalizer and merge classes from the attribute bag by @marcoluzi in #187
 - Changed Image component to use standard HTML `loading` attribute instead of `use-lazy-loading` boolean by @marcoluzi in #190
 - Changed Image component to use standard HTML `decoding` attribute instead of `decoding-mode` boolean by @marcoluzi in #190
-
-### Removed
 
 ## [v0.1.0-beta.7] - 2026-02-17
 
@@ -206,7 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.7...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.8...develop
+[v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8
 [v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
 [v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6
 [v0.1.0-beta.5]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.5
