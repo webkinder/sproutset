@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webkinder\SproutsetPackage\Managers;
 
+use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 use Webkinder\SproutsetPackage\Support\SyncStrategy;
 
@@ -21,6 +22,7 @@ final class ImageSizeManager
         $this->initializeSynchronizationStrategy();
         add_filter('intermediate_image_sizes_advanced', $this->createPostTypeFilter(), 10, 3);
         add_filter('image_size_names_choose', $this->createUIFilter(), 10);
+        $this->registerFileCleanup();
     }
 
     public function synchronizeImageSizeOptionsToDatabase(bool $force = false): bool
@@ -361,5 +363,57 @@ final class ImageSizeManager
         $config = config('sproutset-config.image_size_sync');
 
         return is_array($config) ? $config : [];
+    }
+
+    private function registerFileCleanup(): void
+    {
+        add_filter('wp_update_attachment_metadata', $this->cleanupStaleEditFilesOnRestore(...), 999, 2);
+    }
+
+    private function cleanupStaleEditFilesOnRestore(array $metadata, int $attachmentId): array
+    {
+        if (! isset($metadata['original_image']) || ! isset($metadata['file'])) {
+            return $metadata;
+        }
+
+        if (ImageEditDetector::isEditedImage($metadata)) {
+            return $metadata;
+        }
+
+        $backupSizes = get_post_meta($attachmentId, '_wp_attachment_backup_sizes', true);
+
+        if (! is_array($backupSizes) || $backupSizes === []) {
+            return $metadata;
+        }
+
+        $this->deleteOrphanedEditFiles($metadata);
+
+        return $metadata;
+    }
+
+    private function deleteOrphanedEditFiles(array $metadata): void
+    {
+        $uploadDir = wp_upload_dir();
+        $basePath = trailingslashit($uploadDir['basedir']);
+        $pathInfo = pathinfo((string) $metadata['file']);
+        $directory = $basePath.rtrim($pathInfo['dirname'] ?? '', '/').'/';
+
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        $originalBasename = pathinfo($metadata['original_image'], PATHINFO_FILENAME);
+        $pattern = $directory.$originalBasename.'-e*';
+        $orphanedFiles = glob($pattern);
+
+        if (! is_array($orphanedFiles)) {
+            return;
+        }
+
+        foreach ($orphanedFiles as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
+        }
     }
 }

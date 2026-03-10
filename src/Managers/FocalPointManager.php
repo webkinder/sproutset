@@ -9,6 +9,7 @@ use Webkinder\SproutsetPackage\Services\FocalPointCropper;
 use Webkinder\SproutsetPackage\Support\CronScheduler;
 use Webkinder\SproutsetPackage\Support\FocalPointConfig;
 use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
+use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 
 final class FocalPointManager
 {
@@ -279,7 +280,14 @@ final class FocalPointManager
 
     private function renderFocalPointPreview(\WP_Post $attachment, string $inputIdX, string $inputNameX, string $inputIdY, string $inputNameY, string $focalPointX, string $focalPointY): string
     {
-        $previewUrl = wp_get_attachment_image_url($attachment->ID, 'large');
+        $metadata = wp_get_attachment_metadata($attachment->ID);
+        $previewUrl = null;
+
+        if (is_array($metadata) && ImageEditDetector::isEditedImage($metadata)) {
+            $previewUrl = wp_get_attachment_url($attachment->ID);
+        } else {
+            $previewUrl = wp_get_attachment_image_url($attachment->ID, 'large');
+        }
 
         if (! is_string($previewUrl)) {
             $previewUrl = wp_get_attachment_url($attachment->ID);

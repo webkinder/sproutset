@@ -9,9 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Scheduled re-optimization of edited attachments when unoptimized sizes are detected on metadata updates by @marcoluzi in #NNN
+
 ### Fixed
 
+- Show edited image preview when focal point UI is opened for attachments with edits by @marcoluzi in #NNN
+- Remove orphaned WordPress image edit files when restoring originals to keep uploads clean by @marcoluzi in #NNN
+
 ### Changed
+
+- Cleared optimization markers more granularly for edited vs. restored images and streamlined cron scheduling arguments by @marcoluzi in #NNN
 
 ### Removed
 
