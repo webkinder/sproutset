@@ -8,6 +8,7 @@ use Spatie\Image\Image;
 use Throwable;
 use Webkinder\SproutsetPackage\Support\FocalPointConfig;
 use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
+use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 
 final class FocalPointCropper
@@ -260,9 +261,9 @@ final class FocalPointCropper
         }
 
         $pathInfo = pathinfo((string) $metadata['file']);
-        $directory = rtrim($uploadsBasePath.$pathInfo['dirname'], '/').'/';
+        $directory = mb_rtrim($uploadsBasePath.$pathInfo['dirname'], '/').'/';
 
-        if (isset($metadata['original_image'])) {
+        if (isset($metadata['original_image']) && ! ImageEditDetector::isEditedImage($metadata)) {
             $originalPath = $directory.$metadata['original_image'];
 
             if (file_exists($originalPath)) {
@@ -282,7 +283,7 @@ final class FocalPointCropper
         }
 
         $pathInfo = pathinfo((string) $metadata['file']);
-        $directory = rtrim($uploadsBasePath.$pathInfo['dirname'], '/').'/';
+        $directory = mb_rtrim($uploadsBasePath.$pathInfo['dirname'], '/').'/';
         $filename = $metadata['sizes'][$sizeName]['file'];
 
         return $directory.$filename;

@@ -20,22 +20,18 @@ final class CronOptimizer
 
     public static function scheduleAttachmentOptimization(int $attachmentId): void
     {
-        $eventArguments = [$attachmentId];
-
         CronScheduler::scheduleSingleEventIfNotScheduled(
             self::ATTACHMENT_OPTIMIZATION_HOOK,
-            $eventArguments,
+            [$attachmentId],
             30
         );
     }
 
     public static function scheduleImageOptimization(string $imagePath, int $attachmentId): void
     {
-        $eventArguments = [$imagePath, $attachmentId];
-
         CronScheduler::scheduleSingleEventIfNotScheduled(
             self::SINGLE_IMAGE_OPTIMIZATION_HOOK,
-            $eventArguments,
+            [$imagePath, $attachmentId],
             30
         );
     }
