@@ -15,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.9] - 2026-03-10
+
+### Added
+
+- Scheduled re-optimization of edited attachments when unoptimized sizes are detected on metadata updates by @marcoluzi in #206
+
+### Fixed
+
+- Show edited image preview when focal point UI is opened for attachments with edits by @marcoluzi in #206
+- Remove orphaned WordPress image edit files when restoring originals to keep uploads clean by @marcoluzi in #206
+
+### Changed
+
+- Cleared optimization markers more granularly for edited vs. restored images and streamlined cron scheduling arguments by @marcoluzi in #206
+
 ## [v0.1.0-beta.8] - 2026-02-19
 
 ### Fixed
@@ -25,8 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactored Image component attribute handling to normalize loose input types via a shared normalizer and merge classes from the attribute bag by @marcoluzi in #187
-- Changed Image component to use standard HTML `loading` attribute instead of `use-lazy-loading` boolean by @marcoluzi in #190
-- Changed Image component to use standard HTML `decoding` attribute instead of `decoding-mode` boolean by @marcoluzi in #190
+- **BREAKING**: Changed Image component to use standard HTML `loading` attribute instead of `use-lazy-loading` boolean by @marcoluzi in #190
+- **BREAKING**: Changed Image component to use standard HTML `decoding` attribute instead of `decoding-mode` boolean by @marcoluzi in #190
 
 ## [v0.1.0-beta.7] - 2026-02-17
 
@@ -212,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.8...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.9...develop
+[v0.1.0-beta.9]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.9
 [v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8
 [v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
 [v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6

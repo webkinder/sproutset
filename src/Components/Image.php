@@ -11,6 +11,7 @@ use Webkinder\SproutsetPackage\Services\FocalPointCropper;
 use Webkinder\SproutsetPackage\Support\FocalPointConfig;
 use Webkinder\SproutsetPackage\Support\FocalPointMetadata;
 use Webkinder\SproutsetPackage\Support\ImageComponentInputNormalizer;
+use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use Webkinder\SproutsetPackage\Support\ImageSizeConfigNormalizer;
 
 final class Image extends Component
@@ -298,7 +299,7 @@ final class Image extends Component
             return;
         }
 
-        $this->inlineStyle = rtrim($this->inlineStyle).' '.$focalStyle;
+        $this->inlineStyle = mb_rtrim($this->inlineStyle).' '.$focalStyle;
     }
 
     private function calculateAspectRatioDimensions(int $fullWidth, int $fullHeight, int $targetWidth, int $targetHeight, bool $crop): array
@@ -469,6 +470,10 @@ final class Image extends Component
     private function determineSourceFilePath(string $attachmentFilePath, array $metadata): string
     {
         if (empty($metadata['original_image'])) {
+            return $attachmentFilePath;
+        }
+
+        if (ImageEditDetector::isEditedImage($metadata)) {
             return $attachmentFilePath;
         }
 
