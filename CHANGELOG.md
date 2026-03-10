@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.10] - 2026-03-10
+
+### Fixed
+
+- Apply `object-fit: cover` to cropped image srcset variants when any target exceeds source dimensions by @marcoluzi in #209
+
 ## [v0.1.0-beta.9] - 2026-03-10
 
 ### Added
@@ -227,7 +233,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.9...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.10...develop
+[v0.1.0-beta.10]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.10
 [v0.1.0-beta.9]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.9
 [v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8
 [v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
