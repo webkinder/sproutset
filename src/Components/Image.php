@@ -261,7 +261,25 @@ final class Image extends Component
         $actualWidth = $imageData[1];
         $actualHeight = $imageData[2];
 
+        $needsObjectFit = false;
+
         if ($crop && ($actualWidth < $targetWidth || $actualHeight < $targetHeight)) {
+            $needsObjectFit = true;
+        }
+
+        if (! $needsObjectFit && $crop && isset($sizeConfiguration['srcset']) && is_array($sizeConfiguration['srcset'])) {
+            foreach ($sizeConfiguration['srcset'] as $multiplier) {
+                $variantTargetWidth = (int) round($targetWidth * $multiplier);
+                $variantTargetHeight = $targetHeight > 0 ? (int) round($targetHeight * $multiplier) : 0;
+
+                if ($fullWidth < $variantTargetWidth || ($variantTargetHeight > 0 && $fullHeight < $variantTargetHeight)) {
+                    $needsObjectFit = true;
+                    break;
+                }
+            }
+        }
+
+        if ($needsObjectFit) {
             $this->width = $targetWidth;
             $this->height = $targetHeight > 0 ? $targetHeight : $actualHeight;
             $this->inlineStyle = 'object-fit: cover;';
