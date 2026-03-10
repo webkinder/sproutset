@@ -227,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.8...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.9...develop
+[v0.1.0-beta.9]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.9
 [v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8
 [v0.1.0-beta.7]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.7
 [v0.1.0-beta.6]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.6
