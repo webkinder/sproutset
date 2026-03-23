@@ -3929,16 +3929,16 @@
         },
         {
             "name": "roots/acorn",
-            "version": "v5.1.0",
+            "version": "v5.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roots/acorn.git",
-                "reference": "d15ec8fa7379c2c650ba371d82257ccd9eed8523"
+                "reference": "e1feb675a824709aface11cf8965dcd01655d655"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roots/acorn/zipball/d15ec8fa7379c2c650ba371d82257ccd9eed8523",
-                "reference": "d15ec8fa7379c2c650ba371d82257ccd9eed8523",
+                "url": "https://api.github.com/repos/roots/acorn/zipball/e1feb675a824709aface11cf8965dcd01655d655",
+                "reference": "e1feb675a824709aface11cf8965dcd01655d655",
                 "shasum": ""
             },
             "require": {
@@ -4031,7 +4031,7 @@
             "support": {
                 "forum": "https://discourse.roots.io/",
                 "issues": "https://github.com/roots/acorn/issues",
-                "source": "https://github.com/roots/acorn/tree/v5.1.0"
+                "source": "https://github.com/roots/acorn/tree/v5.1.1"
             },
             "funding": [
                 {
@@ -4039,7 +4039,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-17T13:46:05+00:00"
+            "time": "2026-03-23T14:57:56+00:00"
         },
         {
             "name": "roots/support",
