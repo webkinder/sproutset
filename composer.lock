@@ -3922,16 +3922,16 @@
         },
         {
             "name": "roots/acorn",
-            "version": "v6.0.0",
+            "version": "v6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roots/acorn.git",
-                "reference": "2f76918f817175e06c8646140e2c07e5f001abac"
+                "reference": "5c780023f0cb64e7a7335ef6aaf47d5172a0595f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roots/acorn/zipball/2f76918f817175e06c8646140e2c07e5f001abac",
-                "reference": "2f76918f817175e06c8646140e2c07e5f001abac",
+                "url": "https://api.github.com/repos/roots/acorn/zipball/5c780023f0cb64e7a7335ef6aaf47d5172a0595f",
+                "reference": "5c780023f0cb64e7a7335ef6aaf47d5172a0595f",
                 "shasum": ""
             },
             "require": {
@@ -3971,7 +3971,7 @@
                 "vlucas/phpdotenv": "^5.6"
             },
             "require-dev": {
-                "laravel/pint": "^1.15",
+                "carthage-software/mago": "^1.24.0",
                 "mockery/mockery": "^1.6",
                 "pestphp/pest": "^4.0",
                 "phpcompatibility/php-compatibility": "^9.3",
@@ -4022,7 +4022,7 @@
             "support": {
                 "forum": "https://discourse.roots.io/",
                 "issues": "https://github.com/roots/acorn/issues",
-                "source": "https://github.com/roots/acorn/tree/v6.0.0"
+                "source": "https://github.com/roots/acorn/tree/v6.1.0"
             },
             "funding": [
                 {
@@ -4030,7 +4030,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-25T15:01:51+00:00"
+            "time": "2026-04-26T23:38:01+00:00"
         },
         {
             "name": "roots/support",
