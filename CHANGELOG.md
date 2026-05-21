@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [v0.1.0-beta.11] - 2026-05-21
+
+### Changed
+
+- WordPress 7.0 update by @marcoluzi in #241
+
 ## [v0.1.0-beta.10] - 2026-03-10
 
 ### Fixed
@@ -233,7 +239,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue templates for bug reports, feature requests, and questions
 - Pull request template
 
-[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.10...develop
+[unreleased]: https://github.com/webkinder/sproutset/compare/v0.1.0-beta.11...develop
+[v0.1.0-beta.11]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.11
 [v0.1.0-beta.10]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.10
 [v0.1.0-beta.9]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.9
 [v0.1.0-beta.8]: https://github.com/webkinder/sproutset/releases/tag/v0.1.0-beta.8

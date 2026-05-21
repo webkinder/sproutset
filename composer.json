@@ -21,9 +21,9 @@
     }
   ],
   "require": {
-    "php": "^8.2",
-    "roots/acorn": "^5.0",
-    "roots/wordpress-no-content": "^5.9 || ^6.0",
+    "php": "^8.3",
+    "roots/acorn": "^6.0",
+    "roots/wordpress-no-content": "^5.9 || ^6.0 || ^7.0",
     "spatie/image": "^3.8",
     "spatie/image-optimizer": "^1.8"
   },
@@ -41,7 +41,7 @@
   "config": {
     "optimize-autoloader": true,
     "platform": {
-      "php": "8.2.29"
+      "php": "8.3.0"
     },
     "sort-packages": true
   },
