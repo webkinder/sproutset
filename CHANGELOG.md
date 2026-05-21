@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- WordPress 7.0 update by @marcoluzi in #241
+
 ### Removed
 
 ## [v0.1.0-beta.10] - 2026-03-10
