@@ -23,7 +23,7 @@
   "require": {
     "php": "^8.3",
     "roots/acorn": "^6.0",
-    "roots/wordpress-no-content": "^5.9 || ^6.0",
+    "roots/wordpress-no-content": "^5.9 || ^6.0 || ^7.0",
     "spatie/image": "^3.8",
     "spatie/image-optimizer": "^1.8"
   },
