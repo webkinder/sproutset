@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Webkinder\SproutsetPackage\Managers;
 
+use Closure;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Support\ImageEditDetector;
+use WP_Site_Icon;
 
 final class OptimizationManager
 {
+    private ?Closure $avifFilter = null;
+
     public function initializeOptimizationFeatures(): void
     {
         $this->registerAvifConversionIfEnabled();
@@ -16,6 +20,7 @@ final class OptimizationManager
         $this->registerStaleOptimizationCleanup();
         $this->registerOptimizationOnMetadataUpdate();
         $this->initializeCronOptimizerIfEnabled();
+        $this->registerSiteIconPngRegenerationIfEnabled();
     }
 
     private function registerAvifConversionIfEnabled(): void
@@ -24,10 +29,107 @@ final class OptimizationManager
             return;
         }
 
-        add_filter('image_editor_output_format', $this->createAvifConversionFilter());
+        $this->avifFilter = $this->createAvifConversionFilter();
+        add_filter('image_editor_output_format', $this->avifFilter);
     }
 
-    private function createAvifConversionFilter(): callable
+    private function registerSiteIconPngRegenerationIfEnabled(): void
+    {
+        if (! config('sproutset-config.convert_to_avif', false)) {
+            return;
+        }
+
+        add_action('update_option_site_icon', $this->createSiteIconUpdateHandler(), 20, 2);
+        add_action('added_option', $this->createSiteIconAddedHandler(), 20, 2);
+    }
+
+    private function createSiteIconUpdateHandler(): callable
+    {
+        return function (mixed $oldValue, mixed $newValue): void {
+            $attachmentId = (int) $newValue;
+
+            if ($attachmentId > 0) {
+                $this->regenerateSiteIconSizesAsPng($attachmentId);
+            }
+        };
+    }
+
+    private function createSiteIconAddedHandler(): callable
+    {
+        return function (string $optionName, mixed $value): void {
+            if ($optionName !== 'site_icon') {
+                return;
+            }
+
+            $attachmentId = (int) $value;
+
+            if ($attachmentId > 0) {
+                $this->regenerateSiteIconSizesAsPng($attachmentId);
+            }
+        };
+    }
+
+    private function regenerateSiteIconSizesAsPng(int $attachmentId): void
+    {
+        if (! $this->avifFilter instanceof Closure) {
+            return;
+        }
+
+        $file = get_attached_file($attachmentId);
+
+        if (! $file || ! file_exists($file)) {
+            return;
+        }
+
+        $metadata = wp_get_attachment_metadata($attachmentId);
+
+        if (! is_array($metadata)) {
+            return;
+        }
+
+        $wpSiteIcon = new WP_Site_Icon();
+        $iconSizes = apply_filters('site_icon_image_sizes', $wpSiteIcon->site_icon_sizes);
+
+        if (isset($metadata['sizes']) && is_array($metadata['sizes'])) {
+            foreach (array_keys($metadata['sizes']) as $sizeName) {
+                if (str_starts_with((string) $sizeName, 'site_icon-')) {
+                    unset($metadata['sizes'][$sizeName]);
+                }
+            }
+        }
+
+        remove_filter('image_editor_output_format', $this->avifFilter);
+
+        $forcePngFilter = static function (array $formats): array {
+            $formats['image/avif'] = 'image/png';
+            $formats['image/jpeg'] = 'image/png';
+
+            return $formats;
+        };
+
+        add_filter('image_editor_output_format', $forcePngFilter);
+
+        try {
+            foreach ($iconSizes as $size) {
+                if ($size >= $wpSiteIcon->min_size) {
+                    continue;
+                }
+
+                $sizeInfo = image_make_intermediate_size($file, $size, $size, true);
+
+                if (is_array($sizeInfo)) {
+                    $metadata['sizes']['site_icon-'.$size] = $sizeInfo;
+                }
+            }
+
+            wp_update_attachment_metadata($attachmentId, $metadata);
+        } finally {
+            remove_filter('image_editor_output_format', $forcePngFilter);
+            add_filter('image_editor_output_format', $this->avifFilter);
+        }
+    }
+
+    private function createAvifConversionFilter(): Closure
     {
         return function (array $outputFormats): array {
             $outputFormats['image/jpeg'] = 'image/avif';
