@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Managers;
 
 use Closure;
-use Illuminate\Support\Facades\Request;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use WP_Site_Icon;
@@ -147,8 +146,8 @@ final class OptimizationManager
     private function isSiteIconCropRequest(): bool
     {
         return wp_doing_ajax()
-            && (Request::post('action') ?? '') === 'crop-image'
-            && (Request::post('context') ?? '') === 'site-icon';
+            && ($_POST['action'] ?? '') === 'crop-image'
+            && ($_POST['context'] ?? '') === 'site-icon';
     }
 
     private function registerAutoOptimizeImagesIfEnabled(): void
