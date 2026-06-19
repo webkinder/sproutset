@@ -132,11 +132,28 @@ final class OptimizationManager
     private function createAvifConversionFilter(): Closure
     {
         return function (array $outputFormats): array {
+            // Site icons must stay in a widely supported raster format: the crop AJAX
+            // request runs the cropper and generates all site_icon-* sizes through the
+            // image editor, and servers without an AVIF encoder fail those saves.
+            if ($this->isSiteIconCropRequest()) {
+                return $outputFormats;
+            }
+
             $outputFormats['image/jpeg'] = 'image/avif';
             $outputFormats['image/png'] = 'image/avif';
 
             return $outputFormats;
         };
+    }
+
+    private function isSiteIconCropRequest(): bool
+    {
+        // Read $_POST directly: the Acorn Request facade isn't populated when
+        // this filter fires during admin-ajax `crop-image`, so Request::input()
+        // returns null and the guard would silently fall through to AVIF.
+        return wp_doing_ajax()
+            && (Request::post('action') ?? '') === 'crop-image'
+            && (Request::post('context') ?? '') === 'site-icon';
     }
 
     private function registerAutoOptimizeImagesIfEnabled(): void
