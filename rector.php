@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
+use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use RectorLaravel\Rector\ArrayDimFetch\ServerVariableToRequestFacadeRector;
+use RectorLaravel\Rector\Class_\AddHasFactoryToModelsRector;
 use RectorLaravel\Set\LaravelSetList;
 use RectorLaravel\Set\LaravelSetProvider;
 
@@ -37,11 +39,14 @@ return RectorConfig::configure()
     ->withRootFiles()
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        MakeInheritedMethodVisibilitySameAsParentRector::class,
         ServerVariableToRequestFacadeRector::class,
+        AddHasFactoryToModelsRector::class,
     ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
+        codingStyle: true,
         typeDeclarations: true,
         privatization: true,
         earlyReturn: true,
