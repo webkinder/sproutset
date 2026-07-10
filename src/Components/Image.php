@@ -556,11 +556,16 @@ final class Image extends Component
         ];
     }
 
+    private function shouldApplyAutoSizes(): bool
+    {
+        return $this->useAutoSizes && $this->loading === 'lazy';
+    }
+
     private function normalizeResponsiveSizesAttribute(): string
     {
         $trimmedSizes = $this->sizes !== null ? mb_trim($this->sizes) : null;
 
-        if (! $this->useAutoSizes) {
+        if (! $this->shouldApplyAutoSizes()) {
             if ($trimmedSizes !== null && $trimmedSizes !== '') {
                 return $trimmedSizes;
             }
