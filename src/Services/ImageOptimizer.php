@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Services;
 
 use Exception;
+use Spatie\ImageOptimizer\Optimizer;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Spatie\ImageOptimizer\Optimizers\Avifenc;
 
 final class ImageOptimizer
 {
@@ -20,9 +22,23 @@ final class ImageOptimizer
 
     private function __construct()
     {
-        $this->optimizerChain = OptimizerChainFactory::create();
+        $this->optimizerChain = $this->buildOptimizerChain();
         $this->uploadDirectoryInfo = wp_upload_dir();
         $this->uploadsBasePath = trailingslashit($this->uploadDirectoryInfo['basedir']);
+    }
+
+    private function buildOptimizerChain(): OptimizerChain
+    {
+        $optimizerChain = OptimizerChainFactory::create();
+
+        if (config('sproutset-config.convert_to_avif', false)) {
+            $optimizerChain->setOptimizers(array_values(array_filter(
+                $optimizerChain->getOptimizers(),
+                static fn (Optimizer $optimizer): bool => ! $optimizer instanceof Avifenc,
+            )));
+        }
+
+        return $optimizerChain;
     }
 
     public static function getInstance(): self
