@@ -44,9 +44,9 @@ final class AvifSupportDetector
             return false;
         }
 
-        $sourceCopy = wp_tempnam('sproutset-avif-probe');
+        $sourceCopy = tempnam(get_temp_dir(), 'sproutset-avif-probe');
 
-        if ($sourceCopy === '') {
+        if ($sourceCopy === false) {
             return false;
         }
 
