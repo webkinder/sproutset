@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Webkinder\SproutsetPackage\Components\Image;
 use Webkinder\SproutsetPackage\Console\Optimize;
 use Webkinder\SproutsetPackage\Console\ReapplyFocalCrop;
+use Webkinder\SproutsetPackage\Console\RegenerateMissingSizes;
 use Webkinder\SproutsetPackage\Console\SyncImageSizes;
 
 final class SproutsetServiceProvider extends ServiceProvider
@@ -56,6 +57,7 @@ final class SproutsetServiceProvider extends ServiceProvider
             Optimize::class,
             ReapplyFocalCrop::class,
             SyncImageSizes::class,
+            RegenerateMissingSizes::class,
         ]);
     }
 
