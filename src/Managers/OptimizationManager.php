@@ -31,6 +31,8 @@ final class OptimizationManager
         }
 
         if (! (new AvifSupportDetector())->isAvifOutputSupported()) {
+            add_filter('image_editor_output_format', $this->createAvifFallbackFilter());
+
             return;
         }
 
@@ -143,6 +145,15 @@ final class OptimizationManager
 
             $outputFormats['image/jpeg'] = 'image/avif';
             $outputFormats['image/png'] = 'image/avif';
+
+            return $outputFormats;
+        };
+    }
+
+    private function createAvifFallbackFilter(): Closure
+    {
+        return static function (array $outputFormats): array {
+            $outputFormats['image/avif'] = 'image/jpeg';
 
             return $outputFormats;
         };
