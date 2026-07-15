@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Managers;
 
 use Closure;
+use Webkinder\SproutsetPackage\Services\AvifSupportDetector;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use WP_Site_Icon;
@@ -26,6 +27,12 @@ final class OptimizationManager
     private function registerAvifConversionIfEnabled(): void
     {
         if (! config('sproutset-config.convert_to_avif', false)) {
+            return;
+        }
+
+        if (! (new AvifSupportDetector())->isAvifOutputSupported()) {
+            add_filter('image_editor_output_format', $this->createAvifFallbackFilter());
+
             return;
         }
 
@@ -138,6 +145,15 @@ final class OptimizationManager
 
             $outputFormats['image/jpeg'] = 'image/avif';
             $outputFormats['image/png'] = 'image/avif';
+
+            return $outputFormats;
+        };
+    }
+
+    private function createAvifFallbackFilter(): Closure
+    {
+        return static function (array $outputFormats): array {
+            $outputFormats['image/avif'] = 'image/jpeg';
 
             return $outputFormats;
         };

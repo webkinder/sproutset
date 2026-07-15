@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webkinder\SproutsetPackage\Managers;
 
+use Webkinder\SproutsetPackage\Services\AvifSupportDetector;
 use Webkinder\SproutsetPackage\Services\ImageOptimizer;
 
 final class AdminNotificationManager
@@ -15,6 +16,10 @@ final class AdminNotificationManager
 
         if ($this->shouldShowOptimizationNotice()) {
             add_action('admin_notices', $this->displayOptimizationBinariesNotice(...));
+        }
+
+        if ($this->shouldShowAvifFallbackNotice()) {
+            add_action('admin_notices', $this->displayAvifFallbackNotice(...));
         }
     }
 
@@ -139,6 +144,33 @@ final class AdminNotificationManager
             '<a href="https://github.com/spatie/image-optimizer#optimization-tools" target="_blank" rel="noopener noreferrer">',
             '</a>'
         );
+        echo '</p>';
+        echo '</div>';
+    }
+
+    private function shouldShowAvifFallbackNotice(): bool
+    {
+        if (! config('sproutset-config.convert_to_avif', false)) {
+            return false;
+        }
+
+        $environment = defined('WP_ENV') ? constant('WP_ENV') : 'production';
+
+        if ($environment !== 'development') {
+            return false;
+        }
+
+        return ! (new AvifSupportDetector())->isAvifOutputSupported();
+    }
+
+    private function displayAvifFallbackNotice(): void
+    {
+        echo '<div class="notice notice-error">';
+        echo '<p><strong>Sproutset:</strong> ';
+        echo esc_html__('AVIF conversion is enabled, but this server cannot encode AVIF images. New image sizes are being generated as JPEG/PNG instead.', 'webkinder-sproutset');
+        echo '</p>';
+        echo '<p>';
+        echo esc_html__('Enable AVIF write support in the server image library (ImageMagick or GD) to restore AVIF output.', 'webkinder-sproutset');
         echo '</p>';
         echo '</div>';
     }
