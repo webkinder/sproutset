@@ -104,10 +104,7 @@ final class RegenerateMissingSizes extends Command
             }
         }
 
-        return [
-            $minWidth === PHP_INT_MAX ? 0 : $minWidth,
-            $minHeight === PHP_INT_MAX ? 0 : $minHeight,
-        ];
+        return [$minWidth, $minHeight];
     }
 
     private function reportDryRun(array $candidates): void
