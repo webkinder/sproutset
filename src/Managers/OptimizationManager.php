@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\SproutsetPackage\Managers;
 
 use Closure;
+use Webkinder\SproutsetPackage\Services\AvifSupportDetector;
 use Webkinder\SproutsetPackage\Services\CronOptimizer;
 use Webkinder\SproutsetPackage\Support\ImageEditDetector;
 use WP_Site_Icon;
@@ -26,6 +27,10 @@ final class OptimizationManager
     private function registerAvifConversionIfEnabled(): void
     {
         if (! config('sproutset-config.convert_to_avif', false)) {
+            return;
+        }
+
+        if (! (new AvifSupportDetector())->isAvifOutputSupported()) {
             return;
         }
 
