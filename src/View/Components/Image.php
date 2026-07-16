@@ -71,6 +71,14 @@ final class Image extends Component
      */
     private function htmlAttributesFor(ResolvedImage $resolved): array
     {
+        if ($resolved->isSvg) {
+            return array_filter([
+                'src' => $resolved->src,
+                'alt' => $resolved->alt,
+                'style' => $resolved->style,
+            ]);
+        }
+
         return array_filter([
             'src' => $resolved->src,
             'width' => $resolved->width,

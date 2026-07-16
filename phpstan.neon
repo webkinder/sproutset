@@ -18,3 +18,10 @@ parameters:
 
     ignoreErrors:
         - identifier: method.internalClass
+        - identifier: property.notFound
+          path: tests/
+          message: '/Pest\\Mixins\\Expectation.*::\$not/'
+        - identifier: method.nonObject
+          path: tests/Feature/ImageComponentTest.php
+        - identifier: property.nonObject
+          path: tests/Feature/ImageComponentTest.php

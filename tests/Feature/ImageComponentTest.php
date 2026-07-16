@@ -50,3 +50,66 @@ it('renders nothing when resolution returns null', function (): void {
 
     expect(trim($html))->toBe('');
 });
+
+it('drops empty resolved attributes', function (): void {
+    bindResolver(new ResolvedImage(
+        src: 'https://example.com/cat.jpg',
+        srcset: null,
+        sizes: null,
+        width: 1200,
+        height: 800,
+        alt: 'A cat',
+        style: null,
+        isSvg: false,
+    ));
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
+
+    expect($html)->toContain('<img')
+        ->not->toContain('srcset=')
+        ->not->toContain('sizes=')
+        ->not->toContain('style=');
+});
+
+it('renders a reduced attribute set for an SVG source', function (): void {
+    bindResolver(new ResolvedImage(
+        src: 'https://example.com/logo.svg',
+        srcset: 'ignored 100w',
+        sizes: 'ignored',
+        width: 512,
+        height: 512,
+        alt: 'Logo',
+        style: 'object-fit: cover;',
+        isSvg: true,
+    ));
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
+
+    expect($html)->toContain('<img')
+        ->toContain('src="https://example.com/logo.svg"')
+        ->toContain('alt="Logo"')
+        ->toContain('style="object-fit: cover;"')
+        ->not->toContain('width=')
+        ->not->toContain('height=')
+        ->not->toContain('srcset=')
+        ->not->toContain('sizes=')
+        ->not->toContain('loading=')
+        ->not->toContain('decoding=');
+});
+
+it('re-applies the declared class prop to the img', function (): void {
+    bindResolver(rasterImage());
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" class="rounded shadow" />');
+
+    expect($html)->toContain('class="rounded shadow"');
+});
+
+it('passes arbitrary attributes through the attribute bag', function (): void {
+    bindResolver(rasterImage());
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" id="hero" data-role="banner" />');
+
+    expect($html)->toContain('id="hero"')
+        ->toContain('data-role="banner"');
+});
