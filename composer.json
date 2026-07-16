@@ -17,7 +17,8 @@
     },
     "require": {
         "php": "^8.3",
-        "roots/acorn": "^6.2"
+        "roots/acorn": "^6.2",
+        "spatie/laravel-package-tools": "^1.93"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.5",
@@ -66,5 +67,12 @@
             "@types:check",
             "@test"
         ]
+    },
+    "extra": {
+        "acorn": {
+            "providers": [
+                "Webkinder\\Sproutset\\SproutsetServiceProvider"
+            ]
+        }
     }
 }

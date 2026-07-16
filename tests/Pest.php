@@ -1,18 +1,16 @@
 <?php
 
 declare(strict_types=1);
+use Webkinder\Sproutset\Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
 | Test Case
 |--------------------------------------------------------------------------
 |
-| This library ships no application, so Feature tests do not boot a Laravel
-| container yet. When an Acorn/Testbench test harness is added, bind a base
-| TestCase here, e.g.:
-|
-|   pest()->extend(Webkinder\Sproutset\Tests\TestCase::class)->in('Feature');
-|
-| For now the suite runs plain Pest tests with no framework bootstrap.
+| Feature tests boot a Laravel/Acorn container via Testbench and register the
+| package's service provider through the base TestCase. Unit tests stay plain.
 |
 */
+
+pest()->extend(TestCase::class)->in('Feature');
