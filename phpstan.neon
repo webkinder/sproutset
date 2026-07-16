@@ -23,5 +23,7 @@ parameters:
           message: '/Pest\\Mixins\\Expectation.*::\$not/'
         - identifier: method.nonObject
           path: tests/Feature/ImageComponentTest.php
+          message: '/Cannot call method \w+\(\) on mixed\./'
         - identifier: property.nonObject
           path: tests/Feature/ImageComponentTest.php
+          message: '/Cannot access property \$not on mixed\./'
