@@ -37,7 +37,9 @@ Rendering rules:
 - For a raster source, the `<img>` carries `src`, `width`, `height`, `srcset`, `sizes`,
   `alt`, `style`, `loading`, `decoding` — with empty/`null` values dropped.
 - For an SVG source (`isSvg === true`), the `<img>` carries only `src`, `alt`, `style`.
-- The component `class` is merged with any consumer-supplied `class` via the attribute bag.
+- `class` is a declared prop, so it is re-applied to the `<img>` through the attribute
+  bag. This is required because Blade extracts a declared prop out of the attribute bag —
+  a naive `{{ $attributes }}` dump would silently drop the consumer's `class`.
 - Any other attribute (`id`, `data-*`, `aria-*`, `title`, …) passes through the attribute
   bag onto the `<img>` unchanged.
 
@@ -69,10 +71,10 @@ Scenario: renders nothing when resolution returns null
   When the component is rendered
   Then no markup is emitted
 
-Scenario: merges the component class with consumer classes
+Scenario: re-applies the declared class prop to the img
   Given a resolver that returns a raster ResolvedImage
-  When the component is rendered with class "hero" and a consumer class "rounded"
-  Then the img class attribute contains both hero and rounded
+  When the component is rendered with class "rounded shadow"
+  Then the img class attribute carries both rounded and shadow
 
 Scenario: passes arbitrary attributes through the attribute bag
   Given a resolver that returns a raster ResolvedImage
@@ -95,6 +97,6 @@ Each scenario above maps 1:1 to a Pest test:
 | `drops empty resolved attributes` | `tests/Feature/ImageComponentTest.php` → `it('drops empty resolved attributes')` |
 | `renders a reduced attribute set for an SVG source` | `tests/Feature/ImageComponentTest.php` → `it('renders a reduced attribute set for an SVG source')` |
 | `renders nothing when resolution returns null` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when resolution returns null')` |
-| `merges the component class with consumer classes` | `tests/Feature/ImageComponentTest.php` → `it('merges the component class with consumer classes')` |
+| `re-applies the declared class prop to the img` | `tests/Feature/ImageComponentTest.php` → `it('re-applies the declared class prop to the img')` |
 | `passes arbitrary attributes through the attribute bag` | `tests/Feature/ImageComponentTest.php` → `it('passes arbitrary attributes through the attribute bag')` |
 | `normalizes loose attribute input` | `tests/Unit/ImageInputNormalizerTest.php` → `it('normalizes loose attribute input')` |
