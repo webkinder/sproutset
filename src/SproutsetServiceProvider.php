@@ -6,6 +6,9 @@ namespace Webkinder\Sproutset;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Webkinder\Sproutset\Images\ImageResolver;
+use Webkinder\Sproutset\Images\NullImageResolver;
+use Webkinder\Sproutset\View\Components\Image;
 
 class SproutsetServiceProvider extends PackageServiceProvider
 {
@@ -13,6 +16,13 @@ class SproutsetServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('sproutset')
-            ->hasConfigFile();
+            ->hasConfigFile()
+            ->hasViews()
+            ->hasViewComponents('sproutset', Image::class);
+    }
+
+    public function packageRegistered(): void
+    {
+        $this->app->bind(ImageResolver::class, NullImageResolver::class);
     }
 }

@@ -18,3 +18,9 @@ parameters:
 
     ignoreErrors:
         - identifier: method.internalClass
+        # Larastan's `view()` helper stub declares a conditional return type
+        # (`$view is null ? Factory : View`) that fails to narrow at this
+        # level, always reporting `Factory|View` even for a non-null literal
+        # view name. Verified with a minimal `view('welcome', [])` repro.
+        - identifier: return.type
+          path: src/View/Components/Image.php
