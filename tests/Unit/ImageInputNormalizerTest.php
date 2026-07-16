@@ -12,14 +12,12 @@ it('normalizes loose attribute input', function (): void {
         sizes: '',
         alt: '  A cat  ',
         width: '800',
-        height: null,
         class: '',
         loading: 'EAGER',
         decoding: 'nonsense',
         useAutoSizes: 'false',
         focalPoint: '1',
         focalPointX: '25.5',
-        focalPointY: null,
     );
 
     expect($request)->toBeInstanceOf(ImageRequest::class)

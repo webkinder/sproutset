@@ -55,7 +55,7 @@ final class Image extends Component
 
     public function render(): View
     {
-        $resolved = app(ImageResolver::class)->resolve($this->request);
+        $resolved = resolve(ImageResolver::class)->resolve($this->request);
 
         return ViewFactory::make('sproutset::components.image', [
             'src' => $resolved?->src,

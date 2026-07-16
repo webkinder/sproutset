@@ -6,21 +6,21 @@ namespace Webkinder\Sproutset\Images;
 
 final class ImageInputNormalizer
 {
-    private const DEFAULT_SIZE_NAME = 'large';
+    private const string DEFAULT_SIZE_NAME = 'large';
 
-    private const DEFAULT_DECODING = 'async';
+    private const string DEFAULT_DECODING = 'async';
 
-    private const DEFAULT_LOADING = 'lazy';
-
-    /**
-     * @var list<string>
-     */
-    private const ALLOWED_DECODING_MODES = ['async', 'sync', 'auto'];
+    private const string DEFAULT_LOADING = 'lazy';
 
     /**
      * @var list<string>
      */
-    private const ALLOWED_LOADING_MODES = ['lazy', 'eager'];
+    private const array ALLOWED_DECODING_MODES = ['async', 'sync', 'auto'];
+
+    /**
+     * @var list<string>
+     */
+    private const array ALLOWED_LOADING_MODES = ['lazy', 'eager'];
 
     public static function normalize(
         mixed $attachmentId,
