@@ -25,7 +25,13 @@
         "laravel/pint": "^1.29",
         "orchestra/testbench": "^11.1",
         "pestphp/pest": "^4.7",
+        "php-stubs/wordpress-stubs": "^7.0",
         "rector/rector": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkinder\\Sproutset\\": "src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
