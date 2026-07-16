@@ -11,7 +11,8 @@
   ],
   "branchPrefix": "deps/",
   "labels": ["type:dependency"],
-  "baseBranchPatterns": ["develop"],
+  "baseBranchPatterns": ["main"],
+  "semanticCommits": "enabled",
   "packageRules": [
     {
       "matchPackageNames": [],

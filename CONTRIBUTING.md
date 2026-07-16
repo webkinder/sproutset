@@ -36,14 +36,13 @@ New to pull requests? Check out [First Timers Only](https://www.firsttimersonly.
    composer install
    ```
 
-2. **Branch Strategy** (Gitflow)
-   - `main`: Production releases only
-   - `develop`: Main development branch
-   - `feature/*`: New features (branch from `develop`)
-   - `hotfix/*`: Urgent fixes (branch from `main`)
+2. **Branch Strategy** (trunk-based)
+   - `main`: the only long-lived branch; always releasable
+   - `feature/*`: new features (branch from `main`)
+   - `fix/*`: bug fixes, including urgent ones (branch from `main`)
 
    ```bash
-   git checkout develop
+   git checkout main
    git checkout -b feature/my-feature
    ```
 
@@ -75,15 +74,18 @@ New to pull requests? Check out [First Timers Only](https://www.firsttimersonly.
 
 **Commit messages:**
 
+This project uses [Conventional Commits](https://www.conventionalcommits.org/). Releases are automated from commit history, so the prefix determines the version bump.
+
 ```
-Short summary (50 chars max)
+<type>: short summary (50 chars max)
 
 Detailed explanation if needed. Focus on why, not how.
 Fixes #123
 ```
 
-- Use imperative mood ("Add feature" not "Added feature")
-- Keep first line clear and concise
+- Types: `feat` (→ minor), `fix` (→ patch), `feat!` or a `BREAKING CHANGE:` footer (→ breaking), plus `docs`, `refactor`, `perf`, `chore`, `test`, `ci`.
+- Because PRs are squash-merged, **the PR title must be a valid Conventional Commit** — it becomes the commit on `main` that drives the changelog.
+- Use imperative mood ("add feature" not "added feature"); keep the first line clear and concise.
 
 ## Coding Style
 
@@ -119,50 +121,23 @@ public function registerEventHandler(string $eventName, callable $handler): void
 public function register($event, $handler) { }
 ```
 
-## Release Notes
+## Releases
 
-CHANGELOG.md and GitHub release notes should be identical. Format:
+Releases are automated by [Release Please](https://github.com/googleapis/release-please). You do **not** edit `CHANGELOG.md`, tag versions, or write release notes by hand.
 
-```markdown
-- <change message> by @<username> in #<PR number>
-```
+As Conventional Commits land on `main`, Release Please maintains an open **"chore: release X.Y.Z"** pull request with the computed version bump and the updated changelog. Merging that PR tags the release and publishes the GitHub Release; Packagist picks up the new tag automatically.
 
-**Categories:**
-
-- `Added`: New features
-- `Fixed`: Bug fixes
-- `Changed`: Changes in existing functionality
-- `Removed`: Removed features
-
-**Example:**
-
-```markdown
-- Add AVIF conversion support for PNG images by @johndoe in #123
-- Fix srcset generation for responsive variants by @janedoe in #124
-- Improve on-the-fly image size generation by @devuser in #125
-```
+- Version bumps follow the commit types (`feat` → minor, `fix` → patch, breaking → major). While the package is pre-`1.0`, breaking changes bump the minor and do not jump to `1.0.0`.
+- To cut a specific version (e.g. the first stable release), add a `Release-As: 1.0.0` footer to a commit.
 
 ## Merge Strategy
 
-**Feature branches → develop:**
+All pull requests target `main` and are **squash-merged**:
 
-- Squash merge (keeps history clean)
-- Delete branch after merge
+- One squash commit per PR, using the (Conventional Commit) PR title as its message.
+- Delete the branch after merge.
 
-**Release branches → main:**
-
-- Merge commit with `--no-ff`
-- Delete branch after merge
-
-**Hotfix branches → main and develop:**
-
-- Merge commit with `--no-ff`
-- Delete branch after merge
-
-**Main branch → develop:**
-
-- Merge commit with `--no-ff`
-- Delete branch after merge
+There are no release or hotfix branches — an urgent fix is a `fix/*` branch off `main` like any other change.
 
 ---
 
