@@ -1,0 +1,26 @@
+{
+    "name": "webkinder/sproutset",
+    "description": "Modern responsive image management for projects using the Roots Acorn framework.",
+    "type": "library",
+    "keywords": ["wordpress", "acorn", "roots", "responsive-images", "image-optimization", "blade"],
+    "homepage": "https://github.com/webkinder/sproutset",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marco Luzi",
+            "email": "marco@webkinder.ch"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/webkinder/sproutset/issues",
+        "source": "https://github.com/webkinder/sproutset"
+    },
+    "require": {
+        "php": "^8.3"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}
