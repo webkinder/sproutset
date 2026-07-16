@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\Sproutset\View\Components;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\View as ViewFactory;
 use Illuminate\View\Component;
 use Webkinder\Sproutset\Images\ImageInputNormalizer;
 use Webkinder\Sproutset\Images\ImageRequest;
@@ -56,7 +57,7 @@ final class Image extends Component
     {
         $resolved = app(ImageResolver::class)->resolve($this->request);
 
-        return view('sproutset::components.image', [
+        return ViewFactory::make('sproutset::components.image', [
             'src' => $resolved?->src,
             'class' => $this->request->class,
             'htmlAttributes' => $resolved instanceof ResolvedImage
