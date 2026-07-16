@@ -113,3 +113,35 @@ it('passes arbitrary attributes through the attribute bag', function (): void {
     expect($html)->toContain('id="hero"')
         ->toContain('data-role="banner"');
 });
+
+it('boots with the null default resolver and renders nothing', function (): void {
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
+
+    expect(trim($html))->toBe('');
+});
+
+it('renders nothing when the resolved source is empty', function (): void {
+    bindResolver(new ResolvedImage(
+        src: null,
+        srcset: null,
+        sizes: null,
+        width: null,
+        height: null,
+        alt: '',
+        style: null,
+        isSvg: false,
+    ));
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
+
+    expect(trim($html))->toBe('');
+});
+
+it('applies consumer loading and decoding overrides', function (): void {
+    bindResolver(rasterImage());
+
+    $html = Blade::render('<x-sproutset-image :attachment-id="42" loading="eager" decoding="sync" />');
+
+    expect($html)->toContain('loading="eager"')
+        ->toContain('decoding="sync"');
+});

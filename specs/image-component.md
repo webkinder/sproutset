@@ -85,6 +85,21 @@ Scenario: normalizes loose attribute input
   Given attribute values supplied as strings and other loose types
   When the input is normalized
   Then the ImageRequest carries the coerced typed values and documented defaults
+
+Scenario: boots with the null default resolver and renders nothing
+  Given no resolver override is bound so the package's default NullImageResolver is active
+  When the component is rendered
+  Then no markup is emitted
+
+Scenario: renders nothing when the resolved source is empty
+  Given a resolver that returns a ResolvedImage whose src is null
+  When the component is rendered
+  Then no markup is emitted
+
+Scenario: applies consumer loading and decoding overrides
+  Given a resolver that returns a raster ResolvedImage
+  When the component is rendered with loading "eager" and decoding "sync"
+  Then the img carries loading="eager" and decoding="sync"
 ```
 
 ## Acceptance criteria
@@ -100,3 +115,6 @@ Each scenario above maps 1:1 to a Pest test:
 | `re-applies the declared class prop to the img` | `tests/Feature/ImageComponentTest.php` → `it('re-applies the declared class prop to the img')` |
 | `passes arbitrary attributes through the attribute bag` | `tests/Feature/ImageComponentTest.php` → `it('passes arbitrary attributes through the attribute bag')` |
 | `normalizes loose attribute input` | `tests/Unit/ImageInputNormalizerTest.php` → `it('normalizes loose attribute input')` |
+| `boots with the null default resolver and renders nothing` | `tests/Feature/ImageComponentTest.php` → `it('boots with the null default resolver and renders nothing')` |
+| `renders nothing when the resolved source is empty` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the resolved source is empty')` |
+| `applies consumer loading and decoding overrides` | `tests/Feature/ImageComponentTest.php` → `it('applies consumer loading and decoding overrides')` |
