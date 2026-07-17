@@ -56,6 +56,11 @@ Scenario: Disables the managed Media settings fields
   Given the registered Media settings lock for a config with thumbnail and medium
   When the options-media admin footer is rendered
   Then the output disables the thumbnail and medium inputs and shows the managed-by-configuration note
+
+Scenario: Resolves the collaborators from the container
+  Given the booted service provider
+  When CoreImageSizeOptions and MediaSettingsLock are resolved from the container
+  Then each returns an instance of its class
 ```
 
 ## Acceptance criteria
@@ -72,3 +77,4 @@ Each scenario above maps 1:1 to a Pest test:
 | `Overrides get_option for a managed core size` | `tests/Integration/CoreImageSizeOptionsTest.php` → `test_overrides_get_option_for_a_managed_core_size` |
 | `Leaves an unmanaged core size at the WordPress value` | `tests/Integration/CoreImageSizeOptionsTest.php` → `test_leaves_an_unmanaged_core_size_at_the_wordpress_value` |
 | `Disables the managed Media settings fields` | `tests/Integration/MediaSettingsLockTest.php` → `test_disables_the_managed_media_settings_fields` |
+| `Resolves the collaborators from the container` | `tests/Feature/CoreImageSizeOptionsTest.php` → `it('resolves the core image size collaborators from the container')` |
