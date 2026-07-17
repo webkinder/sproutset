@@ -18,7 +18,7 @@ use Throwable;
  */
 final class OnDemandSizeGenerator
 {
-    private const MAX_GENERATIONS_PER_REQUEST = 10;
+    private const int MAX_GENERATIONS_PER_REQUEST = 10;
 
     private int $generations = 0;
 

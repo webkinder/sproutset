@@ -43,10 +43,10 @@ Rendering rules:
 - Any other attribute (`id`, `data-*`, `aria-*`, `title`, …) passes through the attribute
   bag onto the `<img>` unchanged.
 
-WordPress-backed resolution is **out of scope for this step**. The package ships a
-`NullImageResolver` (returns `null`, so the front end boots without fatally requiring a
-resolver), replaced by the real WordPress-backed `ImageResolver` in a later step. Tests
-bind a fake `ImageResolver` to exercise every rendering rule with no WordPress runtime.
+The container's default `ImageResolver` is the WordPress-backed resolver (see
+`specs/service-provider.md`). `NullImageResolver` remains a boot-safe fallback that
+returns `null`, so a request never fatally requires a working resolver. Tests bind a
+fake `ImageResolver` to exercise every rendering rule with no WordPress runtime.
 
 ## Scenarios
 
@@ -86,8 +86,8 @@ Scenario: normalizes loose attribute input
   When the input is normalized
   Then the ImageRequest carries the coerced typed values and documented defaults
 
-Scenario: boots with the null default resolver and renders nothing
-  Given no resolver override is bound so the package's default NullImageResolver is active
+Scenario: renders nothing when the boot-safe null resolver is bound
+  Given the boot-safe NullImageResolver is bound as the resolver
   When the component is rendered
   Then no markup is emitted
 
@@ -115,6 +115,6 @@ Each scenario above maps 1:1 to a Pest test:
 | `re-applies the declared class prop to the img` | `tests/Feature/ImageComponentTest.php` → `it('re-applies the declared class prop to the img')` |
 | `passes arbitrary attributes through the attribute bag` | `tests/Feature/ImageComponentTest.php` → `it('passes arbitrary attributes through the attribute bag')` |
 | `normalizes loose attribute input` | `tests/Unit/ImageInputNormalizerTest.php` → `it('normalizes loose attribute input')` |
-| `boots with the null default resolver and renders nothing` | `tests/Feature/ImageComponentTest.php` → `it('boots with the null default resolver and renders nothing')` |
+| `renders nothing when the boot-safe null resolver is bound` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the boot-safe null resolver is bound')` |
 | `renders nothing when the resolved source is empty` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the resolved source is empty')` |
 | `applies consumer loading and decoding overrides` | `tests/Feature/ImageComponentTest.php` → `it('applies consumer loading and decoding overrides')` |

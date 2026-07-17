@@ -14,6 +14,11 @@ and can publish the file with `vendor:publish` / `acorn vendor:publish` (tag
 `sproutset-config`). Acorn discovers the provider through the `extra.acorn.providers`
 entry in `composer.json`, so no manual registration is required in a consuming project.
 
+On registration the provider also binds the package's WordPress-backed defaults into the
+container: `AttachmentRepository` resolves to `WpAttachmentRepository`, and `ImageResolver`
+resolves to `WpImageResolver` (the boot-safe `NullImageResolver` remains available as a
+fallback). Consumers override either binding to swap in their own implementation.
+
 ## Scenarios
 
 ```gherkin
@@ -26,6 +31,11 @@ Scenario: Config file is merged
   Given the SproutsetServiceProvider has registered
   When config('sproutset') is read
   Then it returns the merged package configuration array
+
+Scenario: Binds the WordPress-backed resolver by default
+  Given the SproutsetServiceProvider has registered
+  When ImageResolver is resolved from the container
+  Then it returns a WpImageResolver instance
 ```
 
 ## Acceptance criteria
@@ -36,3 +46,4 @@ Each scenario above maps 1:1 to a Pest test:
 | --- | --- |
 | `Provider boots under the container` | `tests/Feature/ServiceProviderTest.php` → `it('registers the sproutset service provider')` |
 | `Config file is merged` | `tests/Feature/ServiceProviderTest.php` → `it('merges the sproutset config file')` |
+| `Binds the WordPress-backed resolver by default` | `tests/Feature/ImageResolverBindingTest.php` → `it('binds the WordPress resolver as the default ImageResolver')` |

@@ -19,13 +19,13 @@ use Webkinder\Sproutset\Attachments\AttachmentRepository;
  * raster dimensions, so they bypass the {@see AttachmentRepository} (which is
  * dimension-oriented and rejects vectors) and resolve straight from the URL.
  */
-final class WpImageResolver implements ImageResolver
+final readonly class WpImageResolver implements ImageResolver
 {
-    private const SVG_MIME = 'image/svg+xml';
+    private const string SVG_MIME = 'image/svg+xml';
 
     public function __construct(
-        private readonly AttachmentRepository $attachments,
-        private readonly OnDemandSizeGenerator $sizeGenerator,
+        private AttachmentRepository $attachments,
+        private OnDemandSizeGenerator $sizeGenerator,
     ) {}
 
     public function resolve(ImageRequest $request): ?ResolvedImage

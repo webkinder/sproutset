@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Blade;
 use Webkinder\Sproutset\Images\ImageResolver;
+use Webkinder\Sproutset\Images\NullImageResolver;
 use Webkinder\Sproutset\Images\ResolvedImage;
 use Webkinder\Sproutset\Tests\Support\FakeImageResolver;
 
@@ -114,7 +115,9 @@ it('passes arbitrary attributes through the attribute bag', function (): void {
         ->toContain('data-role="banner"');
 });
 
-it('boots with the null default resolver and renders nothing', function (): void {
+it('renders nothing when the boot-safe null resolver is bound', function (): void {
+    app()->instance(ImageResolver::class, new NullImageResolver);
+
     $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
 
     expect(trim($html))->toBe('');
