@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
-use Webkinder\Sproutset\Tests\TestCase;
 
 it('ships the default image sizes in config', function (): void {
     /** @var array<string, mixed> $sizes */
@@ -14,6 +13,5 @@ it('ships the default image sizes in config', function (): void {
 });
 
 it('resolves the image size registrar from the container', function (): void {
-    /** @var TestCase $this */
-    expect($this->app->make(ImageSizeRegistrar::class))->toBeInstanceOf(ImageSizeRegistrar::class);
+    expect(resolve(ImageSizeRegistrar::class))->toBeInstanceOf(ImageSizeRegistrar::class);
 });

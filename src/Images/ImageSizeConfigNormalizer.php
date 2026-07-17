@@ -15,7 +15,11 @@ final class ImageSizeConfigNormalizer
         $normalized = [];
 
         foreach ($rawConfig as $sizeName => $sizeConfig) {
-            if (! is_string($sizeName) || ! is_array($sizeConfig)) {
+            if (! is_string($sizeName)) {
+                continue;
+            }
+
+            if (! is_array($sizeConfig)) {
                 continue;
             }
 
