@@ -53,4 +53,18 @@ final class WpImageResolverTest extends IntegrationTestCase
 
         $this->assertSame('', $resolved->alt);
     }
+
+    public function test_marks_svg_sources_and_skips_raster_fields(): void
+    {
+        $id = $this->seedAttachment('example.svg');
+
+        $resolved = $this->resolver()->resolve($this->request($id));
+
+        $this->assertNotNull($resolved);
+        $this->assertTrue($resolved->isSvg);
+        $this->assertNull($resolved->width);
+        $this->assertNull($resolved->height);
+        $this->assertNull($resolved->srcset);
+        $this->assertNotSame('', (string) $resolved->src);
+    }
 }

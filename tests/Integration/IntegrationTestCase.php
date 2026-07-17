@@ -17,9 +17,32 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
 {
     /**
      * Insert a real attachment from a fixture file and return its ID.
+     *
+     * SVGs are inserted directly: WordPress rejects them from the upload
+     * pipeline by default, so the raster factory helper cannot seed them.
      */
     protected function seedAttachment(string $fixture = 'example.jpg'): int
     {
-        return self::factory()->attachment->create_upload_object(__DIR__.'/fixtures/'.$fixture);
+        $file = __DIR__.'/fixtures/'.$fixture;
+
+        if (str_ends_with($fixture, '.svg')) {
+            return $this->seedSvgAttachment($file);
+        }
+
+        return self::factory()->attachment->create_upload_object($file);
+    }
+
+    private function seedSvgAttachment(string $file): int
+    {
+        $upload = wp_upload_dir();
+        $destination = $upload['path'].'/'.basename($file);
+        copy($file, $destination);
+
+        return wp_insert_attachment([
+            'post_mime_type' => 'image/svg+xml',
+            'post_title' => 'example',
+            'post_status' => 'inherit',
+            'guid' => $upload['url'].'/'.basename($file),
+        ], $destination);
     }
 }
