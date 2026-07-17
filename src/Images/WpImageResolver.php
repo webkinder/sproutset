@@ -63,6 +63,15 @@ final readonly class WpImageResolver implements ImageResolver
 
         [$src, $width, $height] = $this->sizedSource($attachment, $request->sizeName);
 
+        $box = $this->presentedBox($request->sizeName, $attachment);
+        $cover = false;
+
+        if ($box !== null) {
+            $width = $box['width'];
+            $height = $box['height'];
+            $cover = $box['cover'];
+        }
+
         return new ResolvedImage(
             src: $src,
             srcset: $this->srcset($attachment->id, $request->sizeName),
@@ -70,7 +79,7 @@ final readonly class WpImageResolver implements ImageResolver
             width: $width,
             height: $height,
             alt: $this->alt($request),
-            style: FocalPointPosition::forRequest($request),
+            style: $this->style($request, $cover),
             isSvg: false,
         );
     }
@@ -94,6 +103,42 @@ final readonly class WpImageResolver implements ImageResolver
         }
 
         return [$source[0], $source[1], $source[2]];
+    }
+
+    /**
+     * @return array{width: int, height: int, cover: bool}|null
+     */
+    private function presentedBox(string $sizeName, Attachment $attachment): ?array
+    {
+        $sizes = wp_get_registered_image_subsizes();
+
+        if (! isset($sizes[$sizeName])) {
+            return null;
+        }
+
+        $spec = $sizes[$sizeName];
+        $targetWidth = is_numeric($spec['width'] ?? null) ? (int) $spec['width'] : 0;
+        $targetHeight = is_numeric($spec['height'] ?? null) ? (int) $spec['height'] : 0;
+        $crop = (bool) ($spec['crop'] ?? false);
+
+        return PresentedDimensions::forSource(
+            $targetWidth,
+            $targetHeight,
+            $crop,
+            $attachment->width,
+            $attachment->height,
+        );
+    }
+
+    private function style(ImageRequest $request, bool $cover): ?string
+    {
+        $focal = FocalPointPosition::forRequest($request);
+
+        if ($focal !== null) {
+            return $focal;
+        }
+
+        return $cover ? 'object-fit: cover;' : null;
     }
 
     private function alt(ImageRequest $request): string
