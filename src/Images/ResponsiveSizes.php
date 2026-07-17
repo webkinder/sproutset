@@ -12,6 +12,10 @@ final class ResponsiveSizes
             return $request->sizes;
         }
 
-        return $request->useAutoSizes ? 'auto' : null;
+        if ($request->useAutoSizes && $request->loading !== 'eager') {
+            return 'auto';
+        }
+
+        return null;
     }
 }

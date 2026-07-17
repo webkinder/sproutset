@@ -31,6 +31,11 @@ The component asks the container-bound `ImageResolver` to `resolve(ImageRequest)
 `ResolvedImage` carries only what rendering needs — `src`, `srcset`, `sizes`, `width`,
 `height`, `alt`, `style`, `isSvg` — with no knowledge of how those values were derived.
 
+When no explicit `sizes` is given, `use-auto-sizes` resolves the `sizes` attribute to
+`auto` — but only when `loading` is not `eager`. `sizes="auto"` is only valid for
+lazy-loaded images, so an eager image drops it (resolving to `null`). An explicit `sizes`
+override is always honored regardless of `loading`.
+
 When `focal-point` is enabled and **both** `focal-point-x` and `focal-point-y` are
 present, the resolved `style` is `object-fit: cover; object-position: <x>% <y>%;`. The
 `object-fit: cover` is required for `object-position` to have any visual effect. If the
@@ -106,6 +111,16 @@ Scenario: applies consumer loading and decoding overrides
   When the component is rendered with loading "eager" and decoding "sync"
   Then the img carries loading="eager" and decoding="sync"
 
+Scenario: emits auto sizes for a lazy-loaded image
+  Given a request with no explicit sizes, auto sizes enabled and lazy loading
+  When the sizes attribute is resolved
+  Then the resolved sizes is "auto"
+
+Scenario: omits auto sizes for an eager-loaded image
+  Given a request with no explicit sizes, auto sizes enabled and eager loading
+  When the sizes attribute is resolved
+  Then the resolved sizes is null
+
 Scenario: emits object-fit and object-position from a focal point
   Given a request with focal point enabled and both coordinates set
   When the focal point style is computed
@@ -133,5 +148,7 @@ Each scenario above maps 1:1 to a Pest test:
 | `renders nothing when the boot-safe null resolver is bound` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the boot-safe null resolver is bound')` |
 | `renders nothing when the resolved source is empty` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the resolved source is empty')` |
 | `applies consumer loading and decoding overrides` | `tests/Feature/ImageComponentTest.php` → `it('applies consumer loading and decoding overrides')` |
+| `emits auto sizes for a lazy-loaded image` | `tests/Unit/ResponsiveSizesTest.php` → `it('emits auto when auto sizes are enabled and no override is given')` |
+| `omits auto sizes for an eager-loaded image` | `tests/Unit/ResponsiveSizesTest.php` → `it('omits auto sizes when eager loading is requested')` |
 | `emits object-fit and object-position from a focal point` | `tests/Unit/FocalPointPositionTest.php` → `it('maps focal coordinates to an object-fit and object-position style')` |
 | `emits no focal style when a coordinate is missing` | `tests/Unit/FocalPointPositionTest.php` → `it('returns null when a coordinate is missing')` |
