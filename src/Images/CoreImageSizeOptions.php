@@ -44,4 +44,14 @@ final readonly class CoreImageSizeOptions
 
         return $overrides;
     }
+
+    /**
+     * @param  array<array-key, mixed>  $rawConfig
+     */
+    public function register(array $rawConfig): void
+    {
+        foreach ($this->overrides($rawConfig) as $optionName => $value) {
+            add_filter("pre_option_{$optionName}", static fn (): int => $value);
+        }
+    }
 }
