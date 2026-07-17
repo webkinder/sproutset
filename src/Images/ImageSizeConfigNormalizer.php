@@ -7,9 +7,6 @@ namespace Webkinder\Sproutset\Images;
 final class ImageSizeConfigNormalizer
 {
     /**
-     * Normalize a raw `image_sizes` config array into a flat, add_image_size()-ready
-     * map: each base size plus its expanded `@Nx` srcset variants, keyed by size name.
-     *
      * @param  array<array-key, mixed>  $rawConfig
      * @return array<string, array{width: int, height: int, crop: bool}>
      */
@@ -41,8 +38,6 @@ final class ImageSizeConfigNormalizer
     }
 
     /**
-     * Positive numeric srcset multipliers, in config order.
-     *
      * @return list<float>
      */
     private function multipliers(mixed $srcset): array
@@ -62,9 +57,6 @@ final class ImageSizeConfigNormalizer
         return $multipliers;
     }
 
-    /**
-     * Coerce a mixed config value to a non-negative int, defaulting non-numeric input to 0.
-     */
     private function toNonNegativeInt(mixed $value): int
     {
         return is_numeric($value) ? max(0, (int) $value) : 0;
