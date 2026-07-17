@@ -57,6 +57,11 @@ Scenario: Registrar resolves from the container
   Given the booted service provider
   When ImageSizeRegistrar is resolved from the container
   Then it returns an ImageSizeRegistrar instance
+
+Scenario: Normalizes the shipped default config
+  Given the shipped config('sproutset.image_sizes') defaults
+  When the config is normalized
+  Then it yields the four base sizes plus @0.5x and @2x variants for medium_large and large, with large@2x sized 2048x2048
 ```
 
 ## Acceptance criteria
@@ -74,3 +79,4 @@ Each scenario above maps 1:1 to a test:
 | `Strips previously registered sizes` | `tests/Integration/ImageSizeRegistrarTest.php` → `test_strips_previously_registered_sizes` |
 | `Ships default image sizes` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('ships the default image sizes in config')` |
 | `Registrar resolves from the container` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('resolves the image size registrar from the container')` |
+| `Normalizes the shipped default config` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('normalizes the shipped default config into base sizes and variants')` |
