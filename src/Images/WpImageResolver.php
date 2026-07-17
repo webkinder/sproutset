@@ -72,7 +72,7 @@ final class WpImageResolver implements ImageResolver
 
         return new ResolvedImage(
             src: $src,
-            srcset: null,
+            srcset: $this->srcset($attachment->id, $request->sizeName),
             sizes: null,
             width: $width,
             height: $height,
@@ -80,6 +80,13 @@ final class WpImageResolver implements ImageResolver
             style: null,
             isSvg: false,
         );
+    }
+
+    private function srcset(int $id, string $sizeName): ?string
+    {
+        $srcset = wp_get_attachment_image_srcset($id, $sizeName);
+
+        return $srcset === false ? null : $srcset;
     }
 
     /**

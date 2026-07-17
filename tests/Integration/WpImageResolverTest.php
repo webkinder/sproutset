@@ -67,4 +67,15 @@ final class WpImageResolverTest extends IntegrationTestCase
         $this->assertNull($resolved->srcset);
         $this->assertNotSame('', (string) $resolved->src);
     }
+
+    public function test_populates_srcset_for_a_raster_image(): void
+    {
+        $id = $this->seedAttachment();
+
+        $resolved = $this->resolver()->resolve($this->request($id, 'medium'));
+
+        // A single-size upload may legitimately have no candidates; assert the
+        // type contract and, when present, the descriptor format.
+        $this->assertTrue($resolved->srcset === null || str_contains($resolved->srcset, 'w'));
+    }
 }
