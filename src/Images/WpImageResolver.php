@@ -23,7 +23,10 @@ final class WpImageResolver implements ImageResolver
 {
     private const SVG_MIME = 'image/svg+xml';
 
-    public function __construct(private readonly AttachmentRepository $attachments) {}
+    public function __construct(
+        private readonly AttachmentRepository $attachments,
+        private readonly OnDemandSizeGenerator $sizeGenerator,
+    ) {}
 
     public function resolve(ImageRequest $request): ?ResolvedImage
     {
@@ -67,6 +70,8 @@ final class WpImageResolver implements ImageResolver
         if (! $attachment instanceof Attachment) {
             return null;
         }
+
+        $this->sizeGenerator->ensure($attachment->id, $request->sizeName);
 
         [$src, $width, $height] = $this->sizedSource($attachment, $request->sizeName);
 

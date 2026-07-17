@@ -6,13 +6,14 @@ namespace Webkinder\Sproutset\Tests\Integration;
 
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\ImageRequest;
+use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
 
 final class WpImageResolverTest extends IntegrationTestCase
 {
     private function resolver(): WpImageResolver
     {
-        return new WpImageResolver(new WpAttachmentRepository);
+        return new WpImageResolver(new WpAttachmentRepository, new OnDemandSizeGenerator);
     }
 
     private function request(int $id, string $size = 'large'): ImageRequest
