@@ -9,10 +9,6 @@ final readonly class ImageSizeRegistrar
     public function __construct(private ImageSizeConfigNormalizer $normalizer) {}
 
     /**
-     * Strip every currently-registered subsize, then register each configured
-     * size (and its `@Nx` variants) so `config('sproutset.image_sizes')` is the
-     * complete roster.
-     *
      * @param  array<array-key, mixed>  $rawConfig
      */
     public function register(array $rawConfig): void
