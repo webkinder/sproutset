@@ -55,7 +55,7 @@ final class WpImageResolver implements ImageResolver
             width: null,
             height: null,
             alt: $this->alt($request->attachmentId),
-            style: null,
+            style: FocalPointPosition::forRequest($request),
             isSvg: true,
         );
     }
@@ -77,7 +77,7 @@ final class WpImageResolver implements ImageResolver
             width: $width,
             height: $height,
             alt: $this->alt($attachment->id),
-            style: null,
+            style: FocalPointPosition::forRequest($request),
             isSvg: false,
         );
     }
