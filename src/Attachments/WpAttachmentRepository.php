@@ -12,12 +12,12 @@ final class WpAttachmentRepository implements AttachmentRepository
             return null;
         }
 
-        $attachment = wp_get_attachment_image_src($id, 'full');
+        $source = wp_get_attachment_image_src($id, 'full');
 
-        $url = $attachment[0];
-        $width = $attachment[1];
-        $height = $attachment[2];
+        if ($source === false) {
+            return null;
+        }
 
-        return new Attachment($id, $url, $width, $height);
+        return new Attachment($id, $source[0], $source[1], $source[2]);
     }
 }
