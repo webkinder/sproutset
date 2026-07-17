@@ -45,7 +45,7 @@ final readonly class WpImageResolver implements ImageResolver
             sizes: null,
             width: null,
             height: null,
-            alt: $this->alt($request->attachmentId),
+            alt: $this->alt($request),
             style: FocalPointPosition::forRequest($request),
             isSvg: true,
         );
@@ -69,7 +69,7 @@ final readonly class WpImageResolver implements ImageResolver
             sizes: ResponsiveSizes::forRequest($request),
             width: $width,
             height: $height,
-            alt: $this->alt($attachment->id),
+            alt: $this->alt($request),
             style: FocalPointPosition::forRequest($request),
             isSvg: false,
         );
@@ -96,9 +96,17 @@ final readonly class WpImageResolver implements ImageResolver
         return [$source[0], $source[1], $source[2]];
     }
 
-    private function alt(int $id): string
+    /**
+     * The alt text for the render: an explicit request override wins, otherwise
+     * the attachment's `_wp_attachment_image_alt` meta, otherwise empty.
+     */
+    private function alt(ImageRequest $request): string
     {
-        $alt = get_post_meta($id, '_wp_attachment_image_alt', true);
+        if ($request->alt !== null) {
+            return $request->alt;
+        }
+
+        $alt = get_post_meta($request->attachmentId, '_wp_attachment_image_alt', true);
 
         return is_string($alt) ? $alt : '';
     }

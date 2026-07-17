@@ -16,10 +16,10 @@ final class WpImageResolverTest extends IntegrationTestCase
         return new WpImageResolver(new WpAttachmentRepository, new OnDemandSizeGenerator);
     }
 
-    private function request(int $id, string $size = 'large'): ImageRequest
+    private function request(int $id, string $size = 'large', ?string $alt = null): ImageRequest
     {
         return new ImageRequest(
-            attachmentId: $id, sizeName: $size, sizes: null, alt: null,
+            attachmentId: $id, sizeName: $size, sizes: null, alt: $alt,
             width: null, height: null, class: null, loading: 'lazy',
             decoding: 'async', useAutoSizes: false, focalPoint: false,
             focalPointX: null, focalPointY: null,
@@ -53,6 +53,16 @@ final class WpImageResolverTest extends IntegrationTestCase
         $resolved = $this->resolver()->resolve($this->request($id));
 
         $this->assertSame('', $resolved->alt);
+    }
+
+    public function test_prefers_an_explicit_alt_over_post_meta(): void
+    {
+        $id = $this->seedAttachment();
+        update_post_meta($id, '_wp_attachment_image_alt', 'From meta');
+
+        $resolved = $this->resolver()->resolve($this->request($id, alt: 'Explicit alt'));
+
+        $this->assertSame('Explicit alt', $resolved->alt);
     }
 
     public function test_marks_svg_sources_and_skips_raster_fields(): void
