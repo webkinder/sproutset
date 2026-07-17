@@ -62,21 +62,20 @@ final class MediaSettingsLock
         (function () {
             var ids = <?php echo $ids; ?>;
             var note = <?php echo $note; ?>;
-            var noted = false;
             ids.forEach(function (id) {
                 var el = document.getElementById(id);
-                if (! el) {
-                    return;
-                }
-                el.setAttribute('disabled', 'disabled');
-                if (! noted) {
-                    var description = document.createElement('p');
-                    description.className = 'description';
-                    description.textContent = note;
-                    (el.closest('td, fieldset, tr') || el.parentNode).appendChild(description);
-                    noted = true;
+                if (el) {
+                    el.setAttribute('disabled', 'disabled');
                 }
             });
+            var anchor = document.getElementById(ids[0]);
+            var table = anchor ? anchor.closest('table.form-table') : null;
+            if (table && table.parentNode) {
+                var description = document.createElement('p');
+                description.className = 'description';
+                description.textContent = note;
+                table.parentNode.insertBefore(description, table);
+            }
         })();
         </script>
         <?php
