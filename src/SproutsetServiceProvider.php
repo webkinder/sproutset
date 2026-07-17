@@ -9,6 +9,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\ImageResolver;
+use Webkinder\Sproutset\Images\ImageSizeRegistrar;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
 use Webkinder\Sproutset\View\Components\Image;
@@ -29,5 +30,20 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $this->app->bind(AttachmentRepository::class, WpAttachmentRepository::class);
         $this->app->singleton(OnDemandSizeGenerator::class);
         $this->app->bind(ImageResolver::class, WpImageResolver::class);
+    }
+
+    public function packageBooted(): void
+    {
+        if (! function_exists('add_action')) {
+            return;
+        }
+
+        add_action('after_setup_theme', function (): void {
+            $rawConfig = config('sproutset.image_sizes', []);
+
+            $this->app->make(ImageSizeRegistrar::class)->register(
+                is_array($rawConfig) ? $rawConfig : [],
+            );
+        }, 10);
     }
 }
