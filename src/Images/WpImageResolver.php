@@ -111,12 +111,12 @@ final readonly class WpImageResolver implements ImageResolver
     private function presentedBox(string $sizeName, Attachment $attachment): ?array
     {
         $sizes = wp_get_registered_image_subsizes();
+        $spec = $sizes[$sizeName] ?? null;
 
-        if (! isset($sizes[$sizeName])) {
+        if (! is_array($spec)) {
             return null;
         }
 
-        $spec = $sizes[$sizeName];
         $targetWidth = is_numeric($spec['width'] ?? null) ? (int) $spec['width'] : 0;
         $targetHeight = is_numeric($spec['height'] ?? null) ? (int) $spec['height'] : 0;
         $crop = (bool) ($spec['crop'] ?? false);
