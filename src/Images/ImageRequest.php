@@ -4,13 +4,6 @@ declare(strict_types=1);
 
 namespace Webkinder\Sproutset\Images;
 
-/**
- * Normalized, typed inputs for a single image render.
- *
- * Produced by {@see ImageInputNormalizer} from the component's loose Blade
- * attributes. Presentation-only fields (`class`, `decoding`) are read by the
- * component; the rest describe what an {@see ImageResolver} must resolve.
- */
 final readonly class ImageRequest
 {
     public function __construct(

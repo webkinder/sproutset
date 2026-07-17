@@ -4,13 +4,6 @@ declare(strict_types=1);
 
 namespace Webkinder\Sproutset\Images;
 
-/**
- * Pure computation of the CSS `object-position` style from a focal point.
- *
- * Fractional focal coordinates (0–1) map to percentages. Nothing is emitted
- * when the focal point is disabled or either coordinate is missing. Holds no
- * WordPress dependency, so it is exercised in the fast Testbench lane.
- */
 final class FocalPointPosition
 {
     public static function forRequest(ImageRequest $request): ?string

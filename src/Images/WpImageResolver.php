@@ -7,18 +7,6 @@ namespace Webkinder\Sproutset\Images;
 use Webkinder\Sproutset\Attachments\Attachment;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 
-/**
- * WordPress-backed {@see ImageResolver}.
- *
- * Runs on the front-end boot path: it gathers render primitives from the
- * WordPress media API for the requested attachment and size, delegates pure
- * presentation logic to {@see ResponsiveSizes} and {@see FocalPointPosition},
- * and never fatals — a missing or broken attachment resolves to `null`.
- *
- * SVG sources are branched out before the raster path: they carry no intrinsic
- * raster dimensions, so they bypass the {@see AttachmentRepository} (which is
- * dimension-oriented and rejects vectors) and resolve straight from the URL.
- */
 final readonly class WpImageResolver implements ImageResolver
 {
     private const string SVG_MIME = 'image/svg+xml';
@@ -95,9 +83,6 @@ final readonly class WpImageResolver implements ImageResolver
     }
 
     /**
-     * The URL and intrinsic dimensions for a named size, falling back to the
-     * attachment's full-size identity when WordPress reports no sized source.
-     *
      * @return array{0: string, 1: int, 2: int}
      */
     private function sizedSource(Attachment $attachment, string $sizeName): array

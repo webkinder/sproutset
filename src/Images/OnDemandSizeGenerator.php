@@ -6,16 +6,6 @@ namespace Webkinder\Sproutset\Images;
 
 use Throwable;
 
-/**
- * Generates a missing registered image size on demand, on the front-end path.
- *
- * WordPress does not create registered sizes retroactively, so a template that
- * requests a size added after upload would otherwise fall back to the closest
- * existing one. This generates the size once, caps the number of generations
- * per request, and swallows every failure so on-demand image editing can never
- * fatal a request. It uses only front-end-safe media APIs — never the
- * admin-only intermediate-size helpers.
- */
 final class OnDemandSizeGenerator
 {
     private const int MAX_GENERATIONS_PER_REQUEST = 10;
