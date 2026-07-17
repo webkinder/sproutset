@@ -22,10 +22,8 @@ final class ImageSizeConfigNormalizer
                 continue;
             }
 
-            // @phpstan-ignore cast.int (width/height are mixed by nature of the raw config array)
-            $width = max(0, (int) ($sizeConfig['width'] ?? 0));
-            // @phpstan-ignore cast.int (width/height are mixed by nature of the raw config array)
-            $height = max(0, (int) ($sizeConfig['height'] ?? 0));
+            $width = $this->toNonNegativeInt($sizeConfig['width'] ?? 0);
+            $height = $this->toNonNegativeInt($sizeConfig['height'] ?? 0);
             $crop = (bool) ($sizeConfig['crop'] ?? false);
 
             $normalized[$sizeName] = ['width' => $width, 'height' => $height, 'crop' => $crop];
@@ -62,5 +60,13 @@ final class ImageSizeConfigNormalizer
         }
 
         return $multipliers;
+    }
+
+    /**
+     * Coerce a mixed config value to a non-negative int, defaulting non-numeric input to 0.
+     */
+    private function toNonNegativeInt(mixed $value): int
+    {
+        return is_numeric($value) ? max(0, (int) $value) : 0;
     }
 }
