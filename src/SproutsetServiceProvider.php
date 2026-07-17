@@ -8,8 +8,10 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
+use Webkinder\Sproutset\Images\CoreImageSizeOptions;
 use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
+use Webkinder\Sproutset\Images\MediaSettingsLock;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
 use Webkinder\Sproutset\View\Components\Image;
@@ -39,11 +41,20 @@ class SproutsetServiceProvider extends PackageServiceProvider
         }
 
         add_action('after_setup_theme', function (): void {
-            $rawConfig = config('sproutset.image_sizes', []);
-
-            $this->app->make(ImageSizeRegistrar::class)->register(
-                is_array($rawConfig) ? $rawConfig : [],
-            );
+            $this->app->make(ImageSizeRegistrar::class)->register($this->imageSizesConfig());
         }, 10);
+
+        $this->app->make(CoreImageSizeOptions::class)->register($this->imageSizesConfig());
+        $this->app->make(MediaSettingsLock::class)->register($this->imageSizesConfig());
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function imageSizesConfig(): array
+    {
+        $rawConfig = config('sproutset.image_sizes', []);
+
+        return is_array($rawConfig) ? $rawConfig : [];
     }
 }
