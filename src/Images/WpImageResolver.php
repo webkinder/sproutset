@@ -73,7 +73,7 @@ final class WpImageResolver implements ImageResolver
         return new ResolvedImage(
             src: $src,
             srcset: $this->srcset($attachment->id, $request->sizeName),
-            sizes: null,
+            sizes: ResponsiveSizes::forRequest($request),
             width: $width,
             height: $height,
             alt: $this->alt($attachment->id),
