@@ -1,0 +1,138 @@
+# AVIF conversion
+
+Sproutset can serve an AVIF version of any image rendered through `<x-sproutset-image>`, layered on top of the original as a `<picture>` source with the original-format `<img>` as fallback. It is opt-in, applies only to images sproutset itself renders, and degrades to identical-to-today markup whenever AVIF is disabled, unsupported by the server, or fails to encode. It never touches WordPress's global image pipeline, so favicons, `og:image`, admin thumbnails, and email images are never affected.
+
+## Behavior
+
+**Scope and principle.** AVIF is *additive*. The original-format `<img>` is always emitted and is always the source of truth; an AVIF `<source>` is layered above it. Because sproutset only augments its own rendered component — and never filters WordPress's global subsize generation — no favicon, social-share, admin, or system image can be replaced by AVIF. When AVIF produces nothing, the component emits the exact same single `<img>` as today.
+
+**Opt-in configuration.** A new `avif` block in `config/sproutset.php`:
+
+```php
+'avif' => [
+    'enabled' => false,   // opt-in; false is a guaranteed no-op
+    'quality' => 50,      // 0–100 encode quality
+],
+```
+
+When `enabled` is `false`, no probe runs, no files are generated, and no `avifSrcset` is produced — output is byte-identical to the pre-feature package. No per-size overrides exist; `quality` is global.
+
+**Capability detection (`AvifSupport`).** The single failure mode this guards against: a server whose image editor can *read* AVIF but cannot *write* it (GD with `imageavif()` present but no libavif encoder; Imagick listing AVIF in `queryFormats()` for read only). Declared capability — including WordPress's `WP_Image_Editor::supports_mime_type()` — is not trusted. Instead `AvifSupport::isSupported()` performs a **real-encode probe**: it encodes a 1×1 image to AVIF **in memory** (GD output buffering / Imagick `getImageBlob()` — no temporary file, nothing admin-only, safe on any request) using the backend WordPress would actually choose, and verifies the resulting bytes carry a valid AVIF `ftyp` signature with an `avif` or `avis` brand. The boolean verdict is cached in a transient keyed by the editor class and package version, so the probe runs about once per server. Any thrown error resolves to unsupported. `AvifSupport` is an interface; a fake implementation is bound in tests.
+
+**Variant generation (`AvifVariantGenerator`).** For an existing subsize file (`image-300x200.jpg`) the generator writes an AVIF sibling in the same directory (`image-300x200.avif`) via `wp_get_image_editor()->save($avifPath, 'image/avif')` with the configured quality. It only runs when `enabled` **and** `AvifSupport::isSupported()`. Generation is **lazy and bounded**: it reuses the existing per-request generation cap that `OnDemandSizeGenerator` enforces, so a single page cannot trigger unbounded encoding; siblings not produced this request fill in on later requests, and the fallback `<img>` covers any gap so nothing ever looks broken. It refuses to encode in three cases: an **animated GIF** source (AVIF would drop the animation), a source whose editor cannot be created, and a result that is **not smaller** than the source (which is discarded, avoiding the pathology of an AVIF larger than the original). On any encode failure it trips a **per-attachment fuse** — a marker written to the attachment's metadata — and never retries that attachment; the component then silently serves the original. All generation runs inside a `try/catch(Throwable)` for boot safety.
+
+**Resolver output and responsive parity (`AvifSrcsetBuilder`).** `ResolvedImage` gains one nullable field, `avifSrcset`. In `WpImageResolver::resolveRaster()`, after the normal srcset is built, if AVIF is active the resolver walks each srcset candidate, ensures its `.avif` sibling (bounded and fused as above), and builds a parallel `avifSrcset` covering the **same widths** — giving the AVIF source true responsive/retina parity with the original. The extension-swap and existence-filter logic is a pure `AvifSrcsetBuilder`, unit-tested in isolation. If AVIF is disabled, unsupported, or no sibling could be produced, `avifSrcset` is `null`.
+
+**Markup.** `image.blade.php` wraps the image in `<picture>` only when `avifSrcset` is present:
+
+```blade
+@if ($avifSrcset)
+  <picture>
+    <source type="image/avif" srcset="{{ $avifSrcset }}" sizes="{{ $sizes }}">
+    <img {{ $attributes->class($class)->merge($htmlAttributes) }}>
+  </picture>
+@else
+  <img {{ $attributes->class($class)->merge($htmlAttributes) }}>
+@endif
+```
+
+The `<img>` element and all its merged attributes are unchanged from today; `<picture>` is an inert wrapper with no box of its own. SVGs skip this path entirely via the resolver's existing SVG branch. The `<source>` repeats the same `sizes` string as the `<img>` so the browser selects the correct AVIF candidate. The only CSS caveat is that a direct-child selector (`.gallery > img`) becomes `.gallery > picture > img`.
+
+**Lifecycle and cleanup (`AvifCleanup`).** AVIF siblings are sproutset-owned and are not listed in WordPress attachment metadata, so WordPress will not remove them. On `delete_attachment`, sproutset unlinks the attachment's `.avif` siblings. A re-edited image generates fresh siblings on demand; any stale orphans from prior edits are harmless and are swept when the attachment is deleted.
+
+**Service provider wiring.** `AvifSupport` binds to its WP implementation as a **singleton** so the transient-backed verdict is memoized per request. The generator and support seam are injected where needed. The `delete_attachment` cleanup hook is registered in `packageBooted()` inside the existing `function_exists('add_action')` guard. Nothing admin-only runs on the boot path; the probe and generation run only during a component render, never at boot.
+
+## Scenarios
+
+```gherkin
+Scenario: Validates a real AVIF byte signature
+  Given a byte string beginning with a valid ftyp box carrying an avif brand
+  When the AVIF signature is validated
+  Then it is accepted, and bytes without an avif/avis brand are rejected
+
+Scenario: Reports unsupported when the encode probe yields no valid AVIF
+  Given an AvifSupport probe whose in-memory encode returns non-AVIF bytes
+  When support is queried
+  Then it reports unsupported
+
+Scenario: Builds a parallel AVIF srcset for existing siblings
+  Given an original srcset and a set of sibling files that exist as AVIF
+  When the AVIF srcset is built
+  Then each candidate with an existing sibling maps to its .avif url at the same descriptor, and candidates without a sibling are omitted
+
+Scenario: Yields no AVIF srcset when none exists
+  Given an original srcset for which no AVIF sibling exists
+  When the AVIF srcset is built
+  Then the result is null
+
+Scenario: Discards an AVIF that is not smaller than the source
+  Given a generated AVIF variant larger than or equal to its source file
+  When the variant is finalized
+  Then the AVIF file is discarded and no sibling is recorded
+
+Scenario: Skips an animated GIF source
+  Given an animated GIF attachment
+  When AVIF generation is attempted
+  Then no AVIF is written and the source is left untouched
+
+Scenario: Trips the per-attachment fuse on encode failure
+  Given an attachment whose AVIF encode throws
+  When AVIF generation is attempted and then attempted again
+  Then a failure marker is recorded and the second attempt performs no encode
+
+Scenario: Renders a picture element when an AVIF srcset is present
+  Given a resolved image carrying an avifSrcset
+  When the component is rendered
+  Then the markup is a picture with an image/avif source and the original img fallback
+
+Scenario: Renders a plain img when no AVIF srcset is present
+  Given a resolved image with a null avifSrcset
+  When the component is rendered
+  Then the markup is a single img identical to the non-AVIF output
+
+Scenario: Produces no AVIF when the feature is disabled
+  Given avif.enabled is false
+  When an image is resolved
+  Then avifSrcset is null and no AVIF file is generated
+
+Scenario: Produces no AVIF when the server cannot write AVIF
+  Given avif.enabled is true and AvifSupport reports unsupported
+  When an image is resolved
+  Then avifSrcset is null and no AVIF file is generated
+
+Scenario: Generates AVIF siblings and serves them when supported
+  Given avif.enabled is true and a server that can write AVIF
+  When an image with a responsive srcset is resolved
+  Then an AVIF sibling exists for each generated candidate and avifSrcset covers the same widths
+
+Scenario: Removes AVIF siblings when the attachment is deleted
+  Given an attachment with generated AVIF siblings
+  When the attachment is deleted
+  Then its .avif sibling files are unlinked
+
+Scenario: Resolves the AVIF collaborators from the container
+  Given the booted service provider
+  When AvifSupport and AvifVariantGenerator are resolved from the container
+  Then each returns an instance of its bound class
+```
+
+## Acceptance criteria
+
+Each scenario above maps 1:1 to a Pest test:
+
+| Scenario | Pest test |
+| --- | --- |
+| `Validates a real AVIF byte signature` | `tests/Unit/AvifSignatureTest.php` → `it('accepts avif branded bytes and rejects others')` |
+| `Reports unsupported when the encode probe yields no valid AVIF` | `tests/Unit/AvifSupportTest.php` → `it('reports unsupported when the probe yields no valid avif')` |
+| `Builds a parallel AVIF srcset for existing siblings` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('maps candidates with existing siblings to avif urls')` |
+| `Yields no AVIF srcset when none exists` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('returns null when no sibling exists')` |
+| `Discards an AVIF that is not smaller than the source` | `tests/Unit/AvifVariantGeneratorTest.php` → `it('discards an avif that is not smaller than the source')` |
+| `Skips an animated GIF source` | `tests/Unit/AvifVariantGeneratorTest.php` → `it('skips an animated gif source')` |
+| `Trips the per-attachment fuse on encode failure` | `tests/Unit/AvifVariantGeneratorTest.php` → `it('trips the fuse and skips retrying after an encode failure')` |
+| `Renders a picture element when an AVIF srcset is present` | `tests/Feature/AvifImageComponentTest.php` → `it('renders a picture with an avif source when an avif srcset is present')` |
+| `Renders a plain img when no AVIF srcset is present` | `tests/Feature/AvifImageComponentTest.php` → `it('renders a plain img when no avif srcset is present')` |
+| `Produces no AVIF when the feature is disabled` | `tests/Feature/AvifResolverTest.php` → `it('produces no avif when disabled')` |
+| `Produces no AVIF when the server cannot write AVIF` | `tests/Feature/AvifResolverTest.php` → `it('produces no avif when the server cannot write avif')` |
+| `Generates AVIF siblings and serves them when supported` | `tests/Integration/AvifVariantGeneratorTest.php` → `test_generates_avif_siblings_and_serves_them_when_supported` |
+| `Removes AVIF siblings when the attachment is deleted` | `tests/Integration/AvifCleanupTest.php` → `test_removes_avif_siblings_when_the_attachment_is_deleted` |
+| `Resolves the AVIF collaborators from the container` | `tests/Feature/AvifServiceProviderTest.php` → `it('resolves the avif collaborators from the container')` |
