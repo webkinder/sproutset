@@ -45,4 +45,23 @@ return [
             'srcset' => [0.5, 2],
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | AVIF Conversion
+    |--------------------------------------------------------------------------
+    |
+    | Opt-in AVIF delivery for images rendered through <x-sproutset-image>.
+    | When enabled and the server can actually write AVIF, an AVIF <source> is
+    | layered over the original <img>. Disabled is a guaranteed no-op.
+    |
+    |   - enabled: master switch (false = identical to no AVIF at all)
+    |   - quality: encode quality 0-100
+    |
+    */
+
+    'avif' => [
+        'enabled' => false,
+        'quality' => 50,
+    ],
 ];

@@ -8,6 +8,7 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
+use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\CoreImageSizeOptions;
 use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
@@ -32,6 +33,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $this->app->bind(AttachmentRepository::class, WpAttachmentRepository::class);
         $this->app->singleton(OnDemandSizeGenerator::class);
         $this->app->bind(ImageResolver::class, WpImageResolver::class);
+        $this->app->singleton(AvifConfig::class, fn (): AvifConfig => $this->avifConfig());
     }
 
     public function packageBooted(): void
@@ -56,5 +58,16 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $rawConfig = config('sproutset.image_sizes', []);
 
         return is_array($rawConfig) ? $rawConfig : [];
+    }
+
+    private function avifConfig(): AvifConfig
+    {
+        $raw = config('sproutset.avif', []);
+        $raw = is_array($raw) ? $raw : [];
+
+        $enabled = (bool) ($raw['enabled'] ?? false);
+        $quality = is_numeric($raw['quality'] ?? null) ? (int) $raw['quality'] : 50;
+
+        return new AvifConfig($enabled, $quality);
     }
 }
