@@ -9,7 +9,7 @@ final readonly class CoreImageSizeOptions
     /**
      * @var array<string, array{width: string, height: string, crop?: string}>
      */
-    private const OPTION_MAP = [
+    private const array OPTION_MAP = [
         'thumbnail' => ['width' => 'thumbnail_size_w', 'height' => 'thumbnail_size_h', 'crop' => 'thumbnail_crop'],
         'medium' => ['width' => 'medium_size_w', 'height' => 'medium_size_h'],
         'medium_large' => ['width' => 'medium_large_size_w', 'height' => 'medium_large_size_h'],
@@ -51,7 +51,7 @@ final readonly class CoreImageSizeOptions
     public function register(array $rawConfig): void
     {
         foreach ($this->overrides($rawConfig) as $optionName => $value) {
-            add_filter("pre_option_{$optionName}", static fn (): int => $value);
+            add_filter('pre_option_'.$optionName, static fn (): int => $value);
         }
     }
 }

@@ -9,7 +9,7 @@ final class MediaSettingsLock
     /**
      * @var array<string, list<string>>
      */
-    private const INPUT_MAP = [
+    private const array INPUT_MAP = [
         'thumbnail' => ['thumbnail_size_w', 'thumbnail_size_h', 'thumbnail_crop'],
         'medium' => ['medium_size_w', 'medium_size_h'],
         'large' => ['large_size_w', 'large_size_h'],
@@ -30,5 +30,55 @@ final class MediaSettingsLock
         }
 
         return $ids;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $rawConfig
+     */
+    public function register(array $rawConfig): void
+    {
+        $inputIds = $this->lockedInputIds($rawConfig);
+
+        if ($inputIds === []) {
+            return;
+        }
+
+        add_action('admin_footer-options-media.php', function () use ($inputIds): void {
+            $this->printLockScript($inputIds);
+        });
+    }
+
+    /**
+     * @param  list<string>  $inputIds
+     */
+    private function printLockScript(array $inputIds): void
+    {
+        $ids = wp_json_encode($inputIds);
+        $note = wp_json_encode(
+            __('These sizes are managed by Sproutset configuration and cannot be edited here.', 'sproutset'),
+        );
+        ?>
+        <script>
+        (function () {
+            var ids = <?php echo $ids; ?>;
+            var note = <?php echo $note; ?>;
+            var noted = false;
+            ids.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (! el) {
+                    return;
+                }
+                el.setAttribute('disabled', 'disabled');
+                if (! noted) {
+                    var description = document.createElement('p');
+                    description.className = 'description';
+                    description.textContent = note;
+                    (el.closest('td, fieldset, tr') || el.parentNode).appendChild(description);
+                    noted = true;
+                }
+            });
+        })();
+        </script>
+        <?php
     }
 }

@@ -30,3 +30,6 @@ parameters:
         - identifier: property.nonObject
           path: tests/Feature/ImageComponentTest.php
           message: '/Cannot access property \$not on mixed\./'
+        - identifier: argument.type
+          path: src/Images/MediaSettingsLock.php
+          message: '/Parameter #2 \$domain of function __/'
