@@ -38,6 +38,7 @@ return RectorConfig::configure()
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
         MakeInheritedMethodVisibilitySameAsParentRector::class,
+        __DIR__.'/tests/Integration',
     ])
     ->withPreparedSets(
         deadCode: true,

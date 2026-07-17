@@ -1,0 +1,22 @@
+{
+    "name": "webkinder/sproutset-drift-lane",
+    "description": "Isolated WordPress drift-lane harness for Sproutset. Kept as a separate Composer project so the WordPress test suite never shares a process with Laravel's global helpers (both define __()).",
+    "type": "project",
+    "license": "GPL-3.0-or-later",
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "wp-phpunit/wp-phpunit": "^7.0",
+        "yoast/phpunit-polyfills": "^3.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkinder\\Sproutset\\": "../../src/",
+            "Webkinder\\Sproutset\\Tests\\Integration\\": ""
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}

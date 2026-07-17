@@ -12,3 +12,9 @@ Thumbs.db
 /.idea/
 /.vscode/
 *.swp
+
+# PHPUnit
+/.phpunit.cache/
+/tests/Integration/vendor/
+/tests/Integration/.phpunit.cache/
+/tests/Integration/.phpunit.result.cache

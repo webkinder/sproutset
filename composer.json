@@ -62,6 +62,10 @@
         "test": [
             "pest"
         ],
+        "test:integration": [
+            "@composer install --working-dir=tests/Integration --no-interaction --quiet",
+            "@php -r \"passthru('cd tests/Integration && vendor/bin/phpunit', $c); exit($c);\""
+        ],
         "check": [
             "@lint:check",
             "@types:check",

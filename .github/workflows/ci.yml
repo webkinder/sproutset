@@ -50,3 +50,63 @@ jobs:
 
       - name: Test (Pest)
         run: composer test
+
+  integration:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        wp: ['6.5', 'latest']
+    name: integration (wp ${{ matrix.wp }})
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, gd
+          coverage: none
+          tools: wp-cli
+
+      - name: Download WordPress core (${{ matrix.wp }})
+        run: |
+          if [ "${{ matrix.wp }}" = "latest" ]; then
+            wp core download --path=/tmp/wordpress --skip-content
+          else
+            wp core download --version=${{ matrix.wp }} --path=/tmp/wordpress --skip-content
+          fi
+
+      # The bundled WordPress test suite (wp-phpunit) is versioned per WordPress
+      # release; align it with the core under test so the suite matches its APIs.
+      - name: Align the WordPress test suite to the series
+        run: |
+          if [ "${{ matrix.wp }}" = "latest" ]; then
+            CONSTRAINT="^7.0"
+          else
+            CONSTRAINT="${{ matrix.wp }}.*"
+          fi
+          composer require --working-dir=tests/Integration --dev --with-all-dependencies --no-interaction "wp-phpunit/wp-phpunit:${CONSTRAINT}"
+
+      - name: Run the drift lane
+        env:
+          WP_TESTS_ABSPATH: /tmp/wordpress
+          WP_TESTS_CONTENT_DIR: /tmp/wp-content
+          WP_TESTS_DB_NAME: wordpress_test
+          WP_TESTS_DB_USER: root
+          WP_TESTS_DB_PASSWORD: root
+          WP_TESTS_DB_HOST: 127.0.0.1
+        run: composer test:integration
