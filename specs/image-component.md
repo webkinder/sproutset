@@ -41,6 +41,27 @@ present, the resolved `style` is `object-fit: cover; object-position: <x>% <y>%;
 `object-fit: cover` is required for `object-position` to have any visual effect. If the
 focal point is disabled, or either coordinate is missing, no `style` is produced.
 
+The resolved `width`/`height` describe the box the `<img>` occupies at its **intended**
+size, derived from the requested size's registered spec (`width`, `height`, `crop`) and
+the attachment's real source dimensions. When the source file is smaller than the
+requested size the box still holds — the largest available file is upscaled by the browser
+rather than collapsing the layout to the source's natural dimensions. WordPress never
+upscales, so this derivation replaces WordPress's delivered dimensions:
+
+- For a **crop** size the box is the target `width`×`height`. When the source cannot fill
+  that box, the resolved `style` gains `object-fit: cover;` so the upscaled file covers the
+  box at the intended ratio without distortion. When the source is large enough, WordPress
+  delivered an exact crop, so the box equals the delivered dimensions and no `object-fit`
+  is added.
+- For a **non-crop** size the box keeps the source's own aspect ratio, scaled up to the
+  target bound: width-only when the target height is `0`, otherwise the contain-fit of both
+  target dimensions. The box shares the source ratio, so no `object-fit` is needed.
+
+A focal-point style always takes precedence over an automatic `object-fit: cover;`. When
+the requested size is not a registered Sproutset size, or the source dimensions are
+unknown, the resolver leaves WordPress's delivered dimensions unchanged and adds no style.
+This derivation is pure aspect-ratio math, isolated in `Images/PresentedDimensions`.
+
 Rendering rules:
 
 - When resolution returns `null`, or the resolved `src` is empty, **nothing** is emitted.
@@ -130,6 +151,26 @@ Scenario: emits no focal style when a coordinate is missing
   Given a request with focal point enabled but a missing coordinate
   When the focal point style is computed
   Then no style is produced
+
+Scenario: upscales a crop size to its target box when the source is too small
+  Given a crop size larger than the attachment's source file
+  When the image is resolved
+  Then the width and height are the target box and the style carries object-fit: cover
+
+Scenario: upscales a non-crop size preserving the source aspect ratio
+  Given a non-crop size larger than the attachment's source file
+  When the image is resolved
+  Then the width and height scale the source ratio up to the target bound and no object-fit is added
+
+Scenario: leaves a big-enough source at its delivered dimensions
+  Given a size the attachment's source file can satisfy
+  When the image is resolved
+  Then the width and height are WordPress's delivered dimensions and no object-fit is added
+
+Scenario: keeps WordPress dimensions for an unregistered size
+  Given a requested size that Sproutset has not registered
+  When the image is resolved
+  Then the resolver leaves the delivered width and height unchanged
 ```
 
 ## Acceptance criteria
@@ -152,3 +193,12 @@ Each scenario above maps 1:1 to a Pest test:
 | `omits auto sizes for an eager-loaded image` | `tests/Unit/ResponsiveSizesTest.php` → `it('omits auto sizes when eager loading is requested')` |
 | `emits object-fit and object-position from a focal point` | `tests/Unit/FocalPointPositionTest.php` → `it('maps focal coordinates to an object-fit and object-position style')` |
 | `emits no focal style when a coordinate is missing` | `tests/Unit/FocalPointPositionTest.php` → `it('returns null when a coordinate is missing')` |
+| `upscales a crop size to its target box when the source is too small` | `tests/Integration/WpImageResolverTest.php` → `test_upscales_a_crop_size_to_its_target_box_with_object_fit_cover` |
+| `upscales a non-crop size preserving the source aspect ratio` | `tests/Integration/WpImageResolverTest.php` → `test_upscales_a_non_crop_size_preserving_the_source_aspect_ratio` |
+| `leaves a big-enough source at its delivered dimensions` | `tests/Integration/WpImageResolverTest.php` → `test_leaves_a_big_enough_source_at_its_delivered_dimensions` |
+| `keeps WordPress dimensions for an unregistered size` | `tests/Integration/WpImageResolverTest.php` → `test_keeps_wordpress_dimensions_for_an_unregistered_size` |
+
+The pure aspect-ratio math in `Images/PresentedDimensions` is covered exhaustively by
+`tests/Unit/PresentedDimensionsTest.php` (crop too-small, crop big-enough, non-crop
+width-bound, non-crop contain-fit, source larger than target, and the null guards for
+zero source dimensions and unknown sizes).
