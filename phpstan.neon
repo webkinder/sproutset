@@ -30,6 +30,3 @@ parameters:
         - identifier: property.nonObject
           path: tests/Feature/ImageComponentTest.php
           message: '/Cannot access property \$not on mixed\./'
-        - identifier: argument.type
-          path: tests/Feature/ImageSizeRegistrationTest.php
-          message: '/Parameter \#1 \$array of function array_keys expects array, mixed given\./'
