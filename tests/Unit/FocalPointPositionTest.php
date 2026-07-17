@@ -15,15 +15,20 @@ function focalRequest(bool $on, ?float $x, ?float $y): ImageRequest
     );
 }
 
-it('maps focal coordinates to an object-position style', function (): void {
-    expect(FocalPointPosition::forRequest(focalRequest(true, 0.25, 0.75)))
-        ->toBe('object-position: 25% 75%;');
+it('maps focal coordinates to an object-fit and object-position style', function (): void {
+    expect(FocalPointPosition::forRequest(focalRequest(true, 25, 75)))
+        ->toBe('object-fit: cover; object-position: 25% 75%;');
+});
+
+it('preserves fractional focal percentages', function (): void {
+    expect(FocalPointPosition::forRequest(focalRequest(true, 33.33, 66.67)))
+        ->toBe('object-fit: cover; object-position: 33.33% 66.67%;');
 });
 
 it('returns null when focal point is off', function (): void {
-    expect(FocalPointPosition::forRequest(focalRequest(false, 0.25, 0.75)))->toBeNull();
+    expect(FocalPointPosition::forRequest(focalRequest(false, 25, 75)))->toBeNull();
 });
 
 it('returns null when a coordinate is missing', function (): void {
-    expect(FocalPointPosition::forRequest(focalRequest(true, 0.25, null)))->toBeNull();
+    expect(FocalPointPosition::forRequest(focalRequest(true, 25, null)))->toBeNull();
 });

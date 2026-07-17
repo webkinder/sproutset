@@ -31,6 +31,11 @@ The component asks the container-bound `ImageResolver` to `resolve(ImageRequest)
 `ResolvedImage` carries only what rendering needs — `src`, `srcset`, `sizes`, `width`,
 `height`, `alt`, `style`, `isSvg` — with no knowledge of how those values were derived.
 
+When `focal-point` is enabled and **both** `focal-point-x` and `focal-point-y` are
+present, the resolved `style` is `object-fit: cover; object-position: <x>% <y>%;`. The
+`object-fit: cover` is required for `object-position` to have any visual effect. If the
+focal point is disabled, or either coordinate is missing, no `style` is produced.
+
 Rendering rules:
 
 - When resolution returns `null`, or the resolved `src` is empty, **nothing** is emitted.
@@ -100,6 +105,16 @@ Scenario: applies consumer loading and decoding overrides
   Given a resolver that returns a raster ResolvedImage
   When the component is rendered with loading "eager" and decoding "sync"
   Then the img carries loading="eager" and decoding="sync"
+
+Scenario: emits object-fit and object-position from a focal point
+  Given a request with focal point enabled and both coordinates set
+  When the focal point style is computed
+  Then the style is "object-fit: cover; object-position: <x>% <y>%;"
+
+Scenario: emits no focal style when a coordinate is missing
+  Given a request with focal point enabled but a missing coordinate
+  When the focal point style is computed
+  Then no style is produced
 ```
 
 ## Acceptance criteria
@@ -118,3 +133,5 @@ Each scenario above maps 1:1 to a Pest test:
 | `renders nothing when the boot-safe null resolver is bound` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the boot-safe null resolver is bound')` |
 | `renders nothing when the resolved source is empty` | `tests/Feature/ImageComponentTest.php` → `it('renders nothing when the resolved source is empty')` |
 | `applies consumer loading and decoding overrides` | `tests/Feature/ImageComponentTest.php` → `it('applies consumer loading and decoding overrides')` |
+| `emits object-fit and object-position from a focal point` | `tests/Unit/FocalPointPositionTest.php` → `it('maps focal coordinates to an object-fit and object-position style')` |
+| `emits no focal style when a coordinate is missing` | `tests/Unit/FocalPointPositionTest.php` → `it('returns null when a coordinate is missing')` |
