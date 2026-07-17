@@ -12,11 +12,6 @@ use Webkinder\Sproutset\Images\ImageRequest;
 use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ResolvedImage;
 
-/**
- * The `<x-sproutset-image>` Blade component: a thin shell over an
- * {@see ImageResolver}. It normalizes the public attributes, renders whatever
- * the resolver returns, and re-applies the declared `class` prop to the tag.
- */
 final class Image extends Component
 {
     private readonly ImageRequest $request;

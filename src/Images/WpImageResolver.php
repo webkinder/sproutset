@@ -96,10 +96,6 @@ final readonly class WpImageResolver implements ImageResolver
         return [$source[0], $source[1], $source[2]];
     }
 
-    /**
-     * The alt text for the render: an explicit request override wins, otherwise
-     * the attachment's `_wp_attachment_image_alt` meta, otherwise empty.
-     */
     private function alt(ImageRequest $request): string
     {
         if ($request->alt !== null) {
