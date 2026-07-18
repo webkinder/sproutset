@@ -22,3 +22,17 @@ it('accepts avif branded bytes and rejects others', function (): void {
         ->and(AvifSignature::isAvif(''))->toBeFalse()
         ->and(AvifSignature::isAvif('avif'))->toBeFalse();                    // too short, no ftyp box
 });
+
+it('does not scan past a corrupted box size for a spoofed brand', function (): void {
+    // Box-size field is absurdly large (invalid); major brand is mp42; a later
+    // "avif" sequence must NOT be treated as a match.
+    $bytes = pack('N', 0xFFFFFFFF).'ftyp'.'mp42'."\x00\x00\x00\x00".'xxxxavifxxxx';
+
+    expect(AvifSignature::isAvif($bytes))->toBeFalse();
+});
+
+it('accepts a valid major brand even when the box size is corrupted', function (): void {
+    $bytes = pack('N', 0xFFFFFFFF).'ftyp'.'avif'."\x00\x00\x00\x00";
+
+    expect(AvifSignature::isAvif($bytes))->toBeTrue();
+});

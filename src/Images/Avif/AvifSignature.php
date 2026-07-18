@@ -24,9 +24,15 @@ final class AvifSignature
         /** @var array{1: int} $unpacked */
         $unpacked = unpack('N', $sizeBytes);
         $boxSize = $unpacked[1];
-        $boxSize = ($boxSize < 12 || $boxSize > strlen($bytes)) ? strlen($bytes) : $boxSize;
 
-        // Major brand (bytes 8-12) plus the compatible-brands list fill the ftyp box.
+        // A corrupted/oversized box-size field must not widen the brand scan
+        // past the ftyp box — arbitrary later bytes could otherwise spoof a brand.
+        if ($boxSize < 12 || $boxSize > strlen($bytes)) {
+            $majorBrand = substr($bytes, 8, 4);
+
+            return $majorBrand === 'avif' || $majorBrand === 'avis';
+        }
+
         $brands = substr($bytes, 8, $boxSize - 8);
 
         return str_contains($brands, 'avif') || str_contains($brands, 'avis');
