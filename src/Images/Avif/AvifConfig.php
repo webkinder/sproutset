@@ -1,6 +1,5 @@
 <?php
 
-// src/Images/Avif/AvifConfig.php
 declare(strict_types=1);
 
 namespace Webkinder\Sproutset\Images\Avif;

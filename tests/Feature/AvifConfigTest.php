@@ -1,6 +1,5 @@
 <?php
 
-// tests/Feature/AvifConfigTest.php
 declare(strict_types=1);
 
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
