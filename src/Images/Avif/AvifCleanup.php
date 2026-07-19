@@ -7,9 +7,7 @@ namespace Webkinder\Sproutset\Images\Avif;
 final class AvifCleanup
 {
     /**
-     * Unlink every .avif sibling belonging to an attachment. Siblings are
-     * sproutset-owned and absent from WP metadata, so WP will not remove them.
-     * Runs before WP deletes the originals, so the files are still present.
+     * Unlink the .avif siblings sproutset generated for an attachment.
      */
     public function forget(int $attachmentId): void
     {
@@ -20,16 +18,35 @@ final class AvifCleanup
         }
 
         $directory = dirname($file);
-        $base = pathinfo($file, PATHINFO_FILENAME);
+        $targets = [$file];
 
-        $siblings = glob($directory.'/'.$base.'*.avif');
+        $metadata = wp_get_attachment_metadata($attachmentId);
 
-        if ($siblings === false) {
-            return;
+        if (is_array($metadata)) {
+            foreach ($metadata['sizes'] as $size) {
+                if (is_array($size) && isset($size['file']) && is_string($size['file'])) {
+                    $targets[] = $directory.'/'.$size['file'];
+                }
+            }
         }
 
-        foreach ($siblings as $sibling) {
-            @unlink($sibling);
+        foreach ($targets as $target) {
+            $sibling = $this->siblingPath($target);
+
+            if ($sibling !== null && is_file($sibling)) {
+                @unlink($sibling);
+            }
         }
+    }
+
+    private function siblingPath(string $file): ?string
+    {
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+        if ($extension === '') {
+            return null;
+        }
+
+        return substr($file, 0, -strlen($extension)).'avif';
     }
 }
