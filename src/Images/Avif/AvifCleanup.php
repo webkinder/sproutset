@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace Webkinder\Sproutset\Images\Avif;
 
+use Throwable;
+
 final class AvifCleanup
 {
     /**
      * Unlink the .avif siblings sproutset generated for an attachment.
      */
     public function forget(int $attachmentId): void
+    {
+        try {
+            $this->doForget($attachmentId);
+        } catch (Throwable) {
+            // Cleanup must never fatal a delete.
+        }
+    }
+
+    private function doForget(int $attachmentId): void
     {
         $file = get_attached_file($attachmentId);
 
@@ -22,8 +33,12 @@ final class AvifCleanup
 
         $metadata = wp_get_attachment_metadata($attachmentId);
 
-        if (is_array($metadata)) {
-            foreach ($metadata['sizes'] as $size) {
+        /** @var array<string, mixed> $data */
+        $data = is_array($metadata) ? $metadata : [];
+        $sizes = $data['sizes'] ?? [];
+
+        if (is_array($sizes)) {
+            foreach ($sizes as $size) {
                 if (is_array($size) && isset($size['file']) && is_string($size['file'])) {
                     $targets[] = $directory.'/'.$size['file'];
                 }

@@ -33,6 +33,17 @@ final class AvifCleanupTest extends IntegrationTestCase
         $this->assertFileDoesNotExist($subsizeSibling);
     }
 
+    public function test_cleanup_is_safe_for_an_attachment_without_subsizes(): void
+    {
+        $id = self::factory()->attachment->create();
+        wp_update_attachment_metadata($id, ['width' => 1, 'height' => 1]); // no 'sizes' key
+
+        // Must not throw or warn even though there are no subsizes.
+        (new AvifCleanup)->forget($id);
+
+        $this->assertTrue(true);
+    }
+
     private function avifSibling(string $file): string
     {
         return substr($file, 0, -strlen(pathinfo($file, PATHINFO_EXTENSION))).'avif';
