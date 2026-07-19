@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Webkinder\Sproutset\Tests\Integration;
 
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
+use Webkinder\Sproutset\Images\Avif\AvifConfig;
+use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
+use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
 use Webkinder\Sproutset\Images\ImageRequest;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
@@ -13,7 +16,15 @@ final class WpImageResolverGenerationTest extends IntegrationTestCase
 {
     private function resolver(): WpImageResolver
     {
-        return new WpImageResolver(new WpAttachmentRepository, new OnDemandSizeGenerator);
+        $avifConfig = new AvifConfig(false, 50);
+
+        return new WpImageResolver(
+            new WpAttachmentRepository,
+            new OnDemandSizeGenerator,
+            new WpAvifSupport(fn (): ?string => null),
+            new AvifVariantGenerator($avifConfig),
+            $avifConfig,
+        );
     }
 
     private function request(int $id, string $size): ImageRequest

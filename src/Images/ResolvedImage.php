@@ -15,5 +15,6 @@ final readonly class ResolvedImage
         public string $alt,
         public ?string $style,
         public bool $isSvg,
+        public ?string $avifSrcset = null,
     ) {}
 }

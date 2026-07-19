@@ -6,6 +6,10 @@ namespace Webkinder\Sproutset\Images;
 
 use Webkinder\Sproutset\Attachments\Attachment;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
+use Webkinder\Sproutset\Images\Avif\AvifConfig;
+use Webkinder\Sproutset\Images\Avif\AvifSrcsetBuilder;
+use Webkinder\Sproutset\Images\Avif\AvifSupport;
+use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 
 final readonly class WpImageResolver implements ImageResolver
 {
@@ -14,6 +18,9 @@ final readonly class WpImageResolver implements ImageResolver
     public function __construct(
         private AttachmentRepository $attachments,
         private OnDemandSizeGenerator $sizeGenerator,
+        private AvifSupport $avifSupport,
+        private AvifVariantGenerator $avifGenerator,
+        private AvifConfig $avifConfig,
     ) {}
 
     public function resolve(ImageRequest $request): ?ResolvedImage
@@ -72,15 +79,18 @@ final readonly class WpImageResolver implements ImageResolver
             $cover = $box['cover'];
         }
 
+        $srcset = $this->srcset($attachment->id, $request->sizeName);
+
         return new ResolvedImage(
             src: $src,
-            srcset: $this->srcset($attachment->id, $request->sizeName),
+            srcset: $srcset,
             sizes: ResponsiveSizes::forRequest($request),
             width: $width,
             height: $height,
             alt: $this->alt($request),
             style: $this->style($request, $cover),
             isSvg: false,
+            avifSrcset: $this->avifSrcset($attachment->id, $srcset),
         );
     }
 
@@ -150,5 +160,60 @@ final readonly class WpImageResolver implements ImageResolver
         $alt = get_post_meta($request->attachmentId, '_wp_attachment_image_alt', true);
 
         return is_string($alt) ? $alt : '';
+    }
+
+    private function avifSrcset(int $attachmentId, ?string $originalSrcset): ?string
+    {
+        if (! $this->avifConfig->enabled || $originalSrcset === null) {
+            return null;
+        }
+
+        if (! $this->avifSupport->isSupported()) {
+            return null;
+        }
+
+        return AvifSrcsetBuilder::build(
+            $originalSrcset,
+            fn (string $url): ?string => $this->avifSiblingUrl($attachmentId, $url),
+        );
+    }
+
+    private function avifSiblingUrl(int $attachmentId, string $candidateUrl): ?string
+    {
+        $file = $this->urlToPath($candidateUrl);
+
+        if ($file === null) {
+            return null;
+        }
+
+        $avifFile = $this->avifGenerator->ensure($attachmentId, $file);
+
+        return $avifFile === null ? null : $this->pathToUrl($avifFile);
+    }
+
+    private function urlToPath(string $url): ?string
+    {
+        $uploads = wp_get_upload_dir();
+        $baseUrl = is_string($uploads['baseurl'] ?? null) ? $uploads['baseurl'] : '';
+        $baseDir = is_string($uploads['basedir'] ?? null) ? $uploads['basedir'] : '';
+
+        if ($baseUrl === '' || ! str_starts_with($url, $baseUrl)) {
+            return null;
+        }
+
+        return $baseDir.substr($url, strlen($baseUrl));
+    }
+
+    private function pathToUrl(string $path): ?string
+    {
+        $uploads = wp_get_upload_dir();
+        $baseDir = is_string($uploads['basedir'] ?? null) ? $uploads['basedir'] : '';
+        $baseUrl = is_string($uploads['baseurl'] ?? null) ? $uploads['baseurl'] : '';
+
+        if ($baseDir === '' || ! str_starts_with($path, $baseDir)) {
+            return null;
+        }
+
+        return $baseUrl.substr($path, strlen($baseDir));
     }
 }
