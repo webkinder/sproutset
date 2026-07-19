@@ -10,6 +10,7 @@ use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifSupport;
+use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
 use Webkinder\Sproutset\Images\CoreImageSizeOptions;
 use Webkinder\Sproutset\Images\ImageResolver;
@@ -37,6 +38,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $this->app->bind(ImageResolver::class, WpImageResolver::class);
         $this->app->singleton(AvifConfig::class, fn (): AvifConfig => $this->avifConfig());
         $this->app->singleton(AvifSupport::class, WpAvifSupport::class);
+        $this->app->singleton(AvifVariantGenerator::class);
     }
 
     public function packageBooted(): void
