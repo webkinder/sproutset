@@ -9,6 +9,13 @@ use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 
 final class AvifVariantGeneratorTest extends IntegrationTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        add_filter('wp_image_editors', static fn (): array => ['WP_Image_Editor_GD']);
+    }
+
     private function generator(int $quality = 50): AvifVariantGenerator
     {
         return new AvifVariantGenerator(new AvifConfig(true, $quality));
@@ -75,6 +82,19 @@ final class AvifVariantGeneratorTest extends IntegrationTestCase
 
         $this->assertNull($avif);
         $this->assertFileDoesNotExist(substr($source, 0, -3).'avif');
+    }
+
+    public function test_returns_an_existing_avif_sibling_without_regenerating(): void
+    {
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = substr($source, 0, -strlen(pathinfo($source, PATHINFO_EXTENSION))).'avif';
+        file_put_contents($sibling, 'sentinel-not-a-real-avif');
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertSame($sibling, $result);
+        $this->assertSame('sentinel-not-a-real-avif', file_get_contents($sibling)); // untouched = not regenerated
     }
 
     public function test_trips_the_fuse_and_skips_retrying_after_an_encode_failure(): void

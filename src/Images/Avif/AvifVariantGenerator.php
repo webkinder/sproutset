@@ -104,7 +104,7 @@ final class AvifVariantGenerator
         $sourceSize = filesize($sourceFile);
 
         if ($avifSize === false || $sourceSize === false) {
-            return false;
+            return true;
         }
 
         return $avifSize >= $sourceSize;
