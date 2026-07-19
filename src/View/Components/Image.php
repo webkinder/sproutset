@@ -55,6 +55,8 @@ final class Image extends Component
         return ViewFactory::make('sproutset::components.image', [
             'src' => $resolved?->src,
             'class' => $this->request->class,
+            'avifSrcset' => $resolved?->avifSrcset,
+            'avifSizes' => $resolved?->sizes,
             'htmlAttributes' => $resolved instanceof ResolvedImage
                 ? $this->htmlAttributesFor($resolved)
                 : [],

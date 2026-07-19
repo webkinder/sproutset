@@ -30,6 +30,12 @@ parameters:
         - identifier: property.nonObject
           path: tests/Feature/ImageComponentTest.php
           message: '/Cannot access property \$not on mixed\./'
+        - identifier: method.nonObject
+          path: tests/Feature/AvifImageComponentTest.php
+          message: '/Cannot call method \w+\(\) on mixed\./'
+        - identifier: property.nonObject
+          path: tests/Feature/AvifImageComponentTest.php
+          message: '/Cannot access property \$not on mixed\./'
         - identifier: argument.type
           path: src/Images/MediaSettingsLock.php
           message: '/Parameter #2 \$domain of function __/'
