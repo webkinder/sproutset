@@ -39,7 +39,7 @@ final class WpAvifSupport implements AvifSupport
     private function computeVerdict(): bool
     {
         try {
-            $bytes = ($this->probe ?? fn (): ?string => $this->defaultProbeBytes())();
+            $bytes = ($this->probe ?? $this->defaultProbeBytes(...))();
 
             return $bytes !== null && AvifSignature::isAvif($bytes);
         } catch (Throwable) {

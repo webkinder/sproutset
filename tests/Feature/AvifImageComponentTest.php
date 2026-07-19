@@ -45,7 +45,6 @@ it('renders a plain img when no avif srcset is present', function (): void {
         alt: 'A cat',
         style: null,
         isSvg: false,
-        avifSrcset: null,
     ));
 
     $html = Blade::render('<x-sproutset-image :attachment-id="42" />');

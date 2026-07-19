@@ -11,13 +11,16 @@ final class AvifSrcsetBuilder
      */
     public static function build(string $originalSrcset, callable $siblingFor): ?string
     {
-        $candidates = array_filter(array_map('trim', explode(',', $originalSrcset)));
+        $candidates = array_filter(array_map(trim(...), explode(',', $originalSrcset)));
         $out = [];
 
         foreach ($candidates as $candidate) {
             $parts = preg_split('/\s+/', $candidate, 2);
+            if ($parts === false) {
+                continue;
+            }
 
-            if ($parts === false || $parts[0] === '') {
+            if ($parts[0] === '') {
                 continue;
             }
 
