@@ -13,9 +13,11 @@ final class AvifSrcsetBuilder
     {
         $candidates = array_filter(array_map(trim(...), explode(',', $originalSrcset)));
         $out = [];
+        $complete = true;
 
         foreach ($candidates as $candidate) {
             $parts = preg_split('/\s+/', $candidate, 2);
+
             if ($parts === false) {
                 continue;
             }
@@ -30,12 +32,14 @@ final class AvifSrcsetBuilder
             $sibling = $siblingFor($url);
 
             if ($sibling === null) {
+                $complete = false;
+
                 continue;
             }
 
             $out[] = $descriptor === '' ? $sibling : $sibling.' '.$descriptor;
         }
 
-        return $out === [] ? null : implode(', ', $out);
+        return ($complete && $out !== []) ? implode(', ', $out) : null;
     }
 }
