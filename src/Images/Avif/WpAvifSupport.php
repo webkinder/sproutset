@@ -101,7 +101,10 @@ final class WpAvifSupport implements AvifSupport
             return null;
         }
 
-        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC', true);
+        // Truecolor (RGBA) rather than grayscale+alpha: some GD builds (e.g. 2.3.3)
+        // reject a grayscale-alpha PNG in imagecreatefromstring(), which would make
+        // the probe a false negative on servers that can in fact write AVIF.
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mP4DwQACfsD/Wj6HMwAAAAASUVORK5CYII=', true);
 
         if ($png === false || file_put_contents($tmp, $png) === false) {
             @unlink($tmp);
@@ -118,9 +121,14 @@ final class WpAvifSupport implements AvifSupport
             return null;
         }
 
-        $value = get_transient(self::TRANSIENT_KEY);
-
-        return is_bool($value) ? $value : null;
+        // A missing transient returns boolean false, indistinguishable from a
+        // stored false verdict; only the explicit '1'/'0' sentinels count as a
+        // cached verdict, so an absent transient re-runs the probe.
+        return match (get_transient(self::TRANSIENT_KEY)) {
+            '1' => true,
+            '0' => false,
+            default => null,
+        };
     }
 
     private function storeVerdict(bool $verdict): void
@@ -128,7 +136,7 @@ final class WpAvifSupport implements AvifSupport
         if (function_exists('set_transient')) {
             // WEEK_IN_SECONDS is a WordPress runtime constant not present in the
             // vendored stubs; the literal keeps `composer types:check` clean.
-            set_transient(self::TRANSIENT_KEY, $verdict, 604800);
+            set_transient(self::TRANSIENT_KEY, $verdict ? '1' : '0', 604800);
         }
     }
 }

@@ -41,3 +41,20 @@ it('reports unsupported and does not throw when the probe throws', function (): 
 
     expect($support->isSupported())->toBeFalse();
 });
+
+it('uses a truecolor png as its probe source so gd builds that reject grayscale+alpha can read it', function (): void {
+    $support = new WpAvifSupport;
+    $method = (new ReflectionClass($support))->getMethod('writeProbeSource');
+    $method->setAccessible(true);
+
+    $path = $method->invoke($support);
+    expect($path)->toBeString();
+    assert(is_string($path));
+
+    $bytes = (string) file_get_contents($path);
+    @unlink($path);
+
+    // The PNG IHDR color-type byte sits at offset 25: 2 = truecolor, 6 = truecolor+alpha.
+    // Grayscale types (0, 4) are what some GD builds reject in imagecreatefromstring().
+    expect(in_array(ord($bytes[25]), [2, 6], true))->toBeTrue();
+});
