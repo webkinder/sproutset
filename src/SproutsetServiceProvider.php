@@ -8,6 +8,7 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
+use Webkinder\Sproutset\Images\Avif\AvifCleanup;
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifSupport;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
@@ -53,6 +54,10 @@ class SproutsetServiceProvider extends PackageServiceProvider
 
         $this->app->make(CoreImageSizeOptions::class)->register($this->imageSizesConfig());
         $this->app->make(MediaSettingsLock::class)->register($this->imageSizesConfig());
+
+        add_action('delete_attachment', function (int $attachmentId): void {
+            $this->app->make(AvifCleanup::class)->forget($attachmentId);
+        }, 10, 1);
     }
 
     /**
