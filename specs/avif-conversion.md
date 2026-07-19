@@ -55,10 +55,15 @@ Scenario: Reports unsupported when the encode probe yields no valid AVIF
   When support is queried
   Then it reports unsupported
 
-Scenario: Builds a parallel AVIF srcset for existing siblings
-  Given an original srcset and a set of sibling files that exist as AVIF
+Scenario: Builds a parallel AVIF srcset when every width has a sibling
+  Given an original srcset whose every candidate has an existing AVIF sibling
   When the AVIF srcset is built
-  Then each candidate with an existing sibling maps to its .avif url at the same descriptor, and candidates without a sibling are omitted
+  Then each candidate maps to its .avif url at the same descriptor
+
+Scenario: Yields no AVIF srcset when a width is missing a sibling
+  Given an original srcset where one candidate has no AVIF sibling
+  When the AVIF srcset is built
+  Then the result is null, and generation was attempted for every candidate
 
 Scenario: Yields no AVIF srcset when none exists
   Given an original srcset for which no AVIF sibling exists
@@ -124,7 +129,8 @@ Each scenario above maps 1:1 to a Pest test:
 | --- | --- |
 | `Validates a real AVIF byte signature` | `tests/Unit/AvifSignatureTest.php` → `it('accepts avif branded bytes and rejects others')` |
 | `Reports unsupported when the encode probe yields no valid AVIF` | `tests/Unit/AvifSupportTest.php` → `it('reports unsupported when the probe yields no valid avif')` |
-| `Builds a parallel AVIF srcset for existing siblings` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('maps candidates with existing siblings to avif urls')` |
+| `Builds a parallel AVIF srcset when every width has a sibling` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('maps every candidate to its avif sibling url at the same descriptor when all siblings exist')` |
+| `Yields no AVIF srcset when a width is missing a sibling` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('returns null when a candidate is missing a sibling, after attempting generation for every candidate')` |
 | `Yields no AVIF srcset when none exists` | `tests/Unit/AvifSrcsetBuilderTest.php` → `it('returns null when no sibling exists')` |
 | `Discards an AVIF that is not smaller than the source` | `tests/Integration/AvifVariantGeneratorTest.php` → `test_discards_an_avif_that_is_not_smaller_than_the_source` |
 | `Skips an animated GIF source` | `tests/Integration/AvifVariantGeneratorTest.php` → `test_skips_an_animated_gif_source` |
