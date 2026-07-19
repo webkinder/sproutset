@@ -95,26 +95,19 @@ final class WpAvifSupport implements AvifSupport
 
     private function writeProbeSource(): ?string
     {
-        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagepng')) {
-            return null;
-        }
-
         $tmp = tempnam(sys_get_temp_dir(), 'sps_avif_');
 
         if ($tmp === false) {
             return null;
         }
 
-        $image = imagecreatetruecolor(1, 1);
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC', true);
 
-        if ($image === false) {
+        if ($png === false || file_put_contents($tmp, $png) === false) {
             @unlink($tmp);
 
             return null;
         }
-
-        imagepng($image, $tmp);
-        imagedestroy($image);
 
         return $tmp;
     }
