@@ -28,7 +28,7 @@ When `enabled` is `false`, no probe runs, no files are generated, and no `avifSr
 ```blade
 @if ($avifSrcset)
   <picture>
-    <source type="image/avif" srcset="{{ $avifSrcset }}" sizes="{{ $sizes }}">
+    <source type="image/avif" srcset="{{ $avifSrcset }}"@if($avifSizes) sizes="{{ $avifSizes }}"@endif>
     <img {{ $attributes->class($class)->merge($htmlAttributes) }}>
   </picture>
 @else

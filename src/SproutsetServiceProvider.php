@@ -76,7 +76,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $raw = is_array($raw) ? $raw : [];
 
         $enabled = (bool) ($raw['enabled'] ?? false);
-        $quality = is_numeric($raw['quality'] ?? null) ? (int) $raw['quality'] : 50;
+        $quality = is_numeric($raw['quality'] ?? null) ? max(0, min(100, (int) $raw['quality'])) : 50;
 
         return new AvifConfig($enabled, $quality);
     }
