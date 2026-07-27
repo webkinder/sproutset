@@ -41,6 +41,9 @@ present, the resolved `style` is `object-fit: cover; object-position: <x>% <y>%;
 `object-fit: cover` is required for `object-position` to have any visual effect. If the
 focal point is disabled, or either coordinate is missing, no `style` is produced.
 
+Attachment-level focal points (set in the Media Library and honored automatically, plus
+server-side cropping of hard-crop sizes) are specified in [`focal-point.md`](focal-point.md).
+
 The resolved `width`/`height` describe the box the `<img>` occupies at its **intended**
 size, derived from the requested size's registered spec (`width`, `height`, `crop`) and
 the attachment's real source dimensions. When the source file is smaller than the
