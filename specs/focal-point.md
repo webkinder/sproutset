@@ -103,4 +103,16 @@ Scenario: saving the picker stores and clamps the focal point and invalidates cr
 
 | Scenario | Test |
 | --- | --- |
-| (filled in as tasks land; completed in Task 11) | |
+| computes a crop window centred on the focal point | `tests/Unit/FocalCropWindowTest.php` → `it('matches the target aspect and centres on the focal point')` |
+| clamps the crop window to the original bounds | `tests/Unit/FocalCropWindowTest.php` → `it('clamps the window origin to the original bounds at the far corner')` |
+| reads a stored focal point from attachment meta | `tests/Integration/FocalPointMetaTest.php` → `test_reads_a_stored_focal_point` |
+| treats an unset or center focal point as none | `tests/Integration/FocalPointMetaTest.php` → `test_returns_null_when_no_focal_point_is_stored`, `test_returns_null_for_a_stored_center_point` |
+| emits object-fit and object-position for a cover context | `tests/Unit/FocalPointPositionTest.php` → `it('maps an off-center focal point in a cover context to object-fit and object-position')` |
+| emits plain object-fit cover for a center focal point in a cover context | `tests/Unit/FocalPointPositionTest.php` → `it('emits plain object-fit cover for a center focal point in a cover context')` |
+| emits no style outside a cover context | `tests/Unit/FocalPointPositionTest.php` → `it('returns null when cover is not in play')` |
+| physically crops hard-crop subsizes from the attachment focal point | `tests/Integration/FocalPointCropperTest.php` → `test_crops_hard_crop_subsizes_and_marks_them_applied`; `tests/Integration/WpImageResolverTest.php` → `test_physically_crops_hard_crop_sizes_from_the_attachment_focal_point` |
+| skips subsizes already cropped at the current focal point | `tests/Integration/FocalPointCropperTest.php` → `test_skips_subsizes_already_applied_at_the_current_point` |
+| does not crop when the per-attachment fuse is tripped | `tests/Integration/FocalPointCropperTest.php` → `test_does_not_crop_or_mark_when_the_fuse_is_tripped` |
+| an explicit per-call focal point overrides the stored one for CSS | `tests/Integration/WpImageResolverTest.php` → `test_explicit_coordinates_override_the_attachment_focal_point` |
+| the feature is inert when disabled | `tests/Integration/WpImageResolverTest.php` → `test_is_inert_when_the_feature_is_disabled`; `tests/Feature/FocalPointConfigTest.php` → `it('reflects a disabled focal point config flag')` |
+| saving the picker stores and clamps the focal point and invalidates crops | `tests/Integration/FocalPointMediaFieldTest.php` → `test_saves_and_clamps_the_focal_point_from_the_form`, `test_clears_the_applied_marker_when_the_focal_point_is_saved` |
