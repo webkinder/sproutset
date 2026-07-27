@@ -51,4 +51,17 @@ final class FocalPointMediaFieldTest extends IntegrationTestCase
         $this->assertStringContainsString('value="25"', $html);
         $this->assertStringContainsString('value="75"', $html);
     }
+
+    public function test_uses_the_real_attachment_id_in_the_input_names(): void
+    {
+        $id = $this->seedAttachment();
+        $attachment = get_post($id);
+
+        $html = (new FocalPointMediaField)->addField([], $attachment)['sproutset_focal_point']['html'];
+
+        $this->assertStringContainsString('name="attachments['.$id.'][sproutset_focal_x]"', $html);
+        $this->assertStringContainsString('name="attachments['.$id.'][sproutset_focal_y]"', $html);
+        $this->assertStringNotContainsString('{{ID}}', $html);
+        $this->assertStringContainsString('draggable="false"', $html);
+    }
 }

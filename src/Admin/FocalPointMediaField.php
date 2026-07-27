@@ -35,7 +35,7 @@ final class FocalPointMediaField
         $formFields['sproutset_focal_point'] = [
             'label' => __('Focal point', 'sproutset'),
             'input' => 'html',
-            'html' => $this->markup((string) $preview, $x, $y),
+            'html' => $this->markup($attachment->ID, (string) $preview, $x, $y),
         ];
 
         return $formFields;
@@ -76,19 +76,19 @@ final class FocalPointMediaField
         echo $this->script();
     }
 
-    private function markup(string $preview, float $x, float $y): string
+    private function markup(int $attachmentId, string $preview, float $x, float $y): string
     {
         return sprintf(
             '<div class="sproutset-focal" data-sproutset-focal>'
-            .'<div class="sproutset-focal__stage"><img src="%1$s" alt="">'
+            .'<div class="sproutset-focal__stage"><img src="%1$s" alt="" draggable="false">'
             .'<span class="sproutset-focal__dot" style="left:%2$s%%;top:%3$s%%"></span></div>'
-            .'<input type="hidden" class="sproutset-focal__x" name="attachments[%4$s][sproutset_focal_x]" value="%2$s">'
-            .'<input type="hidden" class="sproutset-focal__y" name="attachments[%4$s][sproutset_focal_y]" value="%3$s">'
+            .'<input type="hidden" class="sproutset-focal__x" name="attachments[%4$d][sproutset_focal_x]" value="%2$s">'
+            .'<input type="hidden" class="sproutset-focal__y" name="attachments[%4$d][sproutset_focal_y]" value="%3$s">'
             .'<p class="description">%5$s</p></div>',
             esc_url($preview),
             esc_attr((string) round($x, 4)),
             esc_attr((string) round($y, 4)),
-            '{{ID}}',
+            $attachmentId,
             esc_html__('Click or drag to set the focal point used for cropping and positioning.', 'sproutset'),
         );
     }
@@ -96,8 +96,10 @@ final class FocalPointMediaField
     private function styles(): string
     {
         return '<style>'
-            .'.sproutset-focal__stage{position:relative;display:inline-block;max-width:100%;cursor:crosshair}'
-            .'.sproutset-focal__stage img{display:block;max-width:100%;height:auto}'
+            .'.sproutset-focal__stage{position:relative;display:inline-block;max-width:100%;cursor:crosshair;'
+            .'user-select:none;-webkit-user-select:none;touch-action:none}'
+            .'.sproutset-focal__stage img{display:block;max-width:100%;height:auto;pointer-events:none;'
+            .'-webkit-user-drag:none;user-select:none;-webkit-user-select:none}'
             .'.sproutset-focal__dot{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid #fff;'
             .'border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.5);pointer-events:none}'
             .'</style>';
@@ -108,33 +110,56 @@ final class FocalPointMediaField
         return <<<'HTML'
 <script>
 (function () {
+    if (window.__sproutsetFocalInit) { return; }
+    window.__sproutsetFocalInit = true;
+
     function clamp(value) { return Math.max(0, Math.min(100, value)); }
 
-    function init(wrapper) {
-        var stage = wrapper.querySelector('.sproutset-focal__stage');
+    function stageFrom(target) {
+        return target && target.closest ? target.closest('.sproutset-focal__stage') : null;
+    }
+
+    function setFromEvent(stage, event) {
+        var wrapper = stage.closest('.sproutset-focal');
+        if (!wrapper) { return; }
         var dot = wrapper.querySelector('.sproutset-focal__dot');
         var inputX = wrapper.querySelector('.sproutset-focal__x');
         var inputY = wrapper.querySelector('.sproutset-focal__y');
-        if (!stage || !dot || !inputX || !inputY) { return; }
+        if (!dot || !inputX || !inputY) { return; }
 
-        function setFromEvent(event) {
-            var rect = stage.getBoundingClientRect();
-            var x = clamp(((event.clientX - rect.left) / rect.width) * 100);
-            var y = clamp(((event.clientY - rect.top) / rect.height) * 100);
-            dot.style.left = x + '%';
-            dot.style.top = y + '%';
-            inputX.value = Math.round(x * 10000) / 10000;
-            inputY.value = Math.round(y * 10000) / 10000;
-            inputX.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-
-        var dragging = false;
-        stage.addEventListener('pointerdown', function (e) { dragging = true; setFromEvent(e); });
-        stage.addEventListener('pointermove', function (e) { if (dragging) { setFromEvent(e); } });
-        window.addEventListener('pointerup', function () { dragging = false; });
+        var rect = stage.getBoundingClientRect();
+        if (!rect.width || !rect.height) { return; }
+        var x = clamp(((event.clientX - rect.left) / rect.width) * 100);
+        var y = clamp(((event.clientY - rect.top) / rect.height) * 100);
+        dot.style.left = x + '%';
+        dot.style.top = y + '%';
+        inputX.value = Math.round(x * 10000) / 10000;
+        inputY.value = Math.round(y * 10000) / 10000;
+        inputX.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    document.querySelectorAll('[data-sproutset-focal]').forEach(init);
+    // Delegated so the picker works whether the field is present on load
+    // (classic edit screen) or injected later by the media modal (AJAX).
+    var active = null;
+
+    document.addEventListener('pointerdown', function (e) {
+        var stage = stageFrom(e.target);
+        if (!stage) { return; }
+        e.preventDefault();
+        active = stage;
+        setFromEvent(stage, e);
+    });
+    document.addEventListener('pointermove', function (e) {
+        if (!active) { return; }
+        e.preventDefault();
+        setFromEvent(active, e);
+    });
+    document.addEventListener('pointerup', function () { active = null; });
+
+    // Suppress the native image drag so it never triggers the media uploader dropzone.
+    document.addEventListener('dragstart', function (e) {
+        if (stageFrom(e.target)) { e.preventDefault(); }
+    });
 })();
 </script>
 HTML;
