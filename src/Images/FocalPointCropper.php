@@ -20,7 +20,13 @@ final class FocalPointCropper
             $this->run($attachmentId, $focal);
         } catch (Throwable) {
             // Boot-safety: never fatal a request over focal cropping.
+            $this->markFailed($attachmentId);
         }
+    }
+
+    public static function clearFuse(int $attachmentId): void
+    {
+        delete_post_meta($attachmentId, self::FAILED_META_KEY);
     }
 
     private function run(int $attachmentId, FocalPoint $focal): void
@@ -108,11 +114,15 @@ final class FocalPointCropper
 
             $this->crops++;
 
-            if (! $this->cropTo($file, $directory.'/'.$size['file'], $window, $targetWidth, $targetHeight)) {
+            $destination = $directory.'/'.$size['file'];
+
+            if (! $this->cropTo($file, $destination, $window, $targetWidth, $targetHeight)) {
                 $this->markFailed($attachmentId);
 
                 return;
             }
+
+            $this->purgeAvifSibling($destination);
 
             FocalPointMeta::markApplied($attachmentId, $sizeName, $signature);
         }
@@ -134,6 +144,26 @@ final class FocalPointCropper
         }
 
         return ! is_wp_error($editor->save($destination));
+    }
+
+    private function purgeAvifSibling(string $file): void
+    {
+        $sibling = $this->avifSiblingPath($file);
+
+        if ($sibling !== null && is_file($sibling)) {
+            @unlink($sibling);
+        }
+    }
+
+    private function avifSiblingPath(string $file): ?string
+    {
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+        if ($extension === '') {
+            return null;
+        }
+
+        return substr($file, 0, -strlen($extension)).'avif';
     }
 
     private function hasFailed(int $attachmentId): bool

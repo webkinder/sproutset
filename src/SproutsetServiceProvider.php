@@ -74,6 +74,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
         add_filter('wp_generate_attachment_metadata', function (mixed $metadata, int $attachmentId): mixed {
             if (config('sproutset.focal_point', true)) {
                 FocalPointMeta::clearApplied($attachmentId);
+                FocalPointCropper::clearFuse($attachmentId);
             }
 
             return $metadata;

@@ -235,4 +235,13 @@ final class WpImageResolverTest extends IntegrationTestCase
         $this->assertSame([], FocalPointMeta::appliedAt($id));
         $this->assertNull($resolved->style);
     }
+
+    public function test_explicit_override_without_stored_metadata_never_triggers_physical_cropping(): void
+    {
+        $id = $this->seedAttachment();
+
+        $this->focalResolver(true)->resolve($this->focalRequest($id, 'thumbnail', true, 10.0, 20.0));
+
+        $this->assertSame([], FocalPointMeta::appliedAt($id));
+    }
 }

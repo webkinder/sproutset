@@ -51,4 +51,34 @@ final class FocalPointCropperTest extends IntegrationTestCase
 
         $this->assertSame([], FocalPointMeta::appliedAt($id));
     }
+
+    public function test_purges_the_avif_sibling_of_a_re_cropped_subsize(): void
+    {
+        $id = $this->seedAttachment();
+        $metadata = wp_get_attachment_metadata($id);
+        $thumbPath = dirname(get_attached_file($id)).'/'.$metadata['sizes']['thumbnail']['file'];
+        $sibling = $this->avifSibling($thumbPath);
+        file_put_contents($sibling, 'avif-bytes');
+        $this->assertFileExists($sibling);
+
+        (new FocalPointCropper)->ensureForAttachment($id, new FocalPoint(25.0, 75.0));
+
+        $this->assertFileDoesNotExist($sibling);
+    }
+
+    public function test_does_not_mark_a_registered_non_crop_size_as_applied(): void
+    {
+        $id = $this->seedAttachment();
+        $metadata = wp_get_attachment_metadata($id);
+        $this->assertArrayHasKey('medium', $metadata['sizes'] ?? []);
+
+        (new FocalPointCropper)->ensureForAttachment($id, new FocalPoint(25.0, 75.0));
+
+        $this->assertArrayNotHasKey('medium', FocalPointMeta::appliedAt($id));
+    }
+
+    private function avifSibling(string $file): string
+    {
+        return substr($file, 0, -strlen(pathinfo($file, PATHINFO_EXTENSION))).'avif';
+    }
 }
