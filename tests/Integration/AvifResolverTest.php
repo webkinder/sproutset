@@ -110,4 +110,31 @@ final class AvifResolverTest extends IntegrationTestCase
 
         $this->assertTrue($foundAvifFile, 'expected at least one .avif file to exist on disk');
     }
+
+    public function test_serves_avif_for_a_single_size_image_without_a_srcset(): void
+    {
+        add_filter('wp_image_editors', static fn (): array => ['WP_Image_Editor_GD']);
+        add_image_size('sproutset_lone_crop', 800, 450, true);
+
+        $id = $this->seedAttachment('example.jpg');
+
+        // A unique-aspect hard crop shares its ratio with no other subsize, so
+        // WordPress produces no responsive srcset for it.
+        $this->assertFalse(wp_get_attachment_image_srcset($id, 'sproutset_lone_crop'));
+
+        $resolved = $this->resolver(new AvifConfig(true, 50), true)
+            ->resolve($this->request($id, 'sproutset_lone_crop'));
+
+        $this->assertNotNull($resolved);
+        $this->assertNull($resolved->srcset);
+        $this->assertNotNull($resolved->avifSrcset);
+
+        $candidates = array_filter(array_map('trim', explode(',', $resolved->avifSrcset)));
+        $this->assertCount(1, $candidates);
+        $this->assertStringEndsWith('.avif', $resolved->avifSrcset);
+
+        $upload = wp_get_upload_dir();
+        $path = $upload['basedir'].substr($resolved->avifSrcset, strlen((string) $upload['baseurl']));
+        $this->assertFileExists($path);
+    }
 }

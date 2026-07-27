@@ -100,7 +100,7 @@ final readonly class WpImageResolver implements ImageResolver
             alt: $this->alt($request),
             style: FocalPointPosition::forCover($this->cssFocal($request), $request->focalPoint || $cover),
             isSvg: false,
-            avifSrcset: $this->avifSrcset($attachment->id, $srcset),
+            avifSrcset: $this->avifSrcset($attachment->id, $src, $srcset),
         );
     }
 
@@ -174,9 +174,9 @@ final readonly class WpImageResolver implements ImageResolver
         return is_string($alt) ? $alt : '';
     }
 
-    private function avifSrcset(int $attachmentId, ?string $originalSrcset): ?string
+    private function avifSrcset(int $attachmentId, string $src, ?string $originalSrcset): ?string
     {
-        if (! $this->avifConfig->enabled || $originalSrcset === null) {
+        if (! $this->avifConfig->enabled) {
             return null;
         }
 
@@ -185,7 +185,7 @@ final readonly class WpImageResolver implements ImageResolver
         }
 
         return AvifSrcsetBuilder::build(
-            $originalSrcset,
+            $originalSrcset ?? $src,
             fn (string $url): ?string => $this->avifSiblingUrl($attachmentId, $url),
         );
     }
