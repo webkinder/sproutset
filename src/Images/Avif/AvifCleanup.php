@@ -8,9 +8,6 @@ use Throwable;
 
 final class AvifCleanup
 {
-    /**
-     * Unlink the .avif siblings sproutset generated for an attachment.
-     */
     public function forget(int $attachmentId): void
     {
         try {

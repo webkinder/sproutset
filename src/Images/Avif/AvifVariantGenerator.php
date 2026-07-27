@@ -18,11 +18,6 @@ final class AvifVariantGenerator
 
     public function __construct(private readonly AvifConfig $config) {}
 
-    /**
-     * Ensure an .avif sibling exists next to an existing subsize file. Returns
-     * its absolute path, or null when skipped (already-failed attachment, cap
-     * reached, animated GIF, encode failure, or a result no smaller than source).
-     */
     public function ensure(int $attachmentId, string $sourceFile): ?string
     {
         $avifFile = $this->siblingPath($sourceFile);

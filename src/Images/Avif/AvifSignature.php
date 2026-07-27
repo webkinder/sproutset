@@ -6,10 +6,6 @@ namespace Webkinder\Sproutset\Images\Avif;
 
 final class AvifSignature
 {
-    /**
-     * True when the bytes are an ISO-BMFF stream whose ftyp box declares an
-     * avif/avis brand — the only reliable proof the encoder actually wrote AVIF.
-     */
     public static function isAvif(string $bytes): bool
     {
         if (strlen($bytes) < 12) {
@@ -25,8 +21,6 @@ final class AvifSignature
         $unpacked = unpack('N', $sizeBytes);
         $boxSize = $unpacked[1];
 
-        // A corrupted/oversized box-size field must not widen the brand scan
-        // past the ftyp box — arbitrary later bytes could otherwise spoof a brand.
         if ($boxSize < 12 || $boxSize > strlen($bytes)) {
             $majorBrand = substr($bytes, 8, 4);
 
