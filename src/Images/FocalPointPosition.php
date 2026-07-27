@@ -6,20 +6,20 @@ namespace Webkinder\Sproutset\Images;
 
 final class FocalPointPosition
 {
-    public static function forRequest(ImageRequest $request): ?string
+    public static function forCover(?FocalPoint $focal, bool $coverInPlay): ?string
     {
-        if (! $request->focalPoint) {
+        if (! $coverInPlay) {
             return null;
         }
 
-        if ($request->focalPointX === null || $request->focalPointY === null) {
-            return null;
+        if (! $focal instanceof FocalPoint || $focal->isCenter()) {
+            return 'object-fit: cover;';
         }
 
         return sprintf(
             'object-fit: cover; object-position: %s%% %s%%;',
-            self::percent($request->focalPointX),
-            self::percent($request->focalPointY),
+            self::percent($focal->x),
+            self::percent($focal->y),
         );
     }
 
