@@ -15,6 +15,7 @@ use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
 use Webkinder\Sproutset\Images\CoreImageSizeOptions;
 use Webkinder\Sproutset\Images\FocalPointConfig;
+use Webkinder\Sproutset\Images\FocalPointCropper;
 use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
 use Webkinder\Sproutset\Images\MediaSettingsLock;
@@ -42,6 +43,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $this->app->singleton(FocalPointConfig::class, fn (): FocalPointConfig => new FocalPointConfig(
             (bool) config('sproutset.focal_point', true),
         ));
+        $this->app->singleton(FocalPointCropper::class);
         $this->app->singleton(AvifSupport::class, WpAvifSupport::class);
         $this->app->singleton(AvifVariantGenerator::class);
     }
