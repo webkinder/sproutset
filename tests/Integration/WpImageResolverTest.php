@@ -8,6 +8,9 @@ use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
+use Webkinder\Sproutset\Images\FocalPointConfig;
+use Webkinder\Sproutset\Images\FocalPointCropper;
+use Webkinder\Sproutset\Images\FocalPointMeta;
 use Webkinder\Sproutset\Images\ImageRequest;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
@@ -24,6 +27,8 @@ final class WpImageResolverTest extends IntegrationTestCase
             new WpAvifSupport(fn (): ?string => null),
             new AvifVariantGenerator($avifConfig),
             $avifConfig,
+            new FocalPointCropper,
+            new FocalPointConfig(true),
         );
     }
 
@@ -161,6 +166,73 @@ final class WpImageResolverTest extends IntegrationTestCase
         $this->assertNotNull($resolved);
         $this->assertSame(1200, $resolved->width);
         $this->assertSame(800, $resolved->height);
+        $this->assertNull($resolved->style);
+    }
+
+    private function focalResolver(bool $enabled): WpImageResolver
+    {
+        $avifConfig = new AvifConfig(false, 50);
+
+        return new WpImageResolver(
+            new WpAttachmentRepository,
+            new OnDemandSizeGenerator,
+            new WpAvifSupport(fn (): ?string => null),
+            new AvifVariantGenerator($avifConfig),
+            $avifConfig,
+            new FocalPointCropper,
+            new FocalPointConfig($enabled),
+        );
+    }
+
+    private function focalRequest(int $id, string $size, bool $explicit, ?float $x, ?float $y): ImageRequest
+    {
+        return new ImageRequest(
+            attachmentId: $id, sizeName: $size, sizes: null, alt: null,
+            width: null, height: null, class: null, loading: 'lazy',
+            decoding: 'async', useAutoSizes: false, focalPoint: $explicit,
+            focalPointX: $x, focalPointY: $y,
+        );
+    }
+
+    public function test_emits_object_position_from_the_attachment_focal_point_in_a_cover_context(): void
+    {
+        $id = $this->seedAttachment();
+        FocalPointMeta::write($id, 25.0, 75.0);
+
+        // focalPoint=true forces a cover context; coords come from metadata.
+        $resolved = $this->focalResolver(true)->resolve($this->focalRequest($id, 'large', true, null, null));
+
+        $this->assertSame('object-fit: cover; object-position: 25% 75%;', $resolved->style);
+    }
+
+    public function test_explicit_coordinates_override_the_attachment_focal_point(): void
+    {
+        $id = $this->seedAttachment();
+        FocalPointMeta::write($id, 25.0, 75.0);
+
+        $resolved = $this->focalResolver(true)->resolve($this->focalRequest($id, 'large', true, 10.0, 20.0));
+
+        $this->assertSame('object-fit: cover; object-position: 10% 20%;', $resolved->style);
+    }
+
+    public function test_physically_crops_hard_crop_sizes_from_the_attachment_focal_point(): void
+    {
+        $id = $this->seedAttachment();
+        FocalPointMeta::write($id, 25.0, 75.0);
+
+        $this->focalResolver(true)->resolve($this->focalRequest($id, 'thumbnail', false, null, null));
+
+        $this->assertSame('25,75', FocalPointMeta::appliedAt($id)['thumbnail'] ?? null);
+    }
+
+    public function test_is_inert_when_the_feature_is_disabled(): void
+    {
+        $id = $this->seedAttachment();
+        FocalPointMeta::write($id, 25.0, 75.0);
+
+        $resolved = $this->focalResolver(false)->resolve($this->focalRequest($id, 'thumbnail', false, null, null));
+
+        $this->assertSame([], FocalPointMeta::appliedAt($id));
         $this->assertNull($resolved->style);
     }
 }

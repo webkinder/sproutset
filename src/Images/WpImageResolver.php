@@ -21,6 +21,8 @@ final readonly class WpImageResolver implements ImageResolver
         private AvifSupport $avifSupport,
         private AvifVariantGenerator $avifGenerator,
         private AvifConfig $avifConfig,
+        private FocalPointCropper $cropper,
+        private FocalPointConfig $focalConfig,
     ) {}
 
     public function resolve(ImageRequest $request): ?ResolvedImage
@@ -53,7 +55,7 @@ final readonly class WpImageResolver implements ImageResolver
             width: null,
             height: null,
             alt: $this->alt($request),
-            style: FocalPointPosition::forRequest($request),
+            style: FocalPointPosition::forCover($this->cssFocal($request), $request->focalPoint),
             isSvg: true,
         );
     }
@@ -67,6 +69,14 @@ final readonly class WpImageResolver implements ImageResolver
         }
 
         $this->sizeGenerator->ensure($attachment->id, $request->sizeName);
+
+        if ($this->focalConfig->enabled) {
+            $metaFocal = FocalPointMeta::read($attachment->id);
+
+            if ($metaFocal instanceof FocalPoint) {
+                $this->cropper->ensureForAttachment($attachment->id, $metaFocal);
+            }
+        }
 
         [$src, $width, $height] = $this->sizedSource($attachment, $request->sizeName);
 
@@ -88,7 +98,7 @@ final readonly class WpImageResolver implements ImageResolver
             width: $width,
             height: $height,
             alt: $this->alt($request),
-            style: $this->style($request, $cover),
+            style: FocalPointPosition::forCover($this->cssFocal($request), $request->focalPoint || $cover),
             isSvg: false,
             avifSrcset: $this->avifSrcset($attachment->id, $srcset),
         );
@@ -140,15 +150,17 @@ final readonly class WpImageResolver implements ImageResolver
         );
     }
 
-    private function style(ImageRequest $request, bool $cover): ?string
+    private function cssFocal(ImageRequest $request): ?FocalPoint
     {
-        $focal = FocalPointPosition::forRequest($request);
-
-        if ($focal !== null) {
-            return $focal;
+        if ($request->focalPoint && $request->focalPointX !== null && $request->focalPointY !== null) {
+            return new FocalPoint($request->focalPointX, $request->focalPointY);
         }
 
-        return $cover ? 'object-fit: cover;' : null;
+        if ($this->focalConfig->enabled) {
+            return FocalPointMeta::read($request->attachmentId);
+        }
+
+        return null;
     }
 
     private function alt(ImageRequest $request): string

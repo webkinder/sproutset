@@ -8,6 +8,8 @@ use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifSupport;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
+use Webkinder\Sproutset\Images\FocalPointConfig;
+use Webkinder\Sproutset\Images\FocalPointCropper;
 use Webkinder\Sproutset\Images\ImageRequest;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
 use Webkinder\Sproutset\Images\WpImageResolver;
@@ -32,6 +34,8 @@ final class AvifResolverTest extends IntegrationTestCase
             $support,
             new AvifVariantGenerator($config),
             $config,
+            new FocalPointCropper,
+            new FocalPointConfig(true),
         );
     }
 
