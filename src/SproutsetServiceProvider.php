@@ -17,6 +17,7 @@ use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
 use Webkinder\Sproutset\Images\CoreImageSizeOptions;
 use Webkinder\Sproutset\Images\FocalPointConfig;
 use Webkinder\Sproutset\Images\FocalPointCropper;
+use Webkinder\Sproutset\Images\FocalPointMeta;
 use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
 use Webkinder\Sproutset\Images\MediaSettingsLock;
@@ -69,6 +70,14 @@ class SproutsetServiceProvider extends PackageServiceProvider
         if (config('sproutset.focal_point', true) && function_exists('is_admin') && is_admin()) {
             $this->app->make(FocalPointMediaField::class)->register();
         }
+
+        add_filter('wp_generate_attachment_metadata', function (mixed $metadata, int $attachmentId): mixed {
+            if (config('sproutset.focal_point', true)) {
+                FocalPointMeta::clearApplied($attachmentId);
+            }
+
+            return $metadata;
+        }, 10, 2);
     }
 
     /**
