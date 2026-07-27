@@ -35,7 +35,7 @@ final class FocalPointMediaField
         $formFields['sproutset_focal_point'] = [
             'label' => __('Focal point', 'sproutset'),
             'input' => 'html',
-            'html' => $this->markup((string) $preview, (float) $x, (float) $y),
+            'html' => $this->markup((string) $preview, $x, $y),
         ];
 
         return $formFields;

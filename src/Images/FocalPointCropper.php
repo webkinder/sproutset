@@ -63,7 +63,15 @@ final class FocalPointCropper
                 return;
             }
 
-            if (! is_string($sizeName) || ! isset($registered[$sizeName]) || ! is_array($registered[$sizeName])) {
+            if (! is_string($sizeName)) {
+                continue;
+            }
+
+            if (! isset($registered[$sizeName])) {
+                continue;
+            }
+
+            if (! is_array($registered[$sizeName])) {
                 continue;
             }
 
@@ -77,7 +85,15 @@ final class FocalPointCropper
                 continue;
             }
 
-            if (! is_array($size) || ! isset($size['file']) || ! is_string($size['file'])) {
+            if (! is_array($size)) {
+                continue;
+            }
+
+            if (! isset($size['file'])) {
+                continue;
+            }
+
+            if (! is_string($size['file'])) {
                 continue;
             }
 
