@@ -64,4 +64,19 @@ return [
         'enabled' => false,
         'quality' => 50,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Focal Point
+    |--------------------------------------------------------------------------
+    |
+    | Attachment-level focal points: set once per image in the Media Library and
+    | honored everywhere <x-sproutset-image> renders it. Hard-crop sizes are
+    | re-cropped around the point; cover contexts get object-position. A center
+    | (50/50) point is a no-op. Set to false to disable the picker, metadata
+    | honoring, and cropping entirely.
+    |
+    */
+
+    'focal_point' => true,
 ];
