@@ -39,3 +39,6 @@ parameters:
         - identifier: argument.type
           path: src/Images/MediaSettingsLock.php
           message: '/Parameter #2 \$domain of function __/'
+        - identifier: argument.type
+          path: src/Admin/FocalPointMediaField.php
+          message: '/Parameter #2 \$domain of function __/'

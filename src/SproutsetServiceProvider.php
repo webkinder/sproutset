@@ -6,6 +6,7 @@ namespace Webkinder\Sproutset;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Webkinder\Sproutset\Admin\FocalPointMediaField;
 use Webkinder\Sproutset\Attachments\AttachmentRepository;
 use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
 use Webkinder\Sproutset\Images\Avif\AvifCleanup;
@@ -64,6 +65,10 @@ class SproutsetServiceProvider extends PackageServiceProvider
         add_action('delete_attachment', function (int $attachmentId): void {
             $this->app->make(AvifCleanup::class)->forget($attachmentId);
         }, 10, 1);
+
+        if (config('sproutset.focal_point', true) && function_exists('is_admin') && is_admin()) {
+            $this->app->make(FocalPointMediaField::class)->register();
+        }
     }
 
     /**
