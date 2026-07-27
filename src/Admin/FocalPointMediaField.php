@@ -138,8 +138,6 @@ final class FocalPointMediaField
         inputX.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    // Delegated so the picker works whether the field is present on load
-    // (classic edit screen) or injected later by the media modal (AJAX).
     var active = null;
 
     document.addEventListener('pointerdown', function (e) {
@@ -156,7 +154,6 @@ final class FocalPointMediaField
     });
     document.addEventListener('pointerup', function () { active = null; });
 
-    // Suppress the native image drag so it never triggers the media uploader dropzone.
     document.addEventListener('dragstart', function (e) {
         if (stageFrom(e.target)) { e.preventDefault(); }
     });
