@@ -45,7 +45,6 @@ it('reports unsupported and does not throw when the probe throws', function (): 
 it('uses a truecolor png as its probe source so gd builds that reject grayscale+alpha can read it', function (): void {
     $support = new WpAvifSupport;
     $method = (new ReflectionClass($support))->getMethod('writeProbeSource');
-    $method->setAccessible(true);
 
     $path = $method->invoke($support);
     expect($path)->toBeString();
