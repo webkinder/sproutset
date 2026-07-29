@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":configMigration",
+    "abandonments:recommended",
+    "security:minimumReleaseAgeNpm",
+    "schedule:weekly"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [],
+      "enabled": false
+    },
+    {
+      "description": "Automatically merge minor and patch-level updates",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Assigning PRs of non-trivial updates",
+      "matchUpdateTypes": [
+        "major",
+        "pin",
+        "pinDigest",
+        "rollback",
+        "bump",
+        "replacement"
+      ],
+      "reviewers": ["marcoluzi"],
+      "automerge": false
+    }
+  ],
+  "timezone": "Europe/Zurich",
+  "rangeStrategy": "replace",
+  "platformAutomerge": true,
+  "rebaseWhen": "conflicted",
+  "rollbackPrs": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardAutoclose": false,
+  "addLabels": ["type:dependency"],
+  "commitMessageAction": "Update",
+  "commitMessageTopic": "{{depName}}",
+  "ignoreTests": true
+}
