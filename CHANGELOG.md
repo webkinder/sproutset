@@ -9,6 +9,13 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.1](https://github.com/webkinder/sproutset/compare/v0.1.0...v1.0.0-rc.1) (2026-07-30)
+
+
+### Changed
+
+* rebuild package for the 1.0 release ([#280](https://github.com/webkinder/sproutset/issues/280)) ([bd228f9](https://github.com/webkinder/sproutset/commit/bd228f92b5cbe9e0175c07259848bfc74ecac63a))
+
 ## [v0.1.0-beta.11] - 2026-05-21
 
 ### Changed
