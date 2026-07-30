@@ -1,6 +1,20 @@
-# Composer
-/vendor
-auth.json
+# Dependencies
+/vendor/
 
-# Node
-/node_modules
+# Composer
+composer.phar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+/.idea/
+/.vscode/
+*.swp
+
+# PHPUnit
+/.phpunit.cache/
+/tests/Integration/vendor/
+/tests/Integration/.phpunit.cache/
+/tests/Integration/.phpunit.result.cache

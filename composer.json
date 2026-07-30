@@ -1,55 +1,82 @@
 {
-  "$schema": "https://getcomposer.org/schema.json",
-  "name": "webkinder/sproutset",
-  "description": "A Composer package for handling responsive images in Roots Bedrock + Sage + Blade projects.",
-  "keywords": [
-    "responsive images",
-    "bedrock",
-    "sage",
-    "blade"
-  ],
-  "homepage": "https://github.com/webkinder/sproutset",
-  "license": "GPL-3.0-or-later",
-  "authors": [
-    {
-      "name": "Marco Luzi",
-      "email": "marco@webkinder.ch"
+    "name": "webkinder/sproutset",
+    "description": "Modern responsive image management for projects using the Roots Acorn framework.",
+    "type": "library",
+    "keywords": ["wordpress", "acorn", "roots", "responsive-images", "image-optimization", "blade"],
+    "homepage": "https://github.com/webkinder/sproutset",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marco Luzi",
+            "email": "marco@webkinder.ch"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/webkinder/sproutset/issues",
+        "source": "https://github.com/webkinder/sproutset"
     },
-    {
-      "name": "Raphael Portmann",
-      "email": "raphael@webkinder.ch"
-    }
-  ],
-  "require": {
-    "php": "^8.3",
-    "roots/acorn": "^6.0",
-    "roots/wordpress-no-content": "^5.9 || ^6.0 || ^7.0",
-    "spatie/image": "^3.8",
-    "spatie/image-optimizer": "^1.8"
-  },
-  "require-dev": {
-    "driftingly/rector-laravel": "^2.1",
-    "laravel/pint": "^1.26",
-    "rector/rector": "^2.3",
-    "wp-cli/i18n-command": "^2.6"
-  },
-  "autoload": {
-    "psr-4": {
-      "Webkinder\\SproutsetPackage\\": "src/"
-    }
-  },
-  "config": {
-    "optimize-autoloader": true,
-    "platform": {
-      "php": "8.3.0"
+    "require": {
+        "php": "^8.4",
+        "roots/acorn": "^6.2",
+        "spatie/laravel-package-tools": "^1.93"
     },
-    "sort-packages": true
-  },
-  "extra": {
-    "acorn": {
-      "providers": [
-        "Webkinder\\SproutsetPackage\\SproutsetServiceProvider"
-      ]
+    "require-dev": {
+        "driftingly/rector-laravel": "^2.5",
+        "larastan/larastan": "^3.10",
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.1",
+        "pestphp/pest": "^5.0",
+        "php-stubs/wordpress-stubs": "^7.0",
+        "rector/rector": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkinder\\Sproutset\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkinder\\Sproutset\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": [
+            "rector",
+            "pint --parallel"
+        ],
+        "lint:check": [
+            "rector --dry-run",
+            "pint --parallel --test"
+        ],
+        "types:check": [
+            "phpstan analyse"
+        ],
+        "test": [
+            "pest"
+        ],
+        "test:integration": [
+            "@composer install --working-dir=tests/Integration --no-interaction --quiet",
+            "@php -r \"passthru('cd tests/Integration && vendor/bin/phpunit', $c); exit($c);\""
+        ],
+        "check": [
+            "@lint:check",
+            "@types:check",
+            "@test"
+        ]
+    },
+    "extra": {
+        "acorn": {
+            "providers": [
+                "Webkinder\\Sproutset\\SproutsetServiceProvider"
+            ]
+        }
     }
-  }
 }

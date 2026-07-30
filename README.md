@@ -2,241 +2,128 @@
 
 Modern responsive image management for projects using the Roots Acorn framework.
 
-## Features
-
-- Automatic `srcset` and `sizes` generation
-- AVIF conversion for JPEG/PNG images
-- Image optimization via Spatie Image Optimizer
-- Custom image sizes with responsive variants
-- Blade component with clean syntax
-- On-the-fly size generation
-- CLI batch optimization
-
 ## Requirements
 
-- PHP ^8.2
-- Roots Acorn ^5.0
-- WordPress ^5.9 || ^6.0 || ^7.0
+- PHP ^8.4
+- WordPress 6.7+
+- Roots Acorn ^6.2
 
 ## Installation
 
+Install via Composer:
+
 ```bash
 composer require webkinder/sproutset
+```
+
+Acorn auto-discovers the service provider (declared under `extra.acorn.providers`), so no manual registration is needed. To customize the defaults, publish the config file:
+
+```bash
 wp acorn vendor:publish --tag=sproutset-config
 ```
 
-The package auto-registers via Acorn. Configure image sizes in `config/sproutset-config.php`.
+This writes `config/sproutset.php`, read throughout via `config('sproutset.*')`.
 
 ## Configuration
 
-Edit `config/sproutset-config.php`:
+`config/sproutset.php` has three blocks.
+
+### Image sizes
+
+`image_sizes` is the complete roster Sproutset registers with WordPress on every request. Each size takes:
+
+- `width` — target width in pixels.
+- `height` — target height in pixels (`0` = proportional).
+- `crop` — `true` for a hard crop, `false` to scale within the box.
+- `srcset` — optional list of multipliers; each adds an `@Nx` variant (e.g. `large@2x`).
+
+The package ships `thumbnail`, `medium`, `medium_large`, and `large`. The four WordPress core sizes are driven from this config, and their fields are locked on **Settings → Media** so they can't drift.
 
 ```php
-return [
-  'convert_to_avif' => true,
-  'auto_optimize_images' => true,
-  'image_size_sync' => [
-    'strategy' => 'admin_request',
-    'cron_interval' => 'daily',
-  ],
-  'image_sizes' => [
-    'thumbnail' => [
-      'width' => 150,
-      'height' => 150,
-      'crop' => true,
-    ],
-    'medium' => [
-      'width' => 400,
-      'height' => 400,
-      'crop' => false,
-    ],
-    'medium_large' => [
-      'width' => 768,
-      'height' => 0,
-      'crop' => false,
-      'srcset' => [
-        0.5,
-        2,
-      ],
-    ],
+'image_sizes' => [
     'large' => [
-      'width' => 1024,
-      'height' => 1024,
-      'crop' => false,
-      'srcset' => [
-        0.5,
-        2,
-      ],
-      'show_in_ui' => true,
+        'width' => 1024,
+        'height' => 1024,
+        'crop' => false,
+        'srcset' => [0.5, 2],
     ],
-  ],
-];
-```
-
-### Global Options
-
-- **`convert_to_avif`**: Enable automatic AVIF conversion for JPEG/PNG images
-- **`auto_optimize_images`**: Optimize images on upload (requires optimization binaries)
-- **`image_size_sync.strategy`**: Controls when WordPress image size options are synchronized with the Sproutset config. Supported values: `request`, `admin_request` (default), `cron`, `manual`.
-- **`image_size_sync.cron_interval`**: WP-Cron schedule key used when the strategy is `cron` (for example `daily`, `hourly`, or a custom schedule registered by your project).
-- **`focal_point_cropping`**: Controls if and how focal-point-based recropping runs. Accepts `false`/`null` (disabled), `true` (immediate), or an array with `strategy` (`immediate` or `cron`) and optional `delay_seconds`.
-- **`max_on_demand_generations_per_request`**: Limits how many missing sizes may be generated (and focal-cropped) on-the-fly during a single web request. Use `0` to disable the limit.
-
-### Image Size Options
-
-- **`width`**: Width in pixels (0 for proportional)
-- **`height`**: Height in pixels (0 for proportional)
-- **`crop`**: Hard crop (`true`) or proportional resize (`false`)
-- **`srcset`**: Array of multipliers for responsive variants, e.g., `[0.5, 2]`
-- **`show_in_ui`**: Show in media library (`true` or custom label string)
-- **`post_types`**: Limit generation on upload to specific post types, e.g., `['post', 'page']`. Note: Missing sizes are still generated on-the-fly when requested.
-
-**Required sizes:** `thumbnail`, `medium`, `medium_large`, `large`
-
-**Example:**
-
-```php
-'hero' => [
-  'width' => 1920,
-  'height' => 1080,
-  'crop' => true,
-  'srcset' => [0.5, 2],
-  'show_in_ui' => 'Hero Image',
-  'post_types' => ['post', 'page'],
 ],
 ```
 
-### Image Size Synchronization
+### AVIF
 
-Sproutset keeps WordPress' core image size options (for example `thumbnail_size_w`, `medium_size_w`, etc.) in sync with the `image_sizes` configuration. This ensures that functions like `wp_get_attachment_image_src()` and other plugins that read these options always see the correct dimensions. Synchronization is guarded by a configuration hash so it only runs when the underlying configuration actually changes. When needed, you can influence when this synchronization happens via the `image_size_sync.strategy` option, the `SPROUTSET_IMAGE_SIZE_SYNC_STRATEGY` env/constant, or the `sproutset_image_size_sync_strategy` filter.
+`avif` opts into AVIF delivery for images rendered through the component. Disabled is a guaranteed no-op.
 
-In environments where you prefer not to run synchronization logic during web requests, you can switch the strategy to `cron` or `manual` and trigger updates explicitly using the CLI command:
+```php
+'avif' => [
+    'enabled' => false, // opt-in
+    'quality' => 50,    // 0–100
+],
+```
 
-```bash
-wp acorn sproutset:sync-image-sizes           # Sync core image size options with Sproutset config
-wp acorn sproutset:sync-image-sizes --force   # Force sync even if no config change is detected
+### Focal point
+
+`focal_point` (default `true`) enables per-image focal points set in the Media Library. Set it to `false` to disable the picker, metadata honoring, and cropping.
+
+```php
+'focal_point' => true,
 ```
 
 ## Usage
 
-Basic usage:
+Render an attachment with the `<x-sproutset-image>` Blade component:
 
 ```blade
-<x-sproutset-image :attachment-id="$attachment_id" size-name="large" />
+<x-sproutset-image :attachment-id="$id" size-name="large" />
 ```
 
-### Parameters
+If the attachment can't be resolved, the component renders nothing.
 
-The component accepts loose types for all parameters (strings, integers, booleans, null) and normalizes them internally. You can pass values as strings from HTML attributes or as typed values from PHP/Blade.
+### Attributes
 
-**Required:**
+| Attribute | Default | Notes |
+| --- | --- | --- |
+| `attachment-id` | `0` | Attachment ID (int or numeric string). |
+| `size-name` | `large` | A registered size name. |
+| `sizes` | `null` | Explicit `sizes` attribute; overrides auto sizes. |
+| `alt` | `null` | Alt text. |
+| `width` / `height` | `null` | Override the rendered box. |
+| `class` | `null` | Merged with the element's classes. |
+| `loading` | `lazy` | `lazy` or `eager`. |
+| `decoding` | `async` | `async`, `sync`, or `auto`. |
+| `use-auto-sizes` | `true` | Resolve `sizes="auto"` for lazy images when no explicit `sizes` is given. |
+| `focal-point` | `false` | Enable per-call focal positioning. |
+| `focal-point-x` / `focal-point-y` | `null` | Focal coordinates, `0`–`100`. |
 
-- **`attachment-id`**: WordPress attachment ID (accepts `int`, `string`, or numeric values)
+Any other attribute (`id`, `data-*`, `aria-*`, `title`, …) passes through onto the `<img>`.
 
-**Optional:**
+When `use-auto-sizes` is on and no explicit `sizes` is set, lazy-loaded images resolve `sizes="auto"`; eager images omit it (`sizes="auto"` is only valid for lazy images).
 
-- **`size-name`**: Image size name (default: `'large'`)
-- **`sizes`**: Custom `sizes` attribute (default: auto-generated)
-- **`alt`**: Alt text (default: from WordPress metadata)
-- **`width`** / **`height`**: Custom dimensions (default: auto-detected, accepts numeric strings)
-- **`class`**: CSS classes (merged with any classes passed via attribute bag)
-- **`loading`**: Loading strategy (default: `'lazy'`). Allowed values: `'lazy'`, `'eager'`.
-- **`decoding`**: Decoding strategy (default: `'async'`). Allowed values: `'async'`, `'sync'`, `'auto'`.
-- **`use-auto-sizes`**: Add `auto,` prefix to the `sizes` attribute (default: `true`)
-- **`focal-point`**: Enable focal point styling/cropping for this image (default: `false`)
-- **`focal-point-x`** / **`focal-point-y`**: Override focal point coordinates (0–100, in percent) when `focal-point` is enabled; defaults are read from the attachment metadata.
+## AVIF
 
-**Arbitrary HTML Attributes:**
+With `avif.enabled` set, Sproutset layers an AVIF `<source>` over the original `<img>` inside a `<picture>`:
 
-Any additional attributes (like `id`, `data-*`, `aria-*`, `title`, etc.) are automatically passed through Laravel's attribute bag and merged into the rendered `<img>` tag.
+```html
+<picture>
+  <source type="image/avif" srcset="…">
+  <img src="…" …>
+</picture>
+```
 
-### Examples
+It is additive — the original `<img>` is always the fallback — and never touches WordPress's global image pipeline, so favicons, `og:image`, and admin thumbnails are unaffected. The one CSS caveat: a direct-child selector like `.gallery > img` becomes `.gallery > picture > img`.
+
+## Focal point
+
+Set a focal point once per image in the Media Library and it is honored everywhere `<x-sproutset-image>` renders it — hard-crop sizes are re-cropped around the point, and cover contexts get `object-position`. A center (50/50) point is a no-op. Override a single placement with the component's attributes:
 
 ```blade
-{{-- Basic usage with string ID --}}
-<x-sproutset-image attachment-id="123" size-name="medium" />
-
-{{-- With PHP variable (integer) --}}
-<x-sproutset-image :attachment-id="$post->thumbnail()->id" size-name="hero" />
-
-{{-- Custom alt and class --}}
-<x-sproutset-image :attachment-id="$post->thumbnail()->id" size-name="hero" alt="Hero banner" class="w-full" />
-
-{{-- Multiple classes (component class + user class) --}}
-<x-sproutset-image :attachment-id="$id" size-name="large" class="rounded-lg shadow-md" />
-
-{{-- Custom sizes attribute --}}
-<x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" />
-
-{{-- Disable lazy loading (above-the-fold images) --}}
-<x-sproutset-image :attachment-id="$hero" size-name="hero" loading="eager" />
-
-{{-- Disable auto prefix for sizes --}}
-<x-sproutset-image :attachment-id="$id" size-name="large" sizes="(max-width: 768px) 100vw, 50vw" :use-auto-sizes="false" />
-
-{{-- Use media library focal point --}}
-<x-sproutset-image :attachment-id="$hero" size-name="hero" focal-point="true" />
-
-{{-- With arbitrary HTML attributes (id, data-*, aria-*, etc.) --}}
-<x-sproutset-image
-    :attachment-id="$id"
-    size-name="large"
-    id="hero-image"
-    data-gallery="main"
-    aria-describedby="image-caption"
-    title="Hero image"
-/>
+<x-sproutset-image :attachment-id="$id" size-name="large" focal-point focal-point-x="30" focal-point-y="70" />
 ```
-
-### Focal Point Cropping
-
-Sproutset lets you define a focal point per image in the WordPress media library and uses it when cropping hard-cropped sizes.
-
-- **Configuration:** Enable via `focal_point_cropping` (boolean or array with `strategy` = `immediate` or `cron` and optional `delay_seconds`).
-- **Media UI:** Set the focal point using the drag handle in the media modal. The coordinates are stored on the attachment.
-- **Component usage:** Pass `focal-point="true"` (and optionally `focal-point-x` / `focal-point-y`) to apply the focal point via `object-position`.
-- **CLI:** Run `wp acorn sproutset:reapply-focal-crop [--optimize]` to reapply focal crops for existing attachments. The `--optimize` flag will also optimize the images.
-- **On-demand generation:** On-the-fly generation of missing sizes respects `max_on_demand_generations_per_request` to avoid heavy single requests.
-
-### Automatic Behavior
-
-- Auto-generated `sizes` attribute based on actual image width
-- Smart `srcset` variants from your config (e.g., `@0.5x`, `@2x`)
-- `object-fit: cover` applied when images are smaller than configured dimensions
-- On-the-fly generation of missing sizes
-
-## Optimization
-
-Sproutset integrates with [Spatie Image Optimizer](https://github.com/spatie/image-optimizer) for image optimization.
-
-### Install Optimization Binaries
-
-**Supported formats:** JPEG (jpegoptim), PNG (optipng/pngquant), WebP (cwebp), AVIF (avifenc), SVG (svgo), GIF (gifsicle)
-
-See [Spatie Image Optimizer](https://github.com/spatie/image-optimizer?tab=readme-ov-file#optimization-tools) for installation instructions.
-
-### Automatic Optimization
-
-When `auto_optimize_images` is enabled:
-
-- Images are optimized on upload
-- Generated sizes are optimized on-the-fly
-- Runs in background via WordPress cron
-- Already optimized images are skipped
-
-### CLI Batch Optimization
-
-```bash
-wp acorn sproutset:optimize           # Optimize unoptimized images
-wp acorn sproutset:optimize --force   # Re-optimize all images
-```
-
-The command shows a progress bar and lists available/missing binaries.
 
 ## Contributing
 
-Contributions are welcome! See [Contributing Guide](CONTRIBUTING.md) for details on reporting bugs, development workflow, and pull request process.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
-Licensed under [GPL-3.0](LICENSE.md). Free to use, modify, and distribute under GPL-3.0 terms.
+Sproutset is open-source software licensed under the [GNU General Public License v3.0](LICENSE).

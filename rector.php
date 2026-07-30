@@ -6,8 +6,6 @@ use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\Config\RectorConfig;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
-use RectorLaravel\Rector\ArrayDimFetch\ServerVariableToRequestFacadeRector;
-use RectorLaravel\Rector\Class_\AddHasFactoryToModelsRector;
 use RectorLaravel\Set\LaravelSetList;
 use RectorLaravel\Set\LaravelSetProvider;
 
@@ -35,20 +33,19 @@ return RectorConfig::configure()
     )
     ->withPaths([
         __DIR__.'/src',
+        __DIR__.'/tests',
     ])
-    ->withRootFiles()
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
         MakeInheritedMethodVisibilitySameAsParentRector::class,
-        ServerVariableToRequestFacadeRector::class,
-        AddHasFactoryToModelsRector::class,
+        __DIR__.'/tests/Integration',
     ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
-        codingStyle: true,
         typeDeclarations: true,
         privatization: true,
         earlyReturn: true,
+        codingStyle: true,
     )
     ->withPhpSets();

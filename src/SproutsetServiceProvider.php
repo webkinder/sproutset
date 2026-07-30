@@ -2,86 +2,103 @@
 
 declare(strict_types=1);
 
-namespace Webkinder\SproutsetPackage;
+namespace Webkinder\Sproutset;
 
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\ServiceProvider;
-use Webkinder\SproutsetPackage\Components\Image;
-use Webkinder\SproutsetPackage\Console\Optimize;
-use Webkinder\SproutsetPackage\Console\ReapplyFocalCrop;
-use Webkinder\SproutsetPackage\Console\RegenerateMissingSizes;
-use Webkinder\SproutsetPackage\Console\SyncImageSizes;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Webkinder\Sproutset\Admin\FocalPointMediaField;
+use Webkinder\Sproutset\Attachments\AttachmentRepository;
+use Webkinder\Sproutset\Attachments\WpAttachmentRepository;
+use Webkinder\Sproutset\Images\Avif\AvifCleanup;
+use Webkinder\Sproutset\Images\Avif\AvifConfig;
+use Webkinder\Sproutset\Images\Avif\AvifSupport;
+use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
+use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
+use Webkinder\Sproutset\Images\CoreImageSizeOptions;
+use Webkinder\Sproutset\Images\FocalPointConfig;
+use Webkinder\Sproutset\Images\FocalPointCropper;
+use Webkinder\Sproutset\Images\FocalPointMeta;
+use Webkinder\Sproutset\Images\ImageResolver;
+use Webkinder\Sproutset\Images\ImageSizeRegistrar;
+use Webkinder\Sproutset\Images\MediaSettingsLock;
+use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
+use Webkinder\Sproutset\Images\WpImageResolver;
+use Webkinder\Sproutset\View\Components\Image;
 
-final class SproutsetServiceProvider extends ServiceProvider
+class SproutsetServiceProvider extends PackageServiceProvider
 {
-    public function register(): void
+    public function configurePackage(Package $package): void
     {
-        $this->app->singleton(Sproutset::class, fn (): Sproutset => new Sproutset());
-
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/sproutset-config.php',
-            'sproutset-config'
-        );
+        $package
+            ->name('sproutset')
+            ->hasConfigFile()
+            ->hasViews()
+            ->hasViewComponents('sproutset', Image::class);
     }
 
-    public function boot(): void
+    public function packageRegistered(): void
     {
-        $this->publishConfiguration();
-        $this->disableAutoSyncDuringSyncCommand();
-        $this->initializeSproutset();
-        $this->registerBladeComponents();
-        $this->registerConsoleCommands();
+        $this->app->bind(AttachmentRepository::class, WpAttachmentRepository::class);
+        $this->app->singleton(OnDemandSizeGenerator::class);
+        $this->app->bind(ImageResolver::class, WpImageResolver::class);
+        $this->app->singleton(AvifConfig::class, fn (): AvifConfig => $this->avifConfig());
+        $this->app->singleton(FocalPointConfig::class, fn (): FocalPointConfig => new FocalPointConfig(
+            (bool) config('sproutset.focal_point', true),
+        ));
+        $this->app->singleton(FocalPointCropper::class);
+        $this->app->singleton(AvifSupport::class, WpAvifSupport::class);
+        $this->app->singleton(AvifVariantGenerator::class);
     }
 
-    private function publishConfiguration(): void
+    public function packageBooted(): void
     {
-        $this->publishes([
-            __DIR__.'/../config/sproutset-config.php' => config_path('sproutset-config.php'),
-        ], 'sproutset-config');
-    }
-
-    private function initializeSproutset(): void
-    {
-        $this->app->make(Sproutset::class);
-    }
-
-    private function registerBladeComponents(): void
-    {
-        Blade::component('sproutset-image', Image::class);
-    }
-
-    private function registerConsoleCommands(): void
-    {
-        $this->commands([
-            Optimize::class,
-            ReapplyFocalCrop::class,
-            SyncImageSizes::class,
-            RegenerateMissingSizes::class,
-        ]);
-    }
-
-    private function disableAutoSyncDuringSyncCommand(): void
-    {
-        if (! $this->isSyncImageSizesCommand()) {
+        if (! function_exists('add_action')) {
             return;
         }
 
-        add_filter('sproutset_image_size_sync_strategy', static fn (): string => 'manual');
+        add_action('after_setup_theme', function (): void {
+            $this->app->make(ImageSizeRegistrar::class)->register($this->imageSizesConfig());
+        }, 10);
+
+        $this->app->make(CoreImageSizeOptions::class)->register($this->imageSizesConfig());
+        $this->app->make(MediaSettingsLock::class)->register($this->imageSizesConfig());
+
+        add_action('delete_attachment', function (int $attachmentId): void {
+            $this->app->make(AvifCleanup::class)->forget($attachmentId);
+        }, 10, 1);
+
+        if (config('sproutset.focal_point', true) && function_exists('is_admin') && is_admin()) {
+            $this->app->make(FocalPointMediaField::class)->register();
+        }
+
+        add_filter('wp_generate_attachment_metadata', function (mixed $metadata, int $attachmentId): mixed {
+            if (config('sproutset.focal_point', true)) {
+                FocalPointMeta::clearApplied($attachmentId);
+                FocalPointCropper::clearFuse($attachmentId);
+            }
+
+            return $metadata;
+        }, 10, 2);
     }
 
-    private function isSyncImageSizesCommand(): bool
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function imageSizesConfig(): array
     {
-        if (PHP_SAPI !== 'cli') {
-            return false;
-        }
+        $rawConfig = config('sproutset.image_sizes', []);
 
-        $arguments = Request::server('argv') ?? [];
+        return is_array($rawConfig) ? $rawConfig : [];
+    }
 
-        if (! is_array($arguments)) {
-            $arguments = (array) $arguments;
-        }
+    private function avifConfig(): AvifConfig
+    {
+        $raw = config('sproutset.avif', []);
+        $raw = is_array($raw) ? $raw : [];
 
-        return in_array('sproutset:sync-image-sizes', $arguments, true);
+        $enabled = (bool) ($raw['enabled'] ?? false);
+        $quality = is_numeric($raw['quality'] ?? null) ? max(0, min(100, (int) $raw['quality'])) : 50;
+
+        return new AvifConfig($enabled, $quality);
     }
 }
