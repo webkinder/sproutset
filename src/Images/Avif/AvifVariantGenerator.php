@@ -113,12 +113,12 @@ final class AvifVariantGenerator
             return null;
         }
 
-        return substr($file, 0, -strlen($extension)).'avif';
+        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 
     private function isAnimatedGif(string $file): bool
     {
-        if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) !== 'gif') {
+        if (mb_strtolower(pathinfo($file, PATHINFO_EXTENSION)) !== 'gif') {
             return false;
         }
 
@@ -128,7 +128,7 @@ final class AvifVariantGenerator
             return false;
         }
 
-        return substr_count($contents, self::GCE_MARKER) > 1;
+        return mb_substr_count($contents, self::GCE_MARKER) > 1;
     }
 
     private function hasFailed(int $attachmentId): bool

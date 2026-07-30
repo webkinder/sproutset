@@ -59,6 +59,6 @@ final class AvifCleanup
             return null;
         }
 
-        return substr($file, 0, -strlen($extension)).'avif';
+        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 }

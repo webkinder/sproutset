@@ -16,7 +16,7 @@
         "source": "https://github.com/webkinder/sproutset"
     },
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "roots/acorn": "^6.2",
         "spatie/laravel-package-tools": "^1.93"
     },
@@ -25,7 +25,7 @@
         "larastan/larastan": "^3.10",
         "laravel/pint": "^1.29",
         "orchestra/testbench": "^11.1",
-        "pestphp/pest": "^4.7",
+        "pestphp/pest": "^5.0",
         "php-stubs/wordpress-stubs": "^7.0",
         "rector/rector": "^2.5"
     },

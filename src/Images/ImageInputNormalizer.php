@@ -60,7 +60,7 @@ final class ImageInputNormalizer
     private static function normalizeEnum(mixed $value, array $allowed, string $default): string
     {
         if (is_string($value)) {
-            $trimmed = mb_strtolower(trim($value));
+            $trimmed = mb_strtolower(mb_trim($value));
 
             if ($trimmed !== '' && in_array($trimmed, $allowed, true)) {
                 return $trimmed;
@@ -93,7 +93,7 @@ final class ImageInputNormalizer
             return self::DEFAULT_SIZE_NAME;
         }
 
-        $trimmed = trim($value);
+        $trimmed = mb_trim($value);
 
         return $trimmed !== '' ? $trimmed : self::DEFAULT_SIZE_NAME;
     }
@@ -112,7 +112,7 @@ final class ImageInputNormalizer
             }
         }
 
-        $trimmed = trim($value);
+        $trimmed = mb_trim($value);
 
         return $trimmed !== '' ? $trimmed : null;
     }
@@ -128,7 +128,7 @@ final class ImageInputNormalizer
         }
 
         if (is_string($value)) {
-            $trimmed = trim($value);
+            $trimmed = mb_trim($value);
 
             if ($trimmed === '' || ! is_numeric($trimmed)) {
                 return null;
@@ -155,7 +155,7 @@ final class ImageInputNormalizer
         }
 
         if (is_string($value)) {
-            $lower = mb_strtolower(trim($value));
+            $lower = mb_strtolower(mb_trim($value));
 
             if (in_array($lower, ['true', '1', 'yes', 'on'], true)) {
                 return true;
@@ -180,7 +180,7 @@ final class ImageInputNormalizer
         }
 
         if (is_string($value)) {
-            $trimmed = trim($value);
+            $trimmed = mb_trim($value);
 
             if ($trimmed === '' || ! is_numeric($trimmed)) {
                 return null;

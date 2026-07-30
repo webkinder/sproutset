@@ -8,12 +8,12 @@ This is a composer library for the Roots Acorn framework (Laravel-flavored conta
 
 Runtime dependencies:
 
-    php - ^8.3 (CI matrix: 8.3, 8.4, 8.5)
+    php - ^8.4 (CI matrix: 8.4, 8.5)
     roots/acorn (ACORN) - ^6.2
 
 Dev dependencies (tooling, not shipped):
 
-    pestphp/pest (PEST) - ^4.7
+    pestphp/pest (PEST) - ^5.0
     larastan/larastan (LARASTAN) - ^3.10
     laravel/pint (PINT) - ^1.29
     rector/rector (RECTOR) - ^2.5

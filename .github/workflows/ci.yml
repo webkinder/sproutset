@@ -4,9 +4,10 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
@@ -17,24 +18,24 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        uses: ramsey/composer-install@v3
 
       - name: Lint (Rector + Pint, check only)
         run: composer lint:check
 
-      - name: Static analysis (PHPStan, php 8.3–8.5 range)
+      - name: Static analysis (PHPStan)
         run: composer types:check
 
   test:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        php: ['8.3', '8.4', '8.5']
+        php: ['8.4', '8.5']
     name: test (php ${{ matrix.php }})
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +47,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        uses: ramsey/composer-install@v3
 
       - name: Test (Pest)
         run: composer test
@@ -54,7 +55,7 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         wp: ['6.5', 'latest']
     name: integration (wp ${{ matrix.wp }})
@@ -77,10 +78,15 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: mysqli, gd
           coverage: none
           tools: wp-cli
+
+      - name: Install drift-lane dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          working-directory: tests/Integration
 
       - name: Download WordPress core (${{ matrix.wp }})
         run: |

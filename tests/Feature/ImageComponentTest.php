@@ -49,7 +49,7 @@ it('renders nothing when resolution returns null', function (): void {
 
     $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
 
-    expect(trim($html))->toBe('');
+    expect(mb_trim($html))->toBe('');
 });
 
 it('drops empty resolved attributes', function (): void {
@@ -120,7 +120,7 @@ it('renders nothing when the boot-safe null resolver is bound', function (): voi
 
     $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
 
-    expect(trim($html))->toBe('');
+    expect(mb_trim($html))->toBe('');
 });
 
 it('renders nothing when the resolved source is empty', function (): void {
@@ -137,7 +137,7 @@ it('renders nothing when the resolved source is empty', function (): void {
 
     $html = Blade::render('<x-sproutset-image :attachment-id="42" />');
 
-    expect(trim($html))->toBe('');
+    expect(mb_trim($html))->toBe('');
 });
 
 it('applies consumer loading and decoding overrides', function (): void {

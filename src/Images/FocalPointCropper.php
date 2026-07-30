@@ -14,6 +14,11 @@ final class FocalPointCropper
 
     private int $crops = 0;
 
+    public static function clearFuse(int $attachmentId): void
+    {
+        delete_post_meta($attachmentId, self::FAILED_META_KEY);
+    }
+
     public function ensureForAttachment(int $attachmentId, FocalPoint $focal): void
     {
         try {
@@ -22,11 +27,6 @@ final class FocalPointCropper
             // Boot-safety: never fatal a request over focal cropping.
             $this->markFailed($attachmentId);
         }
-    }
-
-    public static function clearFuse(int $attachmentId): void
-    {
-        delete_post_meta($attachmentId, self::FAILED_META_KEY);
     }
 
     private function run(int $attachmentId, FocalPoint $focal): void
@@ -163,7 +163,7 @@ final class FocalPointCropper
             return null;
         }
 
-        return substr($file, 0, -strlen($extension)).'avif';
+        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 
     private function hasFailed(int $attachmentId): bool

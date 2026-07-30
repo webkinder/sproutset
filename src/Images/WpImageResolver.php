@@ -213,7 +213,7 @@ final readonly class WpImageResolver implements ImageResolver
             return null;
         }
 
-        return $baseDir.substr($url, strlen($baseUrl));
+        return $baseDir.mb_substr($url, mb_strlen($baseUrl));
     }
 
     private function pathToUrl(string $path): ?string
@@ -226,6 +226,6 @@ final readonly class WpImageResolver implements ImageResolver
             return null;
         }
 
-        return $baseUrl.substr($path, strlen($baseDir));
+        return $baseUrl.mb_substr($path, mb_strlen($baseDir));
     }
 }

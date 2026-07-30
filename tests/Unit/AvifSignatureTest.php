@@ -8,7 +8,7 @@ use Webkinder\Sproutset\Images\Avif\AvifSignature;
 function ftypBytes(string $majorBrand, string $compatible = ''): string
 {
     $body = 'ftyp'.$majorBrand."\x00\x00\x00\x00".$compatible;
-    $size = pack('N', 4 + strlen($body));
+    $size = pack('N', 4 + mb_strlen($body));
 
     return $size.$body;
 }

@@ -9,7 +9,7 @@ function avifFixtureBytes(): string
 {
     $body = 'ftypavif'."\x00\x00\x00\x00";
 
-    return pack('N', 4 + strlen($body)).$body;
+    return pack('N', 4 + mb_strlen($body)).$body;
 }
 
 it('produces a well-formed avif fixture', function (): void {
@@ -44,7 +44,7 @@ it('reports unsupported and does not throw when the probe throws', function (): 
 
 it('uses a truecolor png as its probe source so gd builds that reject grayscale+alpha can read it', function (): void {
     $support = new WpAvifSupport;
-    $method = (new ReflectionClass($support))->getMethod('writeProbeSource');
+    $method = new ReflectionClass($support)->getMethod('writeProbeSource');
 
     $path = $method->invoke($support);
     expect($path)->toBeString();
