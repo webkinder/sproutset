@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        wp: ['6.5', 'latest']
+        wp: ['6.7', 'latest']
     name: integration (wp ${{ matrix.wp }})
     services:
       mysql:
