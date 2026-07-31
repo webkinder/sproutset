@@ -22,7 +22,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: Lint (Rector + Pint, check only)
         run: composer lint:check
@@ -47,7 +47,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: Test (Pest)
         run: composer test
@@ -84,7 +84,7 @@ jobs:
           tools: wp-cli
 
       - name: Install drift-lane dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
         with:
           working-directory: tests/Integration
 
