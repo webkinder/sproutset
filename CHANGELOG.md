@@ -9,6 +9,13 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.2](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-07-31)
+
+
+### Fixed
+
+* only offer the focal point picker for croppable attachments ([#281](https://github.com/webkinder/sproutset/issues/281)) ([df2fe0b](https://github.com/webkinder/sproutset/commit/df2fe0b71d79b80bed2f102ff2f271e504a0f476))
+
 ## [1.0.0-rc.1](https://github.com/webkinder/sproutset/compare/v0.1.0...v1.0.0-rc.1) (2026-07-30)
 
 
