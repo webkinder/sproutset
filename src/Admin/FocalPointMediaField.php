@@ -58,6 +58,10 @@ final class FocalPointMediaField
             return $post;
         }
 
+        if (! $this->isCroppable($id)) {
+            return $post;
+        }
+
         FocalPointMeta::write($id, (float) $attachment['sproutset_focal_x'], (float) $attachment['sproutset_focal_y']);
         FocalPointMeta::clearApplied($id);
 
