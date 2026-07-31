@@ -64,4 +64,14 @@ final class FocalPointMediaFieldTest extends IntegrationTestCase
         $this->assertStringNotContainsString('{{ID}}', $html);
         $this->assertStringContainsString('draggable="false"', $html);
     }
+
+    public function test_does_not_offer_the_picker_for_an_svg_attachment(): void
+    {
+        $id = $this->seedAttachment('example.svg');
+        $attachment = get_post($id);
+
+        $fields = (new FocalPointMediaField)->addField([], $attachment);
+
+        $this->assertArrayNotHasKey('sproutset_focal_point', $fields);
+    }
 }

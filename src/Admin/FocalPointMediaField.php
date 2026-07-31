@@ -23,7 +23,7 @@ final class FocalPointMediaField
      */
     public function addField(array $formFields, WP_Post $attachment): array
     {
-        if (! wp_attachment_is_image($attachment->ID)) {
+        if (! $this->isCroppable($attachment->ID)) {
             return $formFields;
         }
 
@@ -74,6 +74,17 @@ final class FocalPointMediaField
 
         echo $this->styles();
         echo $this->script();
+    }
+
+    private function isCroppable(int $attachmentId): bool
+    {
+        if (! wp_attachment_is_image($attachmentId)) {
+            return false;
+        }
+
+        $mime = get_post_mime_type($attachmentId);
+
+        return $mime !== false && wp_image_editor_supports(['mime_type' => $mime]);
     }
 
     private function markup(int $attachmentId, string $preview, float $x, float $y): string
