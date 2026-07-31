@@ -1,62 +1,13 @@
-## Description
+## Summary
 
-<!-- Provide a clear and concise description of your changes -->
+<!-- What does this PR change and why? -->
 
-## Related Issue
+## Related issue
 
-<!-- Please link to the issue here using #issue-number -->
-
-Fixes #
-
-## Branch Type and Merge Strategy
-
-<!-- Put an `x` in the box that applies -->
-
-- [ ] Feature branch → develop (Will use squash merge)
-- [ ] Release branch → main (Will use --no-ff merge commit)
-- [ ] Hotfix branch → main and develop (Will use --no-ff merge commit)
-- [ ] Main branch → develop (Will use --no-ff merge commit)
-
-## Type of Change
-
-<!-- Put an `x` in all the boxes that apply -->
-
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Code refactoring
-- [ ] Performance improvement
-- [ ] Release
-- [ ] Other
+<!-- e.g. Closes #123 -->
 
 ## Checklist
 
-<!-- Put an `x` in all the boxes that apply -->
-
-- [ ] My code follows the project's coding standards
-- [ ] I have updated the documentation accordingly
-- [ ] I have updated the changelog
-- [ ] I have checked for and resolved any merge conflicts
-- [ ] I have confirmed the correct merge strategy will be used (see Branch Type above)
-- [ ] I have updated CREDITS.md if necessary
-
-## Screenshots (if applicable)
-
-<!-- Add screenshots to help explain your changes -->
-
-## Additional Context
-
-<!-- Add any other context about the pull request here -->
-
-## Testing Instructions
-
-<!-- Please provide step-by-step instructions for testing your changes -->
-
-1.
-2.
-3.
-
-## Deployment Notes (if applicable)
-
-<!-- Note any deployment considerations, such as database migrations, environment variables, etc. -->
+- [ ] PR title follows [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `perf:`, `revert:`)
+- [ ] Changes are focused on a single concern
+- [ ] I have tested these changes

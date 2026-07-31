@@ -5,17 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
-### Added
+## Older releases (0.1.x beta line)
 
-### Fixed
+## [1.0.0-rc.1](https://github.com/webkinder/sproutset/compare/v0.1.0...v1.0.0-rc.1) (2026-07-30)
 
-- Preserve site icon as PNG when AVIF conversion is enabled to prevent Google crawler favicon detection failures by @marcoluzi in #249
 
 ### Changed
 
-### Removed
+* rebuild package for the 1.0 release ([#280](https://github.com/webkinder/sproutset/issues/280)) ([bd228f9](https://github.com/webkinder/sproutset/commit/bd228f92b5cbe9e0175c07259848bfc74ecac63a))
 
 ## [v0.1.0-beta.11] - 2026-05-21
 

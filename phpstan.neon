@@ -1,0 +1,44 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+    - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+
+    paths:
+        - src
+        - tests
+
+    excludePaths:
+        - tests/Integration
+
+    scanFiles:
+        - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
+
+    level: max
+
+    tmpDir: /tmp/phpstan
+
+    ignoreErrors:
+        - identifier: method.internalClass
+        - identifier: property.notFound
+          path: tests/
+          message: '/Pest\\Mixins\\Expectation.*::\$not/'
+        - identifier: method.nonObject
+          path: tests/Feature/ImageComponentTest.php
+          message: '/Cannot call method \w+\(\) on mixed\./'
+        - identifier: property.nonObject
+          path: tests/Feature/ImageComponentTest.php
+          message: '/Cannot access property \$not on mixed\./'
+        - identifier: method.nonObject
+          path: tests/Feature/AvifImageComponentTest.php
+          message: '/Cannot call method \w+\(\) on mixed\./'
+        - identifier: property.nonObject
+          path: tests/Feature/AvifImageComponentTest.php
+          message: '/Cannot access property \$not on mixed\./'
+        - identifier: argument.type
+          path: src/Images/MediaSettingsLock.php
+          message: '/Parameter #2 \$domain of function __/'
+        - identifier: argument.type
+          path: src/Admin/FocalPointMediaField.php
+          message: '/Parameter #2 \$domain of function __/'

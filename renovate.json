@@ -7,12 +7,8 @@
     ":configMigration",
     "abandonments:recommended",
     "security:minimumReleaseAgeNpm",
-    ":rebaseStalePrs"
+    "schedule:weekly"
   ],
-  "branchPrefix": "deps/",
-  "labels": ["type:dependency"],
-  "baseBranchPatterns": ["main"],
-  "semanticCommits": "enabled",
   "packageRules": [
     {
       "matchPackageNames": [],
@@ -30,22 +26,16 @@
         "major",
         "pin",
         "pinDigest",
-        "lockFileMaintenance",
         "rollback",
         "bump",
         "replacement"
       ],
-      "reviewers": ["marcoluzi", "raphaelportmann"],
-      "labels": ["needs:tests"],
+      "reviewers": ["marcoluzi"],
       "automerge": false
     }
   ],
   "timezone": "Europe/Zurich",
-  "schedule": [
-    "after 10pm every weekday",
-    "before 5am every weekday",
-    "every weekend"
-  ],
+  "rangeStrategy": "replace",
   "platformAutomerge": true,
   "rebaseWhen": "conflicted",
   "rollbackPrs": true,
@@ -54,13 +44,5 @@
   "addLabels": ["type:dependency"],
   "commitMessageAction": "Update",
   "commitMessageTopic": "{{depName}}",
-  "lockFileMaintenance": {
-    "enabled": true,
-    "commitMessageAction": "Lock file maintenance",
-    "prBodyDefinitions": {
-      "Change": "All locks refreshed"
-    }
-  },
-  "ignoreTests": true,
-  "composerIgnorePlatformReqs": null,
+  "ignoreTests": true
 }
