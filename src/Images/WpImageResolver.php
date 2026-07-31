@@ -55,7 +55,7 @@ final readonly class WpImageResolver implements ImageResolver
             width: null,
             height: null,
             alt: $this->alt($request),
-            style: FocalPointPosition::forCover($this->cssFocal($request), $request->focalPoint),
+            style: null,
             isSvg: true,
         );
     }

@@ -244,4 +244,16 @@ final class WpImageResolverTest extends IntegrationTestCase
 
         $this->assertSame([], FocalPointMeta::appliedAt($id));
     }
+
+    public function test_emits_no_focal_style_for_an_svg(): void
+    {
+        $id = $this->seedAttachment('example.svg');
+        FocalPointMeta::write($id, 25.0, 75.0);
+
+        $resolved = $this->focalResolver(true)->resolve($this->focalRequest($id, 'large', true, 10.0, 20.0));
+
+        $this->assertNotNull($resolved);
+        $this->assertTrue($resolved->isSvg);
+        $this->assertNull($resolved->style);
+    }
 }
