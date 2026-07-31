@@ -38,7 +38,10 @@ honoring, and cropping. The explicit per-call attribute is independent of the fl
 **Picker eligibility.** The picker is offered — and focal saves accepted — only for attachments
 the registered WordPress image editor can process, probed with `wp_image_editor_supports()`.
 This excludes SVG. Because the probe reflects the server's GD/Imagick build, eligibility is
-capability-dependent: a host without AVIF support shows no picker on AVIF uploads.
+capability-dependent: a host without AVIF support shows no picker on AVIF uploads. A first gate,
+`wp_attachment_is_image()`, constrains eligibility to `image/*` mime types; it is deliberately
+retained rather than replaced by the editor probe, because `wp_image_editor_supports()` alone
+returns `true` for `application/pdf` on an Imagick build with a Ghostscript delegate.
 
 Scenario: computes a crop window centred on the focal point
   Given an original larger than a square crop target and a focal point of 25/75
