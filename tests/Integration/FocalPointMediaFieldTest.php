@@ -64,4 +64,26 @@ final class FocalPointMediaFieldTest extends IntegrationTestCase
         $this->assertStringNotContainsString('{{ID}}', $html);
         $this->assertStringContainsString('draggable="false"', $html);
     }
+
+    public function test_does_not_offer_the_picker_for_an_svg_attachment(): void
+    {
+        $id = $this->seedAttachment('example.svg');
+        $attachment = get_post($id);
+
+        $fields = (new FocalPointMediaField)->addField([], $attachment);
+
+        $this->assertArrayNotHasKey('sproutset_focal_point', $fields);
+    }
+
+    public function test_ignores_a_focal_point_save_for_an_svg_attachment(): void
+    {
+        $id = $this->seedAttachment('example.svg');
+
+        (new FocalPointMediaField)->saveField(
+            ['ID' => $id],
+            ['sproutset_focal_x' => '25', 'sproutset_focal_y' => '75'],
+        );
+
+        $this->assertNull(FocalPointMeta::read($id));
+    }
 }

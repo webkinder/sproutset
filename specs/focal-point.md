@@ -14,7 +14,8 @@ the image into a box, so the two mechanisms split by size type:
 - **Hard-crop registered sizes** — the generated subsize file is physically re-cropped around the
   focal point, sourced from the original. Focal-correct across the whole `srcset`, no CSS.
 - **CSS `object-fit: cover; object-position: x% y%`** — emitted only where cover is in play: an
-  explicit per-call `focal-point` request, the crop-size upscale-too-small fallback, and SVG.
+  explicit per-call `focal-point` request and the crop-size upscale-too-small fallback. SVG is
+  excluded from the feature and never receives focal styling.
 - **Non-crop sizes without explicit cover** — no focal effect.
 
 **Precedence.** CSS position uses `explicit per-call coords → attachment metadata → center`.
@@ -33,6 +34,14 @@ render re-crops. A crop failure trips a per-attachment fuse and the image serves
 
 **Configuration.** `config('sproutset.focal_point')` (default `true`) gates the picker, metadata
 honoring, and cropping. The explicit per-call attribute is independent of the flag.
+
+**Picker eligibility.** The picker is offered — and focal saves accepted — only for attachments
+the registered WordPress image editor can process, probed with `wp_image_editor_supports()`.
+This excludes SVG. Because the probe reflects the server's GD/Imagick build, eligibility is
+capability-dependent: a host without AVIF support shows no picker on AVIF uploads. A first gate,
+`wp_attachment_is_image()`, constrains eligibility to `image/*` mime types; it is deliberately
+retained rather than replaced by the editor probe, because `wp_image_editor_supports()` alone
+returns `true` for `application/pdf` on an Imagick build with a Ghostscript delegate.
 
 Scenario: computes a crop window centred on the focal point
   Given an original larger than a square crop target and a focal point of 25/75
@@ -99,6 +108,16 @@ Scenario: saving the picker stores and clamps the focal point and invalidates cr
   When the attachment form is saved
   Then the coordinates are clamped and stored and the applied-marker is cleared
 
+Scenario: the picker is only offered for attachments the image editor can crop
+  Given an SVG attachment
+  When the attachment edit fields are built, and when a focal point save is posted for it
+  Then no focal point field is added and no coordinates are stored
+
+Scenario: SVG receives no focal styling
+  Given an SVG attachment with a stored focal point and an explicit per-call focal request
+  When the image is resolved
+  Then no style is produced
+
 ## Acceptance criteria
 
 | Scenario | Test |
@@ -116,3 +135,5 @@ Scenario: saving the picker stores and clamps the focal point and invalidates cr
 | an explicit per-call focal point overrides the stored one for CSS | `tests/Integration/WpImageResolverTest.php` → `test_explicit_coordinates_override_the_attachment_focal_point` |
 | the feature is inert when disabled | `tests/Integration/WpImageResolverTest.php` → `test_is_inert_when_the_feature_is_disabled`; `tests/Feature/FocalPointConfigTest.php` → `it('reflects a disabled focal point config flag')` |
 | saving the picker stores and clamps the focal point and invalidates crops | `tests/Integration/FocalPointMediaFieldTest.php` → `test_saves_and_clamps_the_focal_point_from_the_form`, `test_clears_the_applied_marker_when_the_focal_point_is_saved` |
+| the picker is only offered for attachments the image editor can crop | `tests/Integration/FocalPointMediaFieldTest.php` → `test_does_not_offer_the_picker_for_an_svg_attachment`, `test_ignores_a_focal_point_save_for_an_svg_attachment` |
+| SVG receives no focal styling | `tests/Integration/WpImageResolverTest.php` → `test_emits_no_focal_style_for_an_svg` |
