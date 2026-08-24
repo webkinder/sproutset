@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\Sproutset\Images;
 
 use Throwable;
+use Webkinder\Sproutset\Images\Avif\AvifSiblingPath;
 
 final class FocalPointCropper
 {
@@ -122,7 +123,7 @@ final class FocalPointCropper
                 return;
             }
 
-            $this->purgeAvifSibling($destination);
+            $this->purgeAvifSibling($destination, $attachmentId);
 
             FocalPointMeta::markApplied($attachmentId, $sizeName, $signature);
         }
@@ -146,24 +147,13 @@ final class FocalPointCropper
         return ! is_wp_error($editor->save($destination));
     }
 
-    private function purgeAvifSibling(string $file): void
+    private function purgeAvifSibling(string $file, int $attachmentId): void
     {
-        $sibling = $this->avifSiblingPath($file);
+        $sibling = AvifSiblingPath::for($file, $attachmentId);
 
         if ($sibling !== null && is_file($sibling)) {
             @unlink($sibling);
         }
-    }
-
-    private function avifSiblingPath(string $file): ?string
-    {
-        $extension = pathinfo($file, PATHINFO_EXTENSION);
-
-        if ($extension === '') {
-            return null;
-        }
-
-        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 
     private function hasFailed(int $attachmentId): bool

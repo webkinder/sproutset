@@ -20,7 +20,7 @@ final class AvifVariantGenerator
 
     public function ensure(int $attachmentId, string $sourceFile): ?string
     {
-        $avifFile = $this->siblingPath($sourceFile);
+        $avifFile = AvifSiblingPath::for($sourceFile, $attachmentId);
 
         if ($avifFile === null) {
             return null;
@@ -103,17 +103,6 @@ final class AvifVariantGenerator
         }
 
         return $avifSize >= $sourceSize;
-    }
-
-    private function siblingPath(string $file): ?string
-    {
-        $extension = pathinfo($file, PATHINFO_EXTENSION);
-
-        if ($extension === '') {
-            return null;
-        }
-
-        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 
     private function isAnimatedGif(string $file): bool
