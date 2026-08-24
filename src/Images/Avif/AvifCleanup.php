@@ -43,22 +43,11 @@ final class AvifCleanup
         }
 
         foreach ($targets as $target) {
-            $sibling = $this->siblingPath($target);
+            $sibling = AvifSiblingPath::for($target, $attachmentId);
 
             if ($sibling !== null && is_file($sibling)) {
                 @unlink($sibling);
             }
         }
-    }
-
-    private function siblingPath(string $file): ?string
-    {
-        $extension = pathinfo($file, PATHINFO_EXTENSION);
-
-        if ($extension === '') {
-            return null;
-        }
-
-        return mb_substr($file, 0, -mb_strlen($extension)).'avif';
     }
 }

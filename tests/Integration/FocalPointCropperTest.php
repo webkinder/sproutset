@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webkinder\Sproutset\Tests\Integration;
 
+use Webkinder\Sproutset\Images\Avif\AvifSiblingPath;
 use Webkinder\Sproutset\Images\FocalPoint;
 use Webkinder\Sproutset\Images\FocalPointCropper;
 use Webkinder\Sproutset\Images\FocalPointMeta;
@@ -57,7 +58,7 @@ final class FocalPointCropperTest extends IntegrationTestCase
         $id = $this->seedAttachment();
         $metadata = wp_get_attachment_metadata($id);
         $thumbPath = dirname(get_attached_file($id)).'/'.$metadata['sizes']['thumbnail']['file'];
-        $sibling = $this->avifSibling($thumbPath);
+        $sibling = $this->avifSibling($thumbPath, $id);
         file_put_contents($sibling, 'avif-bytes');
         $this->assertFileExists($sibling);
 
@@ -77,8 +78,8 @@ final class FocalPointCropperTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('medium', FocalPointMeta::appliedAt($id));
     }
 
-    private function avifSibling(string $file): string
+    private function avifSibling(string $file, int $attachmentId): ?string
     {
-        return substr($file, 0, -strlen(pathinfo($file, PATHINFO_EXTENSION))).'avif';
+        return AvifSiblingPath::for($file, $attachmentId);
     }
 }

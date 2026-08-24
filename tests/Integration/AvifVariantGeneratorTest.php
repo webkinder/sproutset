@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webkinder\Sproutset\Tests\Integration;
 
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
+use Webkinder\Sproutset\Images\Avif\AvifSiblingPath;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 
 final class AvifVariantGeneratorTest extends IntegrationTestCase
@@ -68,7 +69,7 @@ final class AvifVariantGeneratorTest extends IntegrationTestCase
         $avif = $this->generator()->ensure($id, $source);
 
         $this->assertNull($avif);
-        $this->assertFileDoesNotExist(substr($source, 0, -3).'avif');
+        $this->assertFileDoesNotExist(AvifSiblingPath::for($source, $id));
     }
 
     public function test_skips_an_animated_gif_source(): void
@@ -81,20 +82,39 @@ final class AvifVariantGeneratorTest extends IntegrationTestCase
         $avif = $this->generator()->ensure($id, $source);
 
         $this->assertNull($avif);
-        $this->assertFileDoesNotExist(substr($source, 0, -3).'avif');
+        $this->assertFileDoesNotExist(AvifSiblingPath::for($source, $id));
     }
 
     public function test_returns_an_existing_avif_sibling_without_regenerating(): void
     {
         $id = $this->seedAttachment('example.jpg');
         $source = get_attached_file($id);
-        $sibling = substr($source, 0, -strlen(pathinfo($source, PATHINFO_EXTENSION))).'avif';
+        $sibling = AvifSiblingPath::for($source, $id);
         file_put_contents($sibling, 'sentinel-not-a-real-avif');
 
         $result = $this->generator()->ensure($id, $source);
 
         $this->assertSame($sibling, $result);
         $this->assertSame('sentinel-not-a-real-avif', file_get_contents($sibling)); // untouched = not regenerated
+    }
+
+    public function test_generates_distinct_avif_siblings_for_attachments_sharing_a_basename(): void
+    {
+        if (! $this->serverCanWriteAvif()) {
+            $this->markTestSkipped('Server image editor cannot write AVIF.');
+        }
+
+        $pngId = $this->seedAttachment('example.png');
+        $jpgId = $this->seedAttachment('example.jpg');
+
+        $pngAvif = $this->generator()->ensure($pngId, get_attached_file($pngId));
+        $jpgAvif = $this->generator()->ensure($jpgId, get_attached_file($jpgId));
+
+        $this->assertNotNull($pngAvif);
+        $this->assertNotNull($jpgAvif);
+        $this->assertNotSame($pngAvif, $jpgAvif);
+        $this->assertFileExists($pngAvif);
+        $this->assertFileExists($jpgAvif);
     }
 
     public function test_trips_the_fuse_and_skips_retrying_after_an_encode_failure(): void
