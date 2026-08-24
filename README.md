@@ -5,7 +5,7 @@ Modern responsive image management for projects using the Roots Acorn framework.
 ## Requirements
 
 - PHP ^8.4
-- WordPress 6.7+
+- WordPress 6.7+ (tested up to 7.1)
 - Roots Acorn ^6.2
 
 ## Installation

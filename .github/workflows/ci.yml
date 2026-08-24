@@ -97,15 +97,17 @@ jobs:
           fi
 
       # The bundled WordPress test suite (wp-phpunit) is versioned per WordPress
-      # release; align it with the core under test so the suite matches its APIs.
+      # release; align it with the core that was actually downloaded so the suite
+      # matches its APIs even as `latest` moves on to a new major series.
       - name: Align the WordPress test suite to the series
         run: |
-          if [ "${{ matrix.wp }}" = "latest" ]; then
-            CONSTRAINT="^7.0"
-          else
-            CONSTRAINT="${{ matrix.wp }}.*"
+          SERIES=$(wp core version --path=/tmp/wordpress | cut -d. -f1,2)
+          if [ -z "${SERIES}" ]; then
+            echo "Could not determine the WordPress version under test" >&2
+            exit 1
           fi
-          composer require --working-dir=tests/Integration --dev --with-all-dependencies --no-interaction "wp-phpunit/wp-phpunit:${CONSTRAINT}"
+          echo "Aligning wp-phpunit to WordPress ${SERIES}"
+          composer require --working-dir=tests/Integration --dev --with-all-dependencies --no-interaction "wp-phpunit/wp-phpunit:${SERIES}.*"
 
       - name: Run the drift lane
         env:
