@@ -9,6 +9,17 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.3](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **avif:** scope AVIF sibling filenames by attachment ID to prevent collisions ([#289](https://github.com/webkinder/sproutset/issues/289))
+
+### Fixed
+
+* **avif:** scope AVIF sibling filenames by attachment ID to prevent collisions ([#289](https://github.com/webkinder/sproutset/issues/289)) ([ac6eb40](https://github.com/webkinder/sproutset/commit/ac6eb4040552de87ccd01cd4de505c3c6b315292))
+
 ## [1.0.0-rc.2](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2026-07-31)
 
 
