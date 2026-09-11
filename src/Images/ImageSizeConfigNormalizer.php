@@ -8,7 +8,7 @@ final class ImageSizeConfigNormalizer
 {
     /**
      * @param  array<array-key, mixed>  $rawConfig
-     * @return array<string, array{width: int, height: int, crop: bool}>
+     * @return array<string, array{width: int<0, max>, height: int<0, max>, crop: bool}>
      */
     public function normalize(array $rawConfig): array
     {
@@ -31,8 +31,8 @@ final class ImageSizeConfigNormalizer
 
             foreach ($this->multipliers($sizeConfig['srcset'] ?? null) as $multiplier) {
                 $normalized[$sizeName.'@'.$multiplier.'x'] = [
-                    'width' => $width > 0 ? (int) ($width * $multiplier) : 0,
-                    'height' => $height > 0 ? (int) ($height * $multiplier) : 0,
+                    'width' => $width > 0 ? max(0, (int) ($width * $multiplier)) : 0,
+                    'height' => $height > 0 ? max(0, (int) ($height * $multiplier)) : 0,
                     'crop' => $crop,
                 ];
             }
@@ -61,6 +61,9 @@ final class ImageSizeConfigNormalizer
         return $multipliers;
     }
 
+    /**
+     * @return int<0, max>
+     */
     private function toNonNegativeInt(mixed $value): int
     {
         return is_numeric($value) ? max(0, (int) $value) : 0;

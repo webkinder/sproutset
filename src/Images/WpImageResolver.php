@@ -137,9 +137,9 @@ final readonly class WpImageResolver implements ImageResolver
             return null;
         }
 
-        $targetWidth = is_numeric($spec['width'] ?? null) ? (int) $spec['width'] : 0;
-        $targetHeight = is_numeric($spec['height'] ?? null) ? (int) $spec['height'] : 0;
-        $crop = (bool) ($spec['crop'] ?? false);
+        $targetWidth = (int) $spec['width'];
+        $targetHeight = (int) $spec['height'];
+        $crop = (bool) $spec['crop'];
 
         return PresentedDimensions::forSource(
             $targetWidth,
@@ -206,8 +206,8 @@ final readonly class WpImageResolver implements ImageResolver
     private function urlToPath(string $url): ?string
     {
         $uploads = wp_get_upload_dir();
-        $baseUrl = is_string($uploads['baseurl'] ?? null) ? $uploads['baseurl'] : '';
-        $baseDir = is_string($uploads['basedir'] ?? null) ? $uploads['basedir'] : '';
+        $baseUrl = $uploads['baseurl'];
+        $baseDir = $uploads['basedir'];
 
         if ($baseUrl === '' || ! str_starts_with($url, $baseUrl)) {
             return null;
@@ -219,8 +219,8 @@ final readonly class WpImageResolver implements ImageResolver
     private function pathToUrl(string $path): ?string
     {
         $uploads = wp_get_upload_dir();
-        $baseDir = is_string($uploads['basedir'] ?? null) ? $uploads['basedir'] : '';
-        $baseUrl = is_string($uploads['baseurl'] ?? null) ? $uploads['baseurl'] : '';
+        $baseDir = $uploads['basedir'];
+        $baseUrl = $uploads['baseurl'];
 
         if ($baseDir === '' || ! str_starts_with($path, $baseDir)) {
             return null;

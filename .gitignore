@@ -13,6 +13,9 @@ Thumbs.db
 /.vscode/
 *.swp
 
+# Local, machine-specific Claude instructions
+/CLAUDE.local.md
+
 # PHPUnit
 /.phpunit.cache/
 /tests/Integration/vendor/
