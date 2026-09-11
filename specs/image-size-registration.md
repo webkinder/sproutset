@@ -10,6 +10,12 @@ Normalization coerces `width`/`height` to non-negative integers and `crop` to a 
 
 Registration strips every currently-registered subsize (`remove_image_size()` over `wp_get_registered_image_subsizes()`), then registers each normalized entry. Because this runs on `after_setup_theme` at priority 10, the "complete roster" holds for sizes registered at priority ≤ 10; sizes other plugins register later still apply. WordPress core sizes (thumbnail/medium/medium_large/large) are option-driven and survive the strip unless the config overrides them by name. The package ships those four as defaults so a fresh install keeps working.
 
+## Srcset width ceiling
+
+WordPress' `wp_calculate_image_srcset()` drops any candidate wider than `apply_filters('max_srcset_image_width', 2048, $size_array)` unless that exact width is one of the requested size's dimensions. Configured `@Nx` variants routinely exceed 2048px (a `large@3x` at 3072, or any base above 2048), so the files `OnDemandSizeGenerator` produces for them would be generated yet silently excluded from the emitted srcset.
+
+`SrcsetWidthLimit`, registered on the boot path from the same `config('sproutset.image_sizes')` roster, lifts the ceiling to the largest configured width. It reads the normalized roster (base sizes and their `@Nx` variants) and computes the largest width. When that exceeds WordPress' 2048px default, it registers a `max_srcset_image_width` filter returning `max($currentValue, $largestConfiguredWidth)` — so a higher value another plugin already set is never lowered. When no configured width exceeds the default, no filter is registered and srcset output stays byte-identical to WordPress' behavior.
+
 ## Scenarios
 
 ```gherkin
@@ -62,6 +68,41 @@ Scenario: Normalizes the shipped default config
   Given the shipped config('sproutset.image_sizes') defaults
   When the config is normalized
   Then it yields the four base sizes plus @0.5x and @2x variants for medium_large and large, with large@2x sized 2048x2048
+
+Scenario: Derives the ceiling from the largest configured width
+  Given a config whose largest variant is wider than the 2048px default
+  When the srcset width ceiling is computed
+  Then it equals that largest variant width
+
+Scenario: Counts a base size that itself exceeds the default
+  Given a config with a base size wider than the 2048px default and no variants
+  When the srcset width ceiling is computed
+  Then it equals that base size width
+
+Scenario: Yields no ceiling when the default already covers every width
+  Given a config whose every width is at or below the 2048px default
+  When the srcset width ceiling is computed
+  Then no ceiling is produced
+
+Scenario: Yields no ceiling for an empty config
+  Given an empty config
+  When the srcset width ceiling is computed
+  Then no ceiling is produced
+
+Scenario: Raises the live max_srcset_image_width filter
+  Given a registered ceiling for a config with a variant wider than the default
+  When max_srcset_image_width is filtered from its 2048 default
+  Then it returns the largest configured width
+
+Scenario: Never lowers a ceiling another plugin raised higher
+  Given a registered ceiling below a value another plugin already set
+  When max_srcset_image_width is filtered from that higher value
+  Then it returns the higher value unchanged
+
+Scenario: Leaves the filter untouched when no width exceeds the default
+  Given a config whose every width is at or below the default
+  When max_srcset_image_width is filtered from its 2048 default
+  Then it returns 2048
 ```
 
 ## Acceptance criteria
@@ -80,3 +121,10 @@ Each scenario above maps 1:1 to a test:
 | `Ships default image sizes` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('ships the default image sizes in config')` |
 | `Registrar resolves from the container` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('resolves the image size registrar from the container')` |
 | `Normalizes the shipped default config` | `tests/Feature/ImageSizeRegistrationTest.php` → `it('normalizes the shipped default config into base sizes and variants')` |
+| `Derives the ceiling from the largest configured width` | `tests/Unit/SrcsetWidthLimitTest.php` → `it('raises the ceiling to the largest variant wider than the WordPress default')` |
+| `Counts a base size that itself exceeds the default` | `tests/Unit/SrcsetWidthLimitTest.php` → `it('considers a base size that itself exceeds the default')` |
+| `Yields no ceiling when the default already covers every width` | `tests/Unit/SrcsetWidthLimitTest.php` → `it('leaves the default in place when no configured width exceeds it')` |
+| `Yields no ceiling for an empty config` | `tests/Unit/SrcsetWidthLimitTest.php` → `it('returns null for an empty config')` |
+| `Raises the live max_srcset_image_width filter` | `tests/Integration/SrcsetWidthLimitTest.php` → `test_raises_the_srcset_ceiling_to_the_largest_configured_width` |
+| `Never lowers a ceiling another plugin raised higher` | `tests/Integration/SrcsetWidthLimitTest.php` → `test_never_lowers_a_ceiling_another_plugin_raised_higher` |
+| `Leaves the filter untouched when no width exceeds the default` | `tests/Integration/SrcsetWidthLimitTest.php` → `test_leaves_the_default_untouched_when_no_width_exceeds_it` |

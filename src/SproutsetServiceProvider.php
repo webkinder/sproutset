@@ -22,6 +22,7 @@ use Webkinder\Sproutset\Images\ImageResolver;
 use Webkinder\Sproutset\Images\ImageSizeRegistrar;
 use Webkinder\Sproutset\Images\MediaSettingsLock;
 use Webkinder\Sproutset\Images\OnDemandSizeGenerator;
+use Webkinder\Sproutset\Images\SrcsetWidthLimit;
 use Webkinder\Sproutset\Images\WpImageResolver;
 use Webkinder\Sproutset\View\Components\Image;
 
@@ -62,6 +63,7 @@ class SproutsetServiceProvider extends PackageServiceProvider
 
         $this->app->make(CoreImageSizeOptions::class)->register($this->imageSizesConfig());
         $this->app->make(MediaSettingsLock::class)->register($this->imageSizesConfig());
+        $this->app->make(SrcsetWidthLimit::class)->register($this->imageSizesConfig());
 
         add_action('delete_attachment', function (int $attachmentId): void {
             $this->app->make(AvifCleanup::class)->forget($attachmentId);
