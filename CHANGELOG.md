@@ -9,6 +9,13 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.4](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2026-09-11)
+
+
+### Added
+
+* lift WordPress srcset 2048px ceiling for configured retina widths ([#292](https://github.com/webkinder/sproutset/issues/292)) ([f85f6d8](https://github.com/webkinder/sproutset/commit/f85f6d88b6d4ddb647fc22e4752059a19cc474e7))
+
 ## [1.0.0-rc.3](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2026-08-24)
 
 
