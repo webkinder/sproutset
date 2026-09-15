@@ -52,7 +52,10 @@ final class Image extends Component
     {
         $resolved = resolve(ImageResolver::class)->resolve($this->request);
 
-        return ViewFactory::make('sproutset::components.image', [
+        /** @var view-string $view */
+        $view = 'sproutset::components.image';
+
+        return ViewFactory::make($view, [
             'src' => $resolved?->src,
             'class' => $this->request->class,
             'avifSrcset' => $resolved?->avifSrcset,
