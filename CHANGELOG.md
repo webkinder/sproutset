@@ -9,6 +9,18 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.5](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2026-09-18)
+
+
+### Added
+
+* inject original as srcset fallback for source-limited crop sizes ([#295](https://github.com/webkinder/sproutset/issues/295)) ([e5b329c](https://github.com/webkinder/sproutset/commit/e5b329cf2eda9180e8acf0036dfc7cb8a2681ed7))
+
+
+### Fixed
+
+* annotate package view name as view-string for larastan ([7c8d18e](https://github.com/webkinder/sproutset/commit/7c8d18e0b997cfb1508447ac13b5e84b492bb594))
+
 ## [1.0.0-rc.4](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2026-09-11)
 
 
