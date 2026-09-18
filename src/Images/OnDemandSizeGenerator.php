@@ -12,6 +12,19 @@ final class OnDemandSizeGenerator
 
     private int $generations = 0;
 
+    public function ensureFamily(int $attachmentId, string $sizeName): void
+    {
+        $this->ensure($attachmentId, $sizeName);
+
+        $prefix = $sizeName.'@';
+
+        foreach (array_keys(wp_get_registered_image_subsizes()) as $registeredName) {
+            if (str_starts_with($registeredName, $prefix)) {
+                $this->ensure($attachmentId, $registeredName);
+            }
+        }
+    }
+
     public function ensure(int $attachmentId, string $sizeName): void
     {
         if ($this->generations >= self::MAX_GENERATIONS_PER_REQUEST) {
