@@ -15,6 +15,7 @@ use Webkinder\Sproutset\Images\Avif\AvifSupport;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 use Webkinder\Sproutset\Images\Avif\WpAvifSupport;
 use Webkinder\Sproutset\Images\CoreImageSizeOptions;
+use Webkinder\Sproutset\Images\EagerGenerationDeferral;
 use Webkinder\Sproutset\Images\FocalPointConfig;
 use Webkinder\Sproutset\Images\FocalPointCropper;
 use Webkinder\Sproutset\Images\FocalPointMeta;
@@ -64,6 +65,10 @@ class SproutsetServiceProvider extends PackageServiceProvider
         $this->app->make(CoreImageSizeOptions::class)->register($this->imageSizesConfig());
         $this->app->make(MediaSettingsLock::class)->register($this->imageSizesConfig());
         $this->app->make(SrcsetWidthLimit::class)->register($this->imageSizesConfig());
+        $this->app->make(EagerGenerationDeferral::class)->register(
+            (bool) config('sproutset.defer_generation', false),
+            $this->imageSizesConfig(),
+        );
 
         add_action('delete_attachment', function (int $attachmentId): void {
             $this->app->make(AvifCleanup::class)->forget($attachmentId);

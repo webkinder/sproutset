@@ -26,7 +26,7 @@ This writes `config/sproutset.php`, read throughout via `config('sproutset.*')`.
 
 ## Configuration
 
-`config/sproutset.php` has three blocks.
+`config/sproutset.php` has four blocks.
 
 ### Image sizes
 
@@ -67,6 +67,14 @@ The package ships `thumbnail`, `medium`, `medium_large`, and `large`. The four W
 
 ```php
 'focal_point' => true,
+```
+
+### Defer generation
+
+`defer_generation` (default `false`) defers the `@Nx` srcset variants — the widest, most expensive resizes — to on-demand generation at render instead of eagerly at upload. Every base size stays eager, so each size always has a real file for admin, the editor and WooCommerce, and the front end never falls back to the full-size original. Enable it to avoid `max_execution_time` timeouts on large sources or batch imports; the deferred variants are generated on first render through `<x-sproutset-image>`. Disabled is a no-op.
+
+```php
+'defer_generation' => false,
 ```
 
 ## Usage

@@ -48,6 +48,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Defer Upload-Time Generation
+    |--------------------------------------------------------------------------
+    |
+    | Defer the @Nx srcset variants to on-demand generation at render instead
+    | of eagerly at upload. Base sizes stay eager. Avoids max_execution_time
+    | timeouts on large sources and batch imports. Disabled is a no-op.
+    |
+    */
+
+    'defer_generation' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | AVIF Conversion
     |--------------------------------------------------------------------------
     |

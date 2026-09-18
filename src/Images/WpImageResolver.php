@@ -68,7 +68,7 @@ final readonly class WpImageResolver implements ImageResolver
             return null;
         }
 
-        $this->sizeGenerator->ensure($attachment->id, $request->sizeName);
+        $this->sizeGenerator->ensureFamily($attachment->id, $request->sizeName);
 
         if ($this->focalConfig->enabled) {
             $metaFocal = FocalPointMeta::read($attachment->id);
