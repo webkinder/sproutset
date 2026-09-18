@@ -21,3 +21,5 @@ Thumbs.db
 /tests/Integration/vendor/
 /tests/Integration/.phpunit.cache/
 /tests/Integration/.phpunit.result.cache
+
+.agent/
