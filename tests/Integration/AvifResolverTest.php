@@ -111,6 +111,32 @@ final class AvifResolverTest extends IntegrationTestCase
         $this->assertTrue($foundAvifFile, 'expected at least one .avif file to exist on disk');
     }
 
+    public function test_feeds_the_injected_original_into_the_avif_srcset(): void
+    {
+        add_filter('wp_image_editors', static fn (): array => ['WP_Image_Editor_GD']);
+        add_image_size('sproutset_sfb_avif', 262, 332, true);
+        add_image_size('sproutset_sfb_avif@2x', 524, 664, true);
+        add_image_size('sproutset_sfb_avif@3x', 786, 996, true);
+
+        try {
+            $id = $this->seedAttachment('example.jpg'); // 1200x800: cannot crop @3x
+            $original = (string) wp_get_attachment_url($id);
+            $resolved = $this->resolver(new AvifConfig(true, 50), true)
+                ->resolve($this->request($id, 'sproutset_sfb_avif'));
+        } finally {
+            remove_image_size('sproutset_sfb_avif');
+            remove_image_size('sproutset_sfb_avif@2x');
+            remove_image_size('sproutset_sfb_avif@3x');
+        }
+
+        $this->assertNotNull($resolved);
+        $this->assertStringContainsString($original.' 631w', (string) $resolved->srcset);
+        $this->assertNotNull($resolved->avifSrcset);
+        // The injected original's AVIF sibling carries the 631w descriptor.
+        $this->assertStringContainsString(' 631w', (string) $resolved->avifSrcset);
+        $this->assertStringContainsString('.avif 631w', (string) $resolved->avifSrcset);
+    }
+
     public function test_serves_avif_for_a_single_size_image_without_a_srcset(): void
     {
         add_filter('wp_image_editors', static fn (): array => ['WP_Image_Editor_GD']);

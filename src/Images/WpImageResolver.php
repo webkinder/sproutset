@@ -80,7 +80,9 @@ final readonly class WpImageResolver implements ImageResolver
 
         [$src, $width, $height] = $this->sizedSource($attachment, $request->sizeName);
 
-        $box = $this->presentedBox($request->sizeName, $attachment);
+        $subsizes = wp_get_registered_image_subsizes();
+        $spec = $subsizes[$request->sizeName] ?? null;
+        $box = is_array($spec) ? $this->presentedBox($spec, $attachment) : null;
         $cover = false;
 
         if ($box !== null) {
@@ -90,6 +92,21 @@ final readonly class WpImageResolver implements ImageResolver
         }
 
         $srcset = $this->srcset($attachment->id, $request->sizeName);
+
+        if ($srcset !== null && is_array($spec) && (bool) $spec['crop']) {
+            $fallback = OriginalSrcsetFallback::augment(
+                $srcset,
+                $attachment->url,
+                $attachment->width,
+                $attachment->height,
+                $this->intValue($spec['width']),
+                $this->intValue($spec['height']),
+                $this->topTargetWidth($subsizes, $request->sizeName),
+            );
+
+            $srcset = $fallback['srcset'];
+            $cover = $cover || $fallback['cover'];
+        }
 
         return new ResolvedImage(
             src: $src,
@@ -126,28 +143,44 @@ final readonly class WpImageResolver implements ImageResolver
     }
 
     /**
+     * @param  array<array-key, mixed>  $spec
      * @return array{width: int, height: int, cover: bool}|null
      */
-    private function presentedBox(string $sizeName, Attachment $attachment): ?array
+    private function presentedBox(array $spec, Attachment $attachment): ?array
     {
-        $sizes = wp_get_registered_image_subsizes();
-        $spec = $sizes[$sizeName] ?? null;
-
-        if (! is_array($spec)) {
-            return null;
-        }
-
-        $targetWidth = (int) $spec['width'];
-        $targetHeight = (int) $spec['height'];
-        $crop = (bool) $spec['crop'];
-
         return PresentedDimensions::forSource(
-            $targetWidth,
-            $targetHeight,
-            $crop,
+            $this->intValue($spec['width'] ?? 0),
+            $this->intValue($spec['height'] ?? 0),
+            (bool) ($spec['crop'] ?? false),
             $attachment->width,
             $attachment->height,
         );
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $subsizes
+     */
+    private function topTargetWidth(array $subsizes, string $sizeName): int
+    {
+        $prefix = $sizeName.'@';
+        $widths = [0];
+
+        foreach ($subsizes as $name => $spec) {
+            if (! is_array($spec)) {
+                continue;
+            }
+
+            if ($name === $sizeName || (is_string($name) && str_starts_with($name, $prefix))) {
+                $widths[] = $this->intValue($spec['width'] ?? 0);
+            }
+        }
+
+        return max($widths);
+    }
+
+    private function intValue(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 
     private function cssFocal(ImageRequest $request): ?FocalPoint

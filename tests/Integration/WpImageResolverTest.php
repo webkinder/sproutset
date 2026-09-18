@@ -169,6 +169,46 @@ final class WpImageResolverTest extends IntegrationTestCase
         $this->assertNull($resolved->style);
     }
 
+    public function test_injects_the_original_for_a_source_limited_crop_with_object_fit_cover(): void
+    {
+        add_image_size('sproutset_sfb', 262, 332, true);
+        add_image_size('sproutset_sfb@2x', 524, 664, true);
+        add_image_size('sproutset_sfb@3x', 786, 996, true);
+
+        try {
+            $id = $this->seedAttachment(); // 1200x800: cannot crop the 786x996 @3x
+            $original = (string) wp_get_attachment_url($id);
+            $resolved = $this->resolver()->resolve($this->request($id, 'sproutset_sfb'));
+        } finally {
+            remove_image_size('sproutset_sfb');
+            remove_image_size('sproutset_sfb@2x');
+            remove_image_size('sproutset_sfb@3x');
+        }
+
+        $this->assertNotNull($resolved);
+        // E = min(1200, round(800 * 262 / 332)) = 631.
+        $this->assertStringContainsString($original.' 631w', (string) $resolved->srcset);
+        $this->assertSame('object-fit: cover;', $resolved->style);
+        $this->assertSame(262, $resolved->width);
+        $this->assertSame(332, $resolved->height);
+    }
+
+    public function test_leaves_a_non_crop_size_without_an_injected_original(): void
+    {
+        add_image_size('sproutset_nc', 2000, 0, false);
+
+        try {
+            $id = $this->seedAttachment();
+            $resolved = $this->resolver()->resolve($this->request($id, 'sproutset_nc'));
+        } finally {
+            remove_image_size('sproutset_nc');
+        }
+
+        $this->assertNotNull($resolved);
+        $this->assertSame(2000, $resolved->width);
+        $this->assertNull($resolved->style);
+    }
+
     private function focalResolver(bool $enabled): WpImageResolver
     {
         $avifConfig = new AvifConfig(false, 50);
