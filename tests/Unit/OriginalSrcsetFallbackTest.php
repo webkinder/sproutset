@@ -78,6 +78,18 @@ it('appends the original as the only candidate for an empty srcset', function ()
         ]);
 });
 
+it('injects once when several top multipliers are unmet', function () use ($original): void {
+    // srcset:[2,3,5] on a 262x332 box: source makes only base + @2x; @3x and @5x cannot crop.
+    $srcset = 'https://ex.test/t-262x332.jpg 262w, https://ex.test/t-524x664.jpg 524w';
+
+    // topTarget = 262 * 5 = 1310. E = min(1260, round(900 * 262/332) = 710) = 710.
+    expect(OriginalSrcsetFallback::augment($srcset, $original, 1260, 900, 262, 332, 1310))
+        ->toBe([
+            'srcset' => $srcset.', '.$original.' 710w',
+            'cover' => true,
+        ]);
+});
+
 it('does not duplicate an original already present in the srcset', function () use ($original): void {
     $srcset = 'https://ex.test/t-262x332.jpg 262w, '.$original.' 700w';
 
