@@ -9,6 +9,13 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.6](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.5...v1.0.0-rc.6) (2026-09-18)
+
+
+### Added
+
+* defer eager generation of @Nx srcset variants until render ([#296](https://github.com/webkinder/sproutset/issues/296)) ([ca96b26](https://github.com/webkinder/sproutset/commit/ca96b2636737ea51d09004322d774129c741fce3))
+
 ## [1.0.0-rc.5](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2026-09-18)
 
 
