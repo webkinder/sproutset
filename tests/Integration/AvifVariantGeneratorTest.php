@@ -6,6 +6,7 @@ namespace Webkinder\Sproutset\Tests\Integration;
 
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifSiblingPath;
+use Webkinder\Sproutset\Images\Avif\AvifSignature;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 
 final class AvifVariantGeneratorTest extends IntegrationTestCase
@@ -90,12 +91,101 @@ final class AvifVariantGeneratorTest extends IntegrationTestCase
         $id = $this->seedAttachment('example.jpg');
         $source = get_attached_file($id);
         $sibling = AvifSiblingPath::for($source, $id);
-        file_put_contents($sibling, 'sentinel-not-a-real-avif');
+        $sentinel = "\x00\x00\x00\x14ftypavif\x00\x00\x00\x00avif".'sentinel';
+        file_put_contents($sibling, $sentinel);
 
         $result = $this->generator()->ensure($id, $source);
 
         $this->assertSame($sibling, $result);
-        $this->assertSame('sentinel-not-a-real-avif', file_get_contents($sibling)); // untouched = not regenerated
+        $this->assertSame($sentinel, file_get_contents($sibling)); // untouched = not regenerated
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidSiblingContents(): array
+    {
+        return [
+            'empty' => [''],
+            'non-empty without an AVIF signature' => ["\x89PNG\r\n\x1a\nnot an avif"],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidSiblingContents
+     */
+    public function test_regenerates_an_invalid_avif_sibling(string $invalidContents): void
+    {
+        if (! $this->serverCanWriteAvif()) {
+            $this->markTestSkipped('Server image editor cannot write AVIF.');
+        }
+
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = AvifSiblingPath::for($source, $id);
+        file_put_contents($sibling, $invalidContents);
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertSame($sibling, $result);
+        $this->assertTrue(AvifSignature::isAvif((string) file_get_contents($sibling)));
+    }
+
+    public function test_writes_the_avif_sibling_atomically(): void
+    {
+        if (! $this->serverCanWriteAvif()) {
+            $this->markTestSkipped('Server image editor cannot write AVIF.');
+        }
+
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = AvifSiblingPath::for($source, $id);
+        file_put_contents($sibling, 'stale');
+
+        $encodeTargets = [];
+        $siblingDuringEncode = null;
+        add_filter('image_editor_output_format', static function (array $formats, ?string $filename) use (&$encodeTargets, &$siblingDuringEncode, $sibling): array {
+            $encodeTargets[] = $filename;
+            $siblingDuringEncode = file_get_contents($sibling);
+
+            return $formats;
+        }, 10, 2);
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertSame($sibling, $result);
+        $this->assertNotContains($sibling, $encodeTargets);
+        $this->assertSame('stale', $siblingDuringEncode);
+        $this->assertTrue(AvifSignature::isAvif((string) file_get_contents($sibling)));
+        $this->assertSame([$sibling], glob(dirname($sibling).'/'.basename($sibling, '.avif').'*'));
+    }
+
+    public function test_keeps_an_invalid_sibling_unserved_when_regeneration_is_blocked(): void
+    {
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = AvifSiblingPath::for($source, $id);
+        file_put_contents($sibling, '');
+        update_post_meta($id, '_sproutset_avif_failed', 1);
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertNull($result);
+        $this->assertFileExists($sibling);
+    }
+
+    public function test_trips_the_fuse_when_the_encoded_file_is_not_a_valid_avif(): void
+    {
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = AvifSiblingPath::for($source, $id);
+        add_filter('image_editor_output_format', static fn (array $formats): array => ['image/avif' => 'image/png'] + $formats);
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertNull($result);
+        $this->assertNotEmpty(get_post_meta($id, '_sproutset_avif_failed', true));
+        $this->assertSame([], glob(dirname($sibling).'/'.basename($sibling, '.avif').'*'));
     }
 
     public function test_generates_distinct_avif_siblings_for_attachments_sharing_a_basename(): void

@@ -14,6 +14,8 @@ final class AvifVariantGenerator
 
     private const string GCE_MARKER = "\x00\x21\xF9\x04";
 
+    private const int SIGNATURE_PROBE_BYTES = 64;
+
     private int $generations = 0;
 
     public function __construct(private readonly AvifConfig $config) {}
@@ -26,7 +28,7 @@ final class AvifVariantGenerator
             return null;
         }
 
-        if (is_file($avifFile)) {
+        if ($this->isValidAvif($avifFile)) {
             return $avifFile;
         }
 
@@ -68,7 +70,7 @@ final class AvifVariantGenerator
         }
 
         $editor->set_quality($this->config->quality);
-        $saved = $editor->save($avifFile, 'image/avif');
+        $saved = $editor->save($this->temporaryPathFor($avifFile), 'image/avif');
 
         if (is_wp_error($saved)) {
             $this->markFailed($attachmentId);
@@ -78,19 +80,42 @@ final class AvifVariantGenerator
 
         $savedPath = $saved['path'];
 
-        if (! is_file($savedPath)) {
-            $this->markFailed($attachmentId);
+        try {
+            if (! $this->isValidAvif($savedPath)) {
+                $this->markFailed($attachmentId);
 
-            return null;
+                return null;
+            }
+
+            if ($this->notSmaller($savedPath, $sourceFile)) {
+                return null;
+            }
+
+            return @rename($savedPath, $avifFile) ? $avifFile : null;
+        } finally {
+            if (is_file($savedPath)) {
+                @unlink($savedPath);
+            }
+        }
+    }
+
+    private function temporaryPathFor(string $avifFile): string
+    {
+        return $avifFile.'.tmp-'.bin2hex(random_bytes(6)).'.avif';
+    }
+
+    /**
+     * Whether the file exists and starts with an AVIF signature.
+     */
+    private function isValidAvif(string $file): bool
+    {
+        if (! is_file($file)) {
+            return false;
         }
 
-        if ($this->notSmaller($savedPath, $sourceFile)) {
-            @unlink($savedPath);
+        $header = @file_get_contents($file, false, null, 0, self::SIGNATURE_PROBE_BYTES);
 
-            return null;
-        }
-
-        return $savedPath;
+        return $header !== false && AvifSignature::isAvif($header);
     }
 
     private function notSmaller(string $avifFile, string $sourceFile): bool
@@ -117,7 +142,7 @@ final class AvifVariantGenerator
             return false;
         }
 
-        return mb_substr_count($contents, self::GCE_MARKER) > 1;
+        return mb_substr_count($contents, self::GCE_MARKER, '8bit') > 1;
     }
 
     private function hasFailed(int $attachmentId): bool
