@@ -14,6 +14,8 @@ final class AvifVariantGenerator
 
     private const string GCE_MARKER = "\x00\x21\xF9\x04";
 
+    private const int SIGNATURE_PROBE_BYTES = 64;
+
     private int $generations = 0;
 
     public function __construct(private readonly AvifConfig $config) {}
@@ -28,10 +30,6 @@ final class AvifVariantGenerator
 
         if ($this->isValidAvif($avifFile)) {
             return $avifFile;
-        }
-
-        if (is_file($avifFile)) {
-            @unlink($avifFile);
         }
 
         if ($this->generations >= self::MAX_GENERATIONS_PER_REQUEST) {
@@ -72,7 +70,7 @@ final class AvifVariantGenerator
         }
 
         $editor->set_quality($this->config->quality);
-        $saved = $editor->save($avifFile, 'image/avif');
+        $saved = $editor->save($this->temporaryPathFor($avifFile), 'image/avif');
 
         if (is_wp_error($saved)) {
             $this->markFailed($attachmentId);
@@ -82,20 +80,28 @@ final class AvifVariantGenerator
 
         $savedPath = $saved['path'];
 
-        if (! $this->isValidAvif($savedPath)) {
-            @unlink($savedPath);
-            $this->markFailed($attachmentId);
+        try {
+            if (! $this->isValidAvif($savedPath)) {
+                $this->markFailed($attachmentId);
 
-            return null;
+                return null;
+            }
+
+            if ($this->notSmaller($savedPath, $sourceFile)) {
+                return null;
+            }
+
+            return @rename($savedPath, $avifFile) ? $avifFile : null;
+        } finally {
+            if (is_file($savedPath)) {
+                @unlink($savedPath);
+            }
         }
+    }
 
-        if ($this->notSmaller($savedPath, $sourceFile)) {
-            @unlink($savedPath);
-
-            return null;
-        }
-
-        return $savedPath;
+    private function temporaryPathFor(string $avifFile): string
+    {
+        return $avifFile.'.tmp-'.bin2hex(random_bytes(6)).'.avif';
     }
 
     /**
@@ -107,7 +113,7 @@ final class AvifVariantGenerator
             return false;
         }
 
-        $header = @file_get_contents($file, false, null, 0, 64);
+        $header = @file_get_contents($file, false, null, 0, self::SIGNATURE_PROBE_BYTES);
 
         return $header !== false && AvifSignature::isAvif($header);
     }
@@ -136,7 +142,7 @@ final class AvifVariantGenerator
             return false;
         }
 
-        return mb_substr_count($contents, self::GCE_MARKER) > 1;
+        return mb_substr_count($contents, self::GCE_MARKER, '8bit') > 1;
     }
 
     private function hasFailed(int $attachmentId): bool

@@ -23,6 +23,13 @@ it('accepts avif branded bytes and rejects others', function (): void {
         ->and(AvifSignature::isAvif('avif'))->toBeFalse();                    // too short, no ftyp box
 });
 
+it('measures binary bytes, not multibyte characters', function (): void {
+    // The minor version "\xC3\xA0\xC3\xA0" is also valid UTF-8, so a character count would be 2 short of the box size.
+    $bytes = pack('N', 24).'ftyp'.'mif1'."\xC3\xA0\xC3\xA0".'mif1'.'avif';
+
+    expect(AvifSignature::isAvif($bytes))->toBeTrue();
+});
+
 it('does not scan past a corrupted box size for a spoofed brand', function (): void {
     // Box-size field is absurdly large (invalid); major brand is mp42; a later
     // "avif" sequence must NOT be treated as a match.
