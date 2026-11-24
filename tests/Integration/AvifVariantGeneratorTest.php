@@ -6,6 +6,7 @@ namespace Webkinder\Sproutset\Tests\Integration;
 
 use Webkinder\Sproutset\Images\Avif\AvifConfig;
 use Webkinder\Sproutset\Images\Avif\AvifSiblingPath;
+use Webkinder\Sproutset\Images\Avif\AvifSignature;
 use Webkinder\Sproutset\Images\Avif\AvifVariantGenerator;
 
 final class AvifVariantGeneratorTest extends IntegrationTestCase
@@ -90,12 +91,30 @@ final class AvifVariantGeneratorTest extends IntegrationTestCase
         $id = $this->seedAttachment('example.jpg');
         $source = get_attached_file($id);
         $sibling = AvifSiblingPath::for($source, $id);
-        file_put_contents($sibling, 'sentinel-not-a-real-avif');
+        $sentinel = "\x00\x00\x00\x14ftypavif\x00\x00\x00\x00avif".'sentinel';
+        file_put_contents($sibling, $sentinel);
 
         $result = $this->generator()->ensure($id, $source);
 
         $this->assertSame($sibling, $result);
-        $this->assertSame('sentinel-not-a-real-avif', file_get_contents($sibling)); // untouched = not regenerated
+        $this->assertSame($sentinel, file_get_contents($sibling)); // untouched = not regenerated
+    }
+
+    public function test_regenerates_an_invalid_avif_sibling(): void
+    {
+        if (! $this->serverCanWriteAvif()) {
+            $this->markTestSkipped('Server image editor cannot write AVIF.');
+        }
+
+        $id = $this->seedAttachment('example.jpg');
+        $source = get_attached_file($id);
+        $sibling = AvifSiblingPath::for($source, $id);
+        file_put_contents($sibling, '');
+
+        $result = $this->generator()->ensure($id, $source);
+
+        $this->assertSame($sibling, $result);
+        $this->assertTrue(AvifSignature::isAvif((string) file_get_contents($sibling, false, null, 0, 64)));
     }
 
     public function test_generates_distinct_avif_siblings_for_attachments_sharing_a_basename(): void

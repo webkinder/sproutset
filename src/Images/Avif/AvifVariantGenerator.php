@@ -26,8 +26,12 @@ final class AvifVariantGenerator
             return null;
         }
 
-        if (is_file($avifFile)) {
+        if ($this->isValidAvif($avifFile)) {
             return $avifFile;
+        }
+
+        if (is_file($avifFile)) {
+            @unlink($avifFile);
         }
 
         if ($this->generations >= self::MAX_GENERATIONS_PER_REQUEST) {
@@ -78,7 +82,8 @@ final class AvifVariantGenerator
 
         $savedPath = $saved['path'];
 
-        if (! is_file($savedPath)) {
+        if (! $this->isValidAvif($savedPath)) {
+            @unlink($savedPath);
             $this->markFailed($attachmentId);
 
             return null;
@@ -91,6 +96,20 @@ final class AvifVariantGenerator
         }
 
         return $savedPath;
+    }
+
+    /**
+     * Whether the file exists and starts with an AVIF signature.
+     */
+    private function isValidAvif(string $file): bool
+    {
+        if (! is_file($file)) {
+            return false;
+        }
+
+        $header = @file_get_contents($file, false, null, 0, 64);
+
+        return $header !== false && AvifSignature::isAvif($header);
     }
 
     private function notSmaller(string $avifFile, string $sourceFile): bool
