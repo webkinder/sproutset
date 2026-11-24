@@ -9,6 +9,13 @@ Entries from `v1.0.0-rc.1` onward are managed by release-please.
 
 ## Older releases (0.1.x beta line)
 
+## [1.0.0-rc.7](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.6...v1.0.0-rc.7) (2026-11-24)
+
+
+### Fixed
+
+* **avif:** regenerate empty or invalid AVIF siblings ([#303](https://github.com/webkinder/sproutset/issues/303)) ([327631e](https://github.com/webkinder/sproutset/commit/327631e471d50bf465d874317da10e422d86723e))
+
 ## [1.0.0-rc.6](https://github.com/webkinder/sproutset/compare/v1.0.0-rc.5...v1.0.0-rc.6) (2026-09-18)
 
 
