@@ -39,8 +39,10 @@
   "platformAutomerge": true,
   "rebaseWhen": "conflicted",
   "rollbackPrs": true,
-  "dependencyDashboard": true,
-  "dependencyDashboardAutoclose": false,
+  "dependencyDashboard": {
+    "enabled": true,
+    "autoclose": false
+  },
   "addLabels": ["type:dependency"],
   "commitMessageAction": "Update",
   "commitMessageTopic": "{{depName}}",
